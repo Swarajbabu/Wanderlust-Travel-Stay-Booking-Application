@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New</title>
+</head>
+<body>
+    <h3>Create A new List</h3>
+    <form action="/listings" method="post">
+        <input type="text" name="listing[title]" placeholder="Enter your title">
+        <br>
+        <textarea name="listing[deseription]" placeholder="Enter deseription" type="text"></textarea>
+        <br>
+        <input type="text" name="listing[image]" placeholder="Enter your Image url">
+        <br>
+        <input type="number" name="listing[price]" placeholder="Enter your price">
+        <br>
+        <input type="text" name="listing[country]" placeholder="Enter your country">
+        <br>
+        <input type="text" name="listing[location]" placeholder="Enter your location">
+        <br>
+        <button>Add</button>
+    </form>
+</body>
+</html>
