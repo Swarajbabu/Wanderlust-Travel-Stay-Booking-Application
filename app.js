@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const path = require("path");
+const ejsMate = require("ejs-mate");
 const Listing = require("./modals/listing.js");
 const methodOverride = require("method-override");
 
@@ -10,7 +11,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(methodOverride("_method"))
-
+app.engine("ejs", ejsMate);
 
 let port = 8080;
 let mongodb_url = 'mongodb://127.0.0.1/wanderlust';

@@ -1,22 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Show</title>
-</head>
-<body>
-    <h3>Listing Details</h3>
-    <ul>
-        <li><%= listings.title %></li>
-        <li><%= listings.description %></li>
-        <li>&#8377; <%= Number(listings.price).toLocaleString("en-IN") %></li>
-        <li><%= listings.location %></li>
-        <li><%= listings.country %></li>
-    </ul>
-    <a href="/listings/<%= listings._id %>/edit">Edit this Listing</a><br>
-    <form action="/listings/<%= listings._id %>?_method=DELETE" method="post">
-        <button>Delete this listing</button>
-    </form>
-</body>
-</html>
+<% layout('layouts/boilerplate') -%>
+
+<h3>Listing Details</h3>
+<ul>
+    <li><%= listings.title %></li>
+    <li><%= listings.description %></li>
+    <li>&#8377; <%= Number(listings.price).toLocaleString("en-IN") %></li>
+    <li><%= listings.location %></li>
+    <li><%= listings.country %></li>
+</ul>
+<a href="/listings/<%= listings._id %>/edit">Edit this Listing</a><br>
+<form action="/listings/<%= listings._id %>?_method=DELETE" method="post">
+    <button>Delete this listing</button>
+</form>

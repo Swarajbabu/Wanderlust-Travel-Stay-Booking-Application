@@ -1,30 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
+<% layout('layouts/boilerplate') -%>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New</title>
-</head>
-
-<body>
-    <h3>Edit the List</h3>
-    <form action="/listings/<%= listings._id %>?_method=PUT" method="post">
-        <input type="text" name="listing[title]" value="<%= listings.title %>" placeholder="Enter your title">
-        <br>
-        <textarea name="listing[deseription]" placeholder="Enter deseription" type="text"><%= listings.description %></textarea>
-        <br>
-        <input type="text" name="listing[image]" value="<%= listings.image %>" placeholder="Enter your Image url">
-        <br>
-        <input type="number" name="listing[price]" value="<%= listings.price %>" placeholder="Enter your price">
-        <br>
-        <input type="text" name="listing[country]" value="<%= listings.country %>" placeholder="Enter your country">
-        <br>
-        <input type="text" name="listing[location]" value="<%= listings.location %>" placeholder="Enter your location">
-        <br>
-        <button>Edit</button>
-    </form>
-
-</body>
-
-</html>
+<h3>Edit the Listing</h3>
+<form action="/listings/<%= listings._id %>?_method=PUT" method="post">
+    <input type="text" name="listing[title]" value="<%= listings.title %>" placeholder="Enter your title">
+    <br>
+    <textarea name="listing[description]" placeholder="Enter description"><%= listings.description %></textarea>
+    <br>
+    <input type="text" name="listing[image]" value="<%= listings.image %>" placeholder="Enter your image URL">
+    <br>
+    <input type="number" name="listing[price]" value="<%= listings.price %>" placeholder="Enter your price">
+    <br>
+    <input type="text" name="listing[country]" value="<%= listings.country %>" placeholder="Enter your country">
+    <br>
+    <input type="text" name="listing[location]" value="<%= listings.location %>" placeholder="Enter your location">
+    <br>
+    <button>Edit</button>
+</form>
