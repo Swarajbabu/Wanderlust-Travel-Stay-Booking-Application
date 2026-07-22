@@ -4,6 +4,14 @@ const mongoose = require("mongoose");
 const path = require("path");
 const ejsMate = require("ejs-mate");                                         // EJS mate layout 
 const methodOverride = require("method-override");                           // Override HTTP methods like PUT,PATCH and DELETE
+const session = require("express-session");                                  // Session is used to store data in the form of cookie
+const flash = require("connect-flash");                                      // Flash is used to store data in the form of cookie and dispaly only one message
+const cookieParser = require("cookie-parser");                               // Cookie parser is used to parse the cookie from the request
+
+// Authantaction and authoration
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./modals/user.js");
 
 // const Listing = require("./modals/listing.js");                              // Listing modal schema for store data
 // const Review = require("./modals/review.js");                                // Review modal schema for store data
@@ -35,6 +43,35 @@ app.get("/", (req, res) => {
     res.send("I am root")
 });
 
+const SessionOptions = {
+    secret: "mysupersecretkey",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true
+    }
+};
+
+app.use(session(SessionOptions));
+app.use(flash());
+
+// Aut and Aou
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+app.use((req,res,next)=>{
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+})
+
 app.use("/listings",router_listing);                            
 app.use("/listings/:id/reviews",router_reviews);
 
@@ -53,6 +90,7 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
     console.log(`Server Started in: ${port}`)
 });
+
 
 
 
