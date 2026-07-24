@@ -15,12 +15,13 @@ const User = require("./modals/user.js");
 
 // const Listing = require("./modals/listing.js");                              // Listing modal schema for store data
 // const Review = require("./modals/review.js");                                // Review modal schema for store data
-// const ExpressError = require("./utility/ExpressError.js");                   // Custom Error Class     
+const ExpressError = require("./utility/ExpressError.js");                   // Custom Error Class     
 // const wrapAsync = require("./utility/wrapAsync.js");                         // Async Handler same work like try catch block 
 // const { ListingSchema, reviewSchema } = require("./schema.js");              // Joi schema validation it work for validating that we send a valid data 
 
 const router_listing = require("./routes/listing.js");
 const router_reviews = require("./routes/review.js");
+const router_user = require("./routes/user.js");
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -65,15 +66,26 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+app.get("/demouser",async(req,res)=>{
+    const newuser = new User({
+        email: "swarajvecha@gmail.com",
+        username: "swarajvecha"
+    });
+
+    let registeredUser = await User.register(newuser,"Swaraj@2005");
+    res.send(registeredUser);
+})
 
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
+    res.locals.currUser = req.user;
     next();
 })
 
 app.use("/listings",router_listing);                            
 app.use("/listings/:id/reviews",router_reviews);
+app.use("/",router_user);
 
 // 404 error handling for all the request.
 app.all("*", (req, res, next) => {
