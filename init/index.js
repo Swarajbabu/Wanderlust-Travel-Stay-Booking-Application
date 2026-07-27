@@ -11,9 +11,14 @@ mongoose.connect(mongodb_url)
         console.log(err);
     });
 
-Listing.insertMany(initData.data).then((res)=>{
-    console.log("data Inserted");
-})
+const initDB = async () => {
+    await Listing.deleteMany({});
+    initData.data = initData.data.map((obj) => ({
+        ...obj,
+        owner: "6a6055e51d0707375e698376",
+    }));
+    await Listing.insertMany(initData.data);
+    console.log("data was initialized");
+};
 
-
-
+initDB();

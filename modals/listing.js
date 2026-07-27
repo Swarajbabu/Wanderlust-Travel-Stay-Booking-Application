@@ -23,7 +23,11 @@ const ListingSchema = Schema({
             type: mongoose.Schema.ObjectId,
             ref: "Review",  
         }
-    ]
+    ],
+    owner: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+    }
 })
 
 ListingSchema.post("findOneAndDelete", async (listing) => {

@@ -33,6 +33,7 @@ router.get("/new", isLoggedIn, (req, res) => {
 });
 router.post("/", validateListing, isLoggedIn,wrapAsync(async (req, res, next) => {
     const newListing = new Listing(req.body.listing);
+    newListing.owner = req.user;
     await newListing.save();
     req.flash("success", "New Listing Created!");
     // console.log("Listing Saved");
@@ -43,7 +44,7 @@ router.post("/", validateListing, isLoggedIn,wrapAsync(async (req, res, next) =>
 // Show Route of perticular id
 router.get("/:id", wrapAsync(async (req, res) => {
     const { id } = req.params;
-    const listings = await Listing.findById(id).populate("reviews");
+    const listings = await Listing.findById(id).populate("reviews").populate("owner");
     if (!listings) {
         req.flash("error", "Listing you requested for doesn't exist!");
         res.redirect("/listings");
