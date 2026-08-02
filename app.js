@@ -1,6 +1,5 @@
-require("dotenv").config();
-console.log(process.env.CLOUDINARY_CLOUD_NAME);
-
+// Reload environment configuration
+require("dotenv").config({ override: true });
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -17,11 +16,7 @@ const LocalStrategy = require("passport-local");
 const User = require("./modals/user.js");
 const ExpressError = require("./utility/ExpressError.js");                   // Custom Error Class     
 
-// const Listing = require("./modals/listing.js");                              // Listing modal schema for store data
-// const Review = require("./modals/review.js");                                // Review modal schema for store data
-// const wrapAsync = require("./utility/wrapAsync.js");                         // Async Handler same work like try catch block 
-// const { ListingSchema, reviewSchema } = require("./schema.js");              // Joi schema validation it work for validating that we send a valid data 
-
+// Router listing require
 const router_listing = require("./routes/listing.js");
 const router_reviews = require("./routes/review.js");
 const router_user = require("./routes/user.js");
@@ -33,7 +28,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(methodOverride("_method"))
 app.engine("ejs", ejsMate);
 
-let port = 8080;
+const port = process.env.PORT || 8080;
 let mongodb_url = 'mongodb://127.0.0.1/wanderlust';
 
 mongoose.connect(mongodb_url)

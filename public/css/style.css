@@ -107,6 +107,13 @@ body {
     border: none !important;
 }
 
+.edit-img {
+    height: 150px;
+    width: 250px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+}
+
 /* Show Page */
 .show-img{
     height: 30vh;
