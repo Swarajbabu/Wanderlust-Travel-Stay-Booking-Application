@@ -1,17 +1,17 @@
 <% layout("layouts/boilerplate") -%>
 
 <div class="container mt-5">
-    <div class="alert alert-danger text-center">
+  <div class="alert alert-danger text-center">
 
-        <h1>Error <%= err.statusCode || 500 %></h1>
+    <h1>Error <%= err.statusCode || 500 %></h1>
 
-        <h4><%= err.message || "Something went wrong!" %></h4>
+    <h4><%= err.message || "Something went wrong!" %></h4>
 
-        <hr>
+    <hr>
 
-        <a href="/listings" class="btn btn-primary edit-btn">
-            Back to Home
-        </a>
+    <a href="/listings" class="btn btn-primary edit-btn">
+      Back to Home
+    </a>
 
-    </div>
+  </div>
 </div>

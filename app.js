@@ -64,15 +64,6 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// app.get("/demouser",async(req,res)=>{
-//     const newuser = new User({
-//         email: "swarajvecha@gmail.com",
-//         username: "swarajvecha"
-//     });
-
-//     let registeredUser = await User.register(newuser,"Swaraj@2005");
-//     res.send(registeredUser);
-// })
 
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
@@ -100,8 +91,4 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
     console.log(`Server Started in: ${port}`)
 });
-
-
-
-
-
+// Nodemon reload trigger

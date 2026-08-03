@@ -26,6 +26,21 @@ const ListingSchema = Schema({
     owner: {
         type: mongoose.Schema.ObjectId,
         ref: "User",
+    },
+    geometry: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    },
+    category: {
+        type: String,
+        enum: ["Rooms", "Iconic Cities", "Mountains", "Castles", "Amazing Pools", "Camping", "Farms", "Arctic", "Mansions", "Caves", "New", "Play", "Off-the-grid", "Creative spaces", "Houseboats", "Yurts", "Casas particulares"],
     }
 })
 

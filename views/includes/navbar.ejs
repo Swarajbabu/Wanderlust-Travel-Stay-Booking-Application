@@ -1,24 +1,47 @@
-<nav class="navbar navbar-expand-lg bg-body-light border-bottom sticky-top">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/"><i class="fa-solid fa-compass"></i></a>
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/listings">
+            <i class="fa-solid fa-compass brand-icon me-2"></i>
+            <span class="brand-text">wanderlust</span>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                <a class="nav-link" href="/">Home</a>
-                <a class="nav-link" href="/listings">All listings</a>
-                <a class="nav-link" href="/listings/new">Add New Listing</a>
+                <a class="nav-link" href="/listings">Explore</a>
             </div>
-            <div class="navbar-nav ms-auto">
-                <% if(!currUser){ %>
-                    <a class="nav-link" href="/signup">Signup</a>
-                    <a class="nav-link" href="/login">Login</a>
-                    <% } %>
 
-                <% if (currUser) { %>
-                    <a class="nav-link" href="/logout">Logout</a>
-                <%}%>
+            <div class="navbar-nav mx-auto">
+                <form class="d-flex search-form" role="search" action="/listings" method="GET">
+                    <input class="form-control search-input" type="search" placeholder="Search destinations" name="q">
+                    <button class="btn btn-search" type="submit">
+                        <i class="fa-solid fa-magnifying-glass"></i>Search
+                    </button>
+                </form>
+            </div>
+            
+            <div class="navbar-nav ms-auto align-items-center">
+                <a class="nav-link nav-home-btn me-2" href="/listings/new">Wanderlust your home</a>
+                
+                <div class="dropdown">
+                    <button class="btn btn-profile-menu dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-bars me-2"></i>
+                        <i class="fa-solid fa-circle-user profile-icon"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        <% if(!currUser){ %>
+                            <li><a class="dropdown-item fw-bold" href="/signup">Sign up</a></li>
+                            <li><a class="dropdown-item" href="/login">Log in</a></li>
+                        <% } %>
+                        <% if(currUser){ %>
+                            <li><span class="dropdown-item-text text-muted">Hello, <b><%= currUser.username %></b></span></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/listings/new">Wanderlust your home</a></li>
+                            <li><a class="dropdown-item fw-bold text-danger" href="/logout">Log out</a></li>
+                        <% } %>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

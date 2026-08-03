@@ -1,0 +1,46 @@
+/* Show Page Updates */
+.show-img {
+    height: 45vh;
+    object-fit: cover;
+    border-radius: 1.5rem !important;
+}
+.show-card {
+    padding-left: 0;
+    padding-right: 0;
+    background-color: transparent !important;
+}
+.show-title {
+    font-size: 1.75rem;
+    color: #222222;
+}
+.description-text {
+    font-weight: 300;
+    line-height: 1.6;
+}
+.review-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.review-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+.comment-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+@media (max-width: 576px) {
+    .mobile-no-border {
+        border-left: none !important;
+    }
+    .mobile-no-padding {
+        padding-left: 0 !important;
+        margin-top: 1rem;
+    }
+}
+
+/* Map Styling */
+#map {
+    height: 400px;
+    width: 100%;
+    border-radius: 1rem;
+}

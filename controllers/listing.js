@@ -1,10 +1,24 @@
 const Listing = require("../modals/listing");
+const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
+const mapToken = process.env.MAP_TOKEN;
+const geocodingClient = mbxGeocoding({ accessToken: mapToken });
 
 // showing all the listing
 module.exports.index = async (req, res) => {
-    const allListings = await Listing.find({})
-    res.render("listings/index.ejs", { allListings })
-    // res.send("Working");
+    let { q, category } = req.query;
+    let queryObj = {};
+    if (q) {
+        queryObj.$or = [
+            { title: { $regex: q, $options: "i" } },
+            { location: { $regex: q, $options: "i" } },
+            { country: { $regex: q, $options: "i" } }
+        ];
+    }
+    if (category) {
+        queryObj.category = category;
+    }
+    const allListings = await Listing.find(queryObj);
+    res.render("listings/index.ejs", { allListings });
 };
 
 // rendering to the new listing form
@@ -14,14 +28,28 @@ module.exports.renderNewForm = (req, res) => {
 
 // creating the new listing
 module.exports.createListing = async (req, res, next) => {
+    let response = await geocodingClient.forwardGeocode({
+        query: req.body.listing.location,
+        limit: 1
+    }).send();
+
     let url = req.file.path;
     let filename = req.file.filename;
     const newListing = new Listing(req.body.listing);
     newListing.owner = req.user;
-    newListing.image = { url, filename }
+    newListing.image = { url, filename };
+
+    if (response.body.features && response.body.features.length > 0) {
+        newListing.geometry = response.body.features[0].geometry;
+    } else {
+        newListing.geometry = {
+            type: "Point",
+            coordinates: [78.4867, 17.3850]
+        };
+    }
+
     await newListing.save();
     req.flash("success", "New Listing Created!");
-    // console.log("Listing Saved");
     res.redirect("/listings");
 };
 
@@ -39,7 +67,25 @@ module.exports.showListing = async (req, res) => {
     if (!listings) {
         req.flash("error", "Listing you requested for doesn't exist!");
         res.redirect("/listings");
+        return;
     }
+
+    // Auto-geocode coordinates on-demand if missing
+    if (!listings.geometry || !listings.geometry.coordinates || listings.geometry.coordinates.length !== 2) {
+        try {
+            let response = await geocodingClient.forwardGeocode({
+                query: listings.location,
+                limit: 1
+            }).send();
+            if (response.body.features && response.body.features.length > 0) {
+                listings.geometry = response.body.features[0].geometry;
+                await listings.save();
+            }
+        } catch (err) {
+            console.error("On-demand geocoding failed for listing:", listings._id, err);
+        }
+    }
+
     res.render("listings/show.ejs", { listings });
 };
 
@@ -51,7 +97,7 @@ module.exports.renderEditForm = async (req, res) => {
         req.flash("error", "Listing you requested for doesn't exist!");
         res.redirect("/listings");
     }
-    
+
     let originalImageUrl = listings.image.url;
     originalImageUrl = originalImageUrl.replace("/upload", "/upload/w_250");
     res.render("listings/edit.ejs", { listings, originalImageUrl });
@@ -60,14 +106,29 @@ module.exports.renderEditForm = async (req, res) => {
 // Updating the listing
 module.exports.updateListing = async (req, res) => {
     let { id } = req.params;
-    let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    
+    let response = await geocodingClient.forwardGeocode({
+        query: req.body.listing.location,
+        limit: 1
+    }).send();
+    
+    let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing }, { new: true });
 
-    if(typeof req.file !== 'undefined'){
+    if (response.body.features && response.body.features.length > 0) {
+        listing.geometry = response.body.features[0].geometry;
+    } else {
+        listing.geometry = {
+            type: "Point",
+            coordinates: [78.4867, 17.3850]
+        };
+    }
+
+    if (typeof req.file !== 'undefined') {
         let url = req.file.path;
         let filename = req.file.filename;
         listing.image = { url, filename };
-        await listing.save();
     }
+    await listing.save();
     req.flash("success", "Listing Updated!");
     res.redirect(`/listings/${id}`);
 };

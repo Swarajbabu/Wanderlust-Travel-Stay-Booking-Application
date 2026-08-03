@@ -1,27 +1,165 @@
-
 <% layout('layouts/boilerplate') -%>
-
-<!-- <form action="/listings/new" method="get">
-    <button>Create New Listing</button>
-</form> -->
-<h3>All Listing</h3>
-<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
-    <% for(let listing of allListings){ %>
-        <a href="/listings/<%= listing._id %>" class="listing-link">
-            <div class="card col listing-card">
-                
-                <img src="<%= listing.image.url %>" class="card-img-top" alt="listingimage" style="height: 20rem;">
-            
-                <div class="card-img-overlay"></div>
-            
-                <div class="card-body">
-                    <p class="card-text">
-                        <b> <%= listing.title %> </b> <br>
-                        &#8377; <%= Number(listing.price).toLocaleString("en-IN") %> / Night
-                    </p>
-                </div>
-                
+<link rel="stylesheet" href="/css/index.css">
+<div id="filters-container">
+    <div class="filters-scroll-wrapper">
+        <button class="scroll-btn scroll-left" onclick="scrollFilters(-1)">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        
+        <div class="filters" id="filters-list">
+            <div class="filter" onclick="location.href='/listings'">
+                <i class="fa-solid fa-fire"></i>
+                <p>Trending</p>
             </div>
-        </a>
-    <% } %>
+            <div class="filter" onclick="location.href='/listings?category=Rooms'">
+                <i class="fa-solid fa-bed"></i>
+                <p>Rooms</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Iconic Cities'">
+                <i class="fa-solid fa-mountain-city"></i>
+                <p>Iconic Cities</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Mountains'">
+                <i class="fa-solid fa-mountain"></i>
+                <p>Mountains</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Castles'">
+                <i class="fa-solid fa-fort-awesome"></i>
+                <p>Castles</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Amazing Pools'">
+                <i class="fa-solid fa-person-swimming"></i>
+                <p>Amazing Pools</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Camping'">
+                <i class="fa-solid fa-campground"></i>
+                <p>Camping</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Farms'">
+                <i class="fa-solid fa-cow"></i>
+                <p>Farms</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Arctic'">
+                <i class="fa-solid fa-snowflake"></i>
+                <p>Arctic</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Mansions'">
+                <i class="fa-solid fa-hotel"></i>
+                <p>Mansions</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Caves'">
+                <i class="fa-solid fa-mountain-sun"></i>
+                <p>Caves</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=New'">
+                <i class="fa-solid fa-key"></i>
+                <p>New</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Play'">
+                <i class="fa-solid fa-gamepad"></i>
+                <p>Play</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Off-the-grid'">
+                <i class="fa-solid fa-tree"></i>
+                <p>Off-the-grid</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Creative spaces'">
+                <i class="fa-solid fa-palette"></i>
+                <p>Creative spaces</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Houseboats'">
+                <i class="fa-solid fa-ship"></i>
+                <p>Houseboats</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Yurts'">
+                <i class="fa-solid fa-tent"></i>
+                <p>Yurts</p>
+            </div>
+            <div class="filter" onclick="location.href='/listings?category=Casas particulares'">
+                <i class="fa-solid fa-house-chimney"></i>
+                <p>Casas particulares</p>
+            </div>
+        </div>
+
+        <button class="scroll-btn scroll-right" onclick="scrollFilters(1)">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <div class="tax-toggle">
+        <div class="form-check-reverse form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="taxSwitch">
+            <label class="form-check-label" for="taxSwitch">Display total after taxes</label>
+        </div>
+    </div>
 </div>
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
+  <% for(let listing of allListings){ %>
+  <a href="/listings/<%= listing._id %>" class="listing-link">
+    <div class="card col listing-card">
+
+      <img src="<%= listing.image.url %>" class="card-img-top" alt="listingimage" style="height: 20rem;">
+
+      <div class="card-img-overlay"></div>
+
+      <div class="card-body">
+        <p class="card-text">
+          <b> <%= listing.title %> </b> <br>
+          &#8377; <%= Number(listing.price).toLocaleString("en-IN") %> / Night
+          <i class="tax-info"> &nbsp; &nbsp;+18% GST</i>
+        </p>
+      </div>
+
+    </div>
+  </a>
+  <% } %>
+</div>
+
+<script>
+    let taxSwitch = document.getElementById("taxSwitch");
+    taxSwitch.addEventListener("click", () => {
+        let taxInfo = document.getElementsByClassName("tax-info");
+        for (let info of taxInfo) {
+            if (info.style.display !== "inline") {
+                info.style.display = "inline";
+            } else {
+                info.style.display = "none";
+            }
+        }
+    });
+
+    const filtersList = document.getElementById("filters-list");
+    const btnLeft = document.querySelector(".scroll-left");
+    const btnRight = document.querySelector(".scroll-right");
+
+    function scrollFilters(direction) {
+        const scrollAmount = 300;
+        filtersList.scrollBy({
+            left: direction * scrollAmount,
+            behavior: "smooth"
+        });
+    }
+
+    function updateScrollButtons() {
+        const scrollLeft = filtersList.scrollLeft;
+        const maxScroll = filtersList.scrollWidth - filtersList.clientWidth;
+        
+        if (scrollLeft <= 5) {
+            btnLeft.style.visibility = "hidden";
+        } else {
+            btnLeft.style.visibility = "visible";
+        }
+        
+        if (scrollLeft >= maxScroll - 5) {
+            btnRight.style.visibility = "hidden";
+        } else {
+            btnRight.style.visibility = "visible";
+        }
+    }
+
+    filtersList.addEventListener("scroll", updateScrollButtons);
+    window.addEventListener("resize", updateScrollButtons);
+    
+    // Initial check
+    setTimeout(updateScrollButtons, 100);
+</script>
