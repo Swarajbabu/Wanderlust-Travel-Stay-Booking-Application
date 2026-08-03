@@ -1,23 +1,46 @@
 <% layout('layouts/boilerplate') -%>
-<div class="row mt-3">
-  <h1 class="col-6 offset-3">Signup for Wanderlust</h1>
-  <div class="col-6 offset-3">
+<link rel="stylesheet" href="/css/auth.css">
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <i class="fa-solid fa-compass d-block"></i>
+      <h4>Create your account</h4>
+      <p>Join Wanderlust and explore the world</p>
+    </div>
+
     <form action="/signup" method="post" class="needs-validation" novalidate>
       <div class="mb-3">
         <label class="form-label" for="username">Username</label>
-        <input type="text" name="username" id="username" class="form-control" required>
+        <div class="d-flex">
+          <span class="input-group-icon"><i class="fa-solid fa-user"></i></span>
+          <input type="text" name="username" id="username" class="form-control" placeholder="Choose a username" required>
+        </div>
         <div class="valid-feedback">Looks good!</div>
       </div>
+
       <div class="mb-3">
         <label class="form-label" for="email">Email</label>
-        <input type="email" name="email" id="email" class="form-control" required>
+        <div class="d-flex">
+          <span class="input-group-icon"><i class="fa-solid fa-envelope"></i></span>
+          <input type="email" name="email" id="email" class="form-control" placeholder="you@example.com" required>
+        </div>
       </div>
+
       <div class="mb-3">
         <label class="form-label" for="password">Password</label>
-        <input type="password" name="password" id="password" class="form-control" required>
+        <div class="d-flex">
+          <span class="input-group-icon"><i class="fa-solid fa-lock"></i></span>
+          <input type="password" name="password" id="password" class="form-control" placeholder="Create a password" required>
+        </div>
         <div class="valid-feedback">Looks good!</div>
       </div>
-      <button class="btn btn-success">Signup</button>
+
+      <button class="btn btn-auth mt-2">Sign Up</button>
     </form>
+
+    <div class="auth-divider">or</div>
+
+    <p class="auth-switch">Already have an account? <a href="/login">Log in</a></p>
   </div>
 </div>

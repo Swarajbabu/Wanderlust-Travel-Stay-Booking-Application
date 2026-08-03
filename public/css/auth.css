@@ -1,0 +1,115 @@
+/* Auth Pages — Signup & Login */
+.auth-wrapper {
+    min-height: calc(100vh - 10rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+.auth-card {
+    width: 100%;
+    max-width: 440px;
+    background: white;
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    padding: 2.5rem 2.5rem 2rem;
+    border: 1px solid #f0f0f0;
+}
+.auth-logo {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.auth-logo i {
+    color: #fe424d;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+.auth-logo h4 {
+    color: #222222;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+.auth-logo p {
+    color: #717171;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+.auth-card .form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333333;
+}
+.auth-card .form-control {
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    border: 1px solid #dddddd;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.auth-card .form-control:focus {
+    border-color: #fe424d;
+    box-shadow: 0 0 0 0.2rem rgba(254, 66, 77, 0.15);
+}
+.btn-auth {
+    width: 100%;
+    background-color: #fe424d !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.7rem;
+    border-radius: 10px;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+.btn-auth:hover {
+    background-color: #e33640 !important;
+    transform: translateY(-1px);
+}
+.auth-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    color: #999999;
+    font-size: 0.85rem;
+}
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: #e0e0e0;
+}
+.auth-divider::before {
+    margin-right: 1rem;
+}
+.auth-divider::after {
+    margin-left: 1rem;
+}
+.auth-switch {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #717171;
+}
+.auth-switch a {
+    color: #fe424d;
+    font-weight: 600;
+    text-decoration: none;
+}
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+.input-group-icon {
+    background-color: #f8f8f8;
+    border: 1px solid #dddddd;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    color: #717171;
+    display: flex;
+    align-items: center;
+    padding: 0 0.85rem;
+}
+.input-group-icon + .form-control {
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+}
