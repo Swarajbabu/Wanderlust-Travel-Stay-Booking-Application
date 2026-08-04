@@ -1,53 +1,76 @@
 <% layout('layouts/boilerplate') -%>
+<link rel="stylesheet" href="/css/listing-form.css">
 
-<div class="row mt-md-3">
-  <div class="col-8 offset-2">
-    <h3>Create A New Listing</h3>
+<div class="listing-form-wrapper">
+  <div class="listing-form-card">
+    <div class="listing-form-header">
+      <i class="fa-solid fa-plus-circle d-block"></i>
+      <h3>Create a New Listing</h3>
+      <p>Share your space with travellers around the world</p>
+    </div>
+
     <form action="/listings" method="post" novalidate class="needs-validation" enctype="multipart/form-data">
 
+      <!-- Basic Details -->
+      <div class="form-section-title">Basic Details</div>
+
       <div class="mb-3">
-        <!-- Title -->
-        <label class="form-label" for="title">Title</label>
-        <input type="text" name="listing[title]" placeholder="Enter your title" class="form-control" required>
+        <label class="form-label form-icon-label" for="title">
+          <i class="fa-solid fa-heading"></i> Title
+        </label>
+        <input type="text" name="listing[title]" id="title" placeholder="e.g. Cozy Beachfront Cottage" class="form-control" required>
       </div>
 
       <div class="mb-3">
-        <!-- Description -->
-        <label class="form-label" for="description">Description</label>
-        <textarea name="listing[description]" placeholder="" class="form-control" required></textarea>
-        <div class="invalid-feedback">Please enter short description.</div>
+        <label class="form-label form-icon-label" for="description">
+          <i class="fa-solid fa-align-left"></i> Description
+        </label>
+        <textarea name="listing[description]" id="description" placeholder="Describe your place — what makes it special?" class="form-control" required></textarea>
+        <div class="invalid-feedback">Please enter a short description.</div>
       </div>
 
-      <div class="mb-3">
-        <!-- File Uploded -->
-        <label class="form-label" for="image">Uplode Image Listing</label>
-        <input type="file" name="listing[image]" placeholder="Enter your image URL" class="form-control" required>
+      <!-- Image Upload -->
+      <div class="form-section-title">Image</div>
+
+      <div class="mb-3 file-upload-area">
+        <label class="form-label form-icon-label" for="image">
+          <i class="fa-solid fa-image"></i> Upload Listing Image
+        </label>
+        <input type="file" name="listing[image]" id="image" class="form-control" required>
       </div>
+
+      <!-- Pricing & Location -->
+      <div class="form-section-title">Pricing & Location</div>
 
       <div class="row">
         <div class="mb-3 col-md-4">
-          <label class="form-label" for="price">Price</label>
-          <input type="number" name="listing[price]" placeholder="Ex: 1200" class="form-control" required>
-          <div class="invalid-feedback">Price should be Valid.</div>
+          <label class="form-label form-icon-label" for="price">
+            <i class="fa-solid fa-indian-rupee-sign"></i> Price / Night
+          </label>
+          <input type="number" name="listing[price]" id="price" placeholder="e.g. 1200" class="form-control" required>
+          <div class="invalid-feedback">Price should be valid.</div>
         </div>
 
         <div class="mb-3 col-md-8">
-          <label class="form-label" for="country">Country</label>
-          <input type="text" name="listing[country]" placeholder="Ex: India" class="form-control" required>
-          <div class="invalid-feedback">Country should be Valid.</div>
+          <label class="form-label form-icon-label" for="country">
+            <i class="fa-solid fa-globe"></i> Country
+          </label>
+          <input type="text" name="listing[country]" id="country" placeholder="e.g. India" class="form-control" required>
+          <div class="invalid-feedback">Country should be valid.</div>
         </div>
       </div>
 
       <div class="mb-3">
-        <!-- Location -->
-        <label class="form-label" for="location">Location</label>
-        <input type="text" name="listing[location]" placeholder="Ex: Hyderabad, Telangana" class="form-control" required>
-
-        <div class="invalid-feedback">Location should be Valid.</div>
+        <label class="form-label form-icon-label" for="location">
+          <i class="fa-solid fa-location-dot"></i> Location
+        </label>
+        <input type="text" name="listing[location]" id="location" placeholder="e.g. Hyderabad, Telangana" class="form-control" required>
+        <div class="invalid-feedback">Location should be valid.</div>
       </div>
-      <button class="btn btn-dark add-btn mt-3">Add Your Listing</button>
 
-      <br><br>
+      <button class="btn btn-listing-submit mt-3">
+        <i class="fa-solid fa-paper-plane me-2"></i>Add Your Listing
+      </button>
     </form>
   </div>
 </div>

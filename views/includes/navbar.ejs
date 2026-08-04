@@ -30,11 +30,11 @@
                         <i class="fa-solid fa-circle-user profile-icon"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                        <% if(!currUser){ %>
+                        <% if(typeof currUser === 'undefined' || !currUser){ %>
                             <li><a class="dropdown-item fw-bold" href="/signup">Sign up</a></li>
                             <li><a class="dropdown-item" href="/login">Log in</a></li>
                         <% } %>
-                        <% if(currUser){ %>
+                        <% if(typeof currUser !== 'undefined' && currUser){ %>
                             <li><span class="dropdown-item-text text-muted">Hello, <b><%= currUser.username %></b></span></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/listings/new">Wanderlust your home</a></li>

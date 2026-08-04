@@ -1,56 +1,87 @@
 <% layout('layouts/boilerplate') -%>
+<link rel="stylesheet" href="/css/listing-form.css">
 
+<div class="listing-form-wrapper">
+  <div class="listing-form-card">
+    <div class="listing-form-header">
+      <i class="fa-solid fa-pen-to-square d-block"></i>
+      <h3>Edit Your Listing</h3>
+      <p>Update the details of your space</p>
+    </div>
 
-<form action="/listings/<%= listings._id %>?_method=PUT" method="post" novalidate class="needs-validation" enctype="multipart/form-data">
-  <div class="row mt-3">
-    <div class="col col-md-8 offset-2">
-      <h3>Edit the Listing</h3>
+    <form action="/listings/<%= listings._id %>?_method=PUT" method="post" novalidate class="needs-validation" enctype="multipart/form-data">
+
+      <!-- Basic Details -->
+      <div class="form-section-title">Basic Details</div>
+
       <div class="mb-3">
-        <label class="form-label" for="title">Title</label>
-        <input type="text" name="listing[title]" value="<%= listings.title %>" placeholder="Edit your title" class="form-control" required>
+        <label class="form-label form-icon-label" for="title">
+          <i class="fa-solid fa-heading"></i> Title
+        </label>
+        <input type="text" name="listing[title]" id="title" value="<%= listings.title %>" placeholder="e.g. Cozy Beachfront Cottage" class="form-control" required>
       </div>
 
       <div class="mb-3">
-        <label class="form-label" for="description">Description</label>
-        <textarea name="listing[description]" placeholder="" class="form-control" required><%= listings.description %></textarea>
-        <div class="invalid-feedback">Please enter short description.</div>
+        <label class="form-label form-icon-label" for="description">
+          <i class="fa-solid fa-align-left"></i> Description
+        </label>
+        <textarea name="listing[description]" id="description" placeholder="Describe your place — what makes it special?" class="form-control" required><%= listings.description %></textarea>
+        <div class="invalid-feedback">Please enter a short description.</div>
       </div>
 
-      <div class="mb-3">
-        <p>Current Listing Image</p>
-        <img src="<%= originalImageUrl %>" class="edit-img">
-      </div>
+      <!-- Image -->
+      <div class="form-section-title">Image</div>
 
       <div class="mb-3">
-        <!-- image uplode-->
-        <label class="form-label" for="image">Upload New Image</label>
-        <input type="file" name="listing[image]" class="form-control">
+        <label class="form-label form-icon-label">
+          <i class="fa-solid fa-photo-film"></i> Current Image
+        </label>
+        <div>
+          <img src="<%= originalImageUrl %>" class="current-img-preview" alt="Current listing image">
+        </div>
       </div>
+
+      <div class="mb-3 file-upload-area">
+        <label class="form-label form-icon-label" for="image">
+          <i class="fa-solid fa-image"></i> Upload New Image
+        </label>
+        <input type="file" name="listing[image]" id="image" class="form-control">
+      </div>
+
+      <!-- Pricing & Location -->
+      <div class="form-section-title">Pricing & Location</div>
 
       <div class="row">
         <div class="mb-3 col-md-4">
-          <label class="form-label" for="price">Price</label>
-          <input type="number" name="listing[price]" value="<%= listings.price %>" placeholder="Ex: 1200" class="form-control" required>
-          <div class="invalid-feedback">Price should be Valid.</div>
+          <label class="form-label form-icon-label" for="price">
+            <i class="fa-solid fa-indian-rupee-sign"></i> Price / Night
+          </label>
+          <input type="number" name="listing[price]" id="price" value="<%= listings.price %>" placeholder="e.g. 1200" class="form-control" required>
+          <div class="invalid-feedback">Price should be valid.</div>
         </div>
 
         <div class="mb-3 col-md-8">
-          <label class="form-label" for="country">Country</label>
-          <input type="text" name="listing[country]" value="<%= listings.country %>" placeholder="Ex: India" class="form-control" required>
-          <div class="invalid-feedback">Country should be Valid.</div>
+          <label class="form-label form-icon-label" for="country">
+            <i class="fa-solid fa-globe"></i> Country
+          </label>
+          <input type="text" name="listing[country]" id="country" value="<%= listings.country %>" placeholder="e.g. India" class="form-control" required>
+          <div class="invalid-feedback">Country should be valid.</div>
         </div>
       </div>
 
       <div class="mb-3">
-        <label class="form-label" for="location">Location</label>
-        <input type="text" name="listing[location]" value="<%= listings.location %>" placeholder="Ex: Hyderabad, Telangana" class="form-control" required>
-        <div class="invalid-feedback">Location should be Valid.</div>
+        <label class="form-label form-icon-label" for="location">
+          <i class="fa-solid fa-location-dot"></i> Location
+        </label>
+        <input type="text" name="listing[location]" id="location" value="<%= listings.location %>" placeholder="e.g. Hyderabad, Telangana" class="form-control" required>
+        <div class="invalid-feedback">Location should be valid.</div>
       </div>
 
-      <button class="btn btn-dark edit-btn mt-3">Edit Your Listing</button>
-      <br><br>
-    </div>
+      <button class="btn btn-listing-submit mt-3">
+        <i class="fa-solid fa-check me-2"></i>Update Listing
+      </button>
+    </form>
   </div>
+</div>
 
-</form>
 <script src="/js/script.js"></script>

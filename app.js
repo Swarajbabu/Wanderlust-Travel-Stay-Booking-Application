@@ -1,5 +1,6 @@
 // Reload environment configuration
 require("dotenv").config({ override: true });
+require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -9,6 +10,7 @@ const methodOverride = require("method-override");                           // 
 const session = require("express-session");                                  // Session is used to store data in the form of cookie
 const flash = require("connect-flash");                                      // Flash is used to store data in the form of cookie and dispaly only one message
 const cookieParser = require("cookie-parser");                               // Cookie parser is used to parse the cookie from the request
+const { MongoStore } = require('connect-mongo');
 
 // Authantaction and authoration
 const passport = require("passport");
@@ -21,6 +23,7 @@ const router_listing = require("./routes/listing.js");
 const router_reviews = require("./routes/review.js");
 const router_user = require("./routes/user.js");
 
+app.set("trust proxy", 1);
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -29,7 +32,8 @@ app.use(methodOverride("_method"))
 app.engine("ejs", ejsMate);
 
 const port = process.env.PORT || 8080;
-let mongodb_url = 'mongodb://127.0.0.1/wanderlust';
+let mongodb_url = process.env.MONGODB_ATLAS;
+// let mongodb_url = 'mongodb://127.0.0.1/wanderlust';
 
 mongoose.connect(mongodb_url)
     .then((res) => {
@@ -39,19 +43,35 @@ mongoose.connect(mongodb_url)
     });
 
 app.get("/", (req, res) => {
-    res.send("I am root")
+    res.redirect("/listings");
 });
 
+const secret = process.env.SECRET || "mysupersecretkey";
+
+const store = MongoStore.create({
+    mongoUrl: mongodb_url,
+    crypto:{
+        secret: secret,
+    },
+    touchAfter: 24 * 60 * 60
+});
+
+store.on("error",(err)=>{
+    console.log("ERROR IN MONGO SESSION STORE",err);   
+})
+
 const SessionOptions = {
-    secret: "mysupersecretkey",
+    store,
+    secret: secret,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
         expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true
     }
 };
+
 
 app.use(session(SessionOptions));
 app.use(flash());
@@ -68,7 +88,7 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
-    res.locals.currUser = req.user;
+    res.locals.currUser = req.user || null;
     next();
 })
 

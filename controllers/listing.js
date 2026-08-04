@@ -33,8 +33,8 @@ module.exports.createListing = async (req, res, next) => {
         limit: 1
     }).send();
 
-    let url = req.file.path;
-    let filename = req.file.filename;
+    let url = req.file ? req.file.path : "https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?v=1";
+    let filename = req.file ? req.file.filename : "listingimage";
     const newListing = new Listing(req.body.listing);
     newListing.owner = req.user;
     newListing.image = { url, filename };
