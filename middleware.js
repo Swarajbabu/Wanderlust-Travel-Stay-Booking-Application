@@ -58,7 +58,9 @@ module.exports.isOwner = async (req, res, next) => {
 // Used in:
 // - routes/listing.js: Executed before creating a listing (POST /) and updating a listing (PUT /:id) to ensure all required fields are present and valid.
 module.exports.validateListing = (req, res, next) => {
-    let { error } = ListingSchema.validate(req.body);
+    const bodyCopy = { ...req.body };
+    delete bodyCopy._csrf;
+    let { error } = ListingSchema.validate(bodyCopy);
     if (error) {
         let errMsg = error.details.map((el) => el.message).join(",");
         throw new ExpressError(400, errMsg);
@@ -71,7 +73,9 @@ module.exports.validateListing = (req, res, next) => {
 // Used in:
 // - routes/review.js: Executed before creating a review (POST /) to ensure the rating and comment are valid.
 module.exports.validateReview = (req, res, next) => {
-    let { error } = reviewSchema.validate(req.body);
+    const bodyCopy = { ...req.body };
+    delete bodyCopy._csrf;
+    let { error } = reviewSchema.validate(bodyCopy);
     if (error) {
         let errMsg = error.details.map((el) => el.message).join(",");
         throw new ExpressError(400, errMsg);
@@ -99,7 +103,9 @@ module.exports.isReviewAuthor = async (req, res, next) => {
 
 // Middleware to validate booking information sent in request body against bookingSchema Joi rules.
 module.exports.validateBooking = (req, res, next) => {
-    let { error } = bookingSchema.validate(req.body);
+    const bodyCopy = { ...req.body };
+    delete bodyCopy._csrf;
+    let { error } = bookingSchema.validate(bodyCopy);
     if (error) {
         let errMsg = error.details.map((el) => el.message).join(",");
         throw new ExpressError(400, errMsg);

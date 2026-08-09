@@ -53,7 +53,7 @@
 <script>
   const options = {
       key: "<%= razorpayKeyId %>",
-      amount: <%= order.amount %>,
+      amount: Number("<%= order.amount %>"),
       currency: "<%= order.currency %>",
       name: "Wanderlust Stays",
       description: "Reservation Payment for <%= booking.listing.title %>",

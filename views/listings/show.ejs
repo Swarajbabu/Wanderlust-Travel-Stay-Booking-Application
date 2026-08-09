@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
 <script>
   const mapToken = "<%= process.env.MAP_TOKEN %>";
-  const coordinates = <%- JSON.stringify(listings.geometry && listings.geometry.coordinates && listings.geometry.coordinates.length === 2 ? listings.geometry.coordinates : [78.4867, 17.3850]) %>;
+  const coordinates = JSON.parse('<%- JSON.stringify(listings.geometry && listings.geometry.coordinates && listings.geometry.coordinates.length === 2 ? listings.geometry.coordinates : [78.4867, 17.3850]) %>');
   const listingTitle = "<%= listings.title %>";
 </script>
 
@@ -124,7 +124,7 @@
             </tr>
           </thead>
           <tbody>
-            <% for (booking of bookings) { %>
+            <% for (let booking of bookings) { %>
               <tr>
                 <td><b><%= booking.guest.username %></b></td>
                 <td><%= booking.guest.email %></td>
@@ -208,7 +208,7 @@
     <% if (listings.reviews.length > 0) { %>
     <h4 class="fw-bold mb-4"><i class="fa-solid fa-comments me-2 text-secondary"></i>Guest Reviews</h4>
     <div class="row g-3">
-      <% for(review of listings.reviews) { %>
+      <% for(let review of listings.reviews) { %>
       <div class="col-md-6 col-12">
         <div class="card h-100 review-card shadow-sm border-0 rounded-4 p-3 bg-white border border-light-subtle">
           <div class="card-body p-0">
@@ -248,7 +248,7 @@
 <script src="/js/map.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    const pricePerNight = <%= listings.price %>;
+    const pricePerNight = Number("<%= listings.price %>");
 
     // Fetch booked dates from the endpoint
     fetch('/listings/<%= listings._id %>/bookings/booked-dates')

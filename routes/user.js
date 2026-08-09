@@ -29,6 +29,7 @@ const otpLimiter = process.env.NODE_ENV === "test"
             const email = req.body && req.body.email ? req.body.email.toLowerCase() : "";
             return `${ip}_${email}`;
         },
+        validate: { keyGeneratorIpFallback: false },
         handler: (req, res, next, options) => {
             req.flash("error", "Too many OTP attempts. Please try again after 15 minutes.");
             res.redirect(req.originalUrl || "/login");
