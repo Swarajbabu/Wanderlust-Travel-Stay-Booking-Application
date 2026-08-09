@@ -10,6 +10,7 @@
     </div>
 
     <form action="/listings" method="post" novalidate class="needs-validation" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
       <!-- Basic Details -->
       <div class="form-section-title">Basic Details</div>

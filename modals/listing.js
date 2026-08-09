@@ -42,7 +42,9 @@ const ListingSchema = Schema({
         type: String,
         enum: ["Rooms", "Iconic Cities", "Mountains", "Castles", "Amazing Pools", "Camping", "Farms", "Arctic", "Mansions", "Caves", "New", "Play", "Off-the-grid", "Creative spaces", "Houseboats", "Yurts", "Casas particulares"],
     }
-})
+});
+
+ListingSchema.index({ title: "text", location: "text", country: "text" });
 
 ListingSchema.post("findOneAndDelete", async (listing) => {
     if (listing) {

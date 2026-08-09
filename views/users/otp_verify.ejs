@@ -1,0 +1,40 @@
+<% layout('layouts/boilerplate') -%>
+<link rel="stylesheet" href="/css/auth.css">
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <i class="fa-solid fa-shield-halved d-block"></i>
+      <h4>Verify OTP</h4>
+      <p>Enter the 6-digit code sent to your email</p>
+    </div>
+
+    <form action="/login/otp/verify" method="post" class="needs-validation" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      
+      <div class="mb-3">
+        <label class="form-label" for="email">Email address</label>
+        <div class="d-flex">
+          <span class="input-group-icon"><i class="fa-solid fa-envelope"></i></span>
+          <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" value="<%= email %>" required>
+        </div>
+        <div class="invalid-feedback">Please enter a valid email.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="code">6-Digit Verification Code</label>
+        <div class="d-flex">
+          <span class="input-group-icon"><i class="fa-solid fa-key"></i></span>
+          <input type="text" name="code" id="code" class="form-control" placeholder="123456" pattern="[0-9]{6}" maxlength="6" required>
+        </div>
+        <div class="invalid-feedback">Please enter the 6-digit numeric code.</div>
+      </div>
+
+      <button class="btn btn-auth mt-2">Verify & Log In</button>
+    </form>
+
+    <div class="auth-divider">or</div>
+
+    <p class="auth-switch">Didn't receive a code? <a href="/login/otp/request">Resend OTP</a></p>
+  </div>
+</div>

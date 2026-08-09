@@ -10,6 +10,7 @@
     </div>
 
     <form action="/login" method="post" class="needs-validation" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <div class="mb-3">
         <label class="form-label" for="username">Username</label>
         <div class="d-flex">
@@ -19,7 +20,10 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label" for="password">Password</label>
+        <div class="d-flex justify-content-between">
+          <label class="form-label" for="password">Password</label>
+          <a href="/forgot-password" class="small text-danger fw-semibold text-decoration-none">Forgot password?</a>
+        </div>
         <div class="d-flex">
           <span class="input-group-icon"><i class="fa-solid fa-lock"></i></span>
           <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
@@ -27,9 +31,24 @@
       </div>
 
       <button class="btn btn-auth mt-2">Log In</button>
+      <div class="text-center mt-2">
+        <a href="/login/otp/request" class="small text-danger fw-semibold text-decoration-none">Email me a code instead</a>
+      </div>
     </form>
 
     <div class="auth-divider">or</div>
+
+    <div class="d-grid mb-3">
+      <a href="/auth/google" class="btn btn-outline-dark py-2 fw-semibold rounded-3 d-flex align-items-center justify-content-center border-light-subtle shadow-sm bg-white hover-bg-light">
+        <svg class="me-2" style="width:18px; height:18px;" viewBox="0 0 24 24">
+          <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.68 1.54 14.98 1 12 1 7.35 1 3.37 3.67 1.39 7.56l3.89 3.02c.92-2.77 3.51-4.54 6.72-4.54z"/>
+          <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.43c-.28 1.44-1.09 2.67-2.3 3.49l3.6 2.79c2.1-1.94 3.76-4.8 3.76-8.43z"/>
+          <path fill="#FBBC05" d="M5.28 14.54c-.24-.72-.38-1.5-.38-2.3s.14-1.58.38-2.3L1.39 6.92C.5 8.7 0 10.7 0 12.8s.5 4.1 1.39 5.88l3.89-3.14z"/>
+          <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.6-2.79c-1.01.68-2.3 1.09-3.96 1.09-3.21 0-5.8-1.77-6.72-4.54L1.39 16.9C3.37 20.78 7.35 23 12 23z"/>
+        </svg>
+        Sign in with Google
+      </a>
+    </div>
 
     <p class="auth-switch">Don't have an account? <a href="/signup">Sign up</a></p>
   </div>

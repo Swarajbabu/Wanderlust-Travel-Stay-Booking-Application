@@ -1,114 +1,169 @@
 // Reload environment configuration
-require("dotenv").config({ override: true });
-require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
+const overrideEnv = process.env.NODE_ENV !== "test";
+require("dotenv").config({ override: overrideEnv });
+if (process.env.NODE_ENV !== "test") {
+    const validateEnv = require("./config/validateEnv");
+    validateEnv();
+}
+
+// DNS set servers for development
+if (process.env.NODE_ENV !== "production") {
+    require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
+}
+
 const express = require("express");
 const app = express();
-const mongoose = require("mongoose");
 const path = require("path");
-const ejsMate = require("ejs-mate");                                         // EJS mate layout 
-const methodOverride = require("method-override");                           // Override HTTP methods like PUT,PATCH and DELETE
-const session = require("express-session");                                  // Session is used to store data in the form of cookie
-const flash = require("connect-flash");                                      // Flash is used to store data in the form of cookie and dispaly only one message
-const cookieParser = require("cookie-parser");                               // Cookie parser is used to parse the cookie from the request
-const { MongoStore } = require('connect-mongo');
-
-// Authantaction and authoration
+const ejsMate = require("ejs-mate");
+const methodOverride = require("method-override");
+const cookieParser = require("cookie-parser");
+const flash = require("connect-flash");
 const passport = require("passport");
-const LocalStrategy = require("passport-local");
-const User = require("./modals/user.js");
-const ExpressError = require("./utility/ExpressError.js");                   // Custom Error Class     
+const morgan = require("morgan");
+const helmet = require("helmet");
+const compression = require("compression");
 
-// Router listing require
+// Logger & DB Connection
+const logger = require("./config/logger");
+const connectDB = require("./config/db");
+if (require.main === module) {
+    connectDB();
+}
+
+// Passport & Session configuration imports
+const sessionMiddleware = require("./config/session");
+const configurePassport = require("./config/passport");
+
+// Custom Error Class
+const ExpressError = require("./utility/ExpressError.js");
+
+// Router requires
 const router_listing = require("./routes/listing.js");
 const router_reviews = require("./routes/review.js");
 const router_user = require("./routes/user.js");
+const router_bookings = require("./routes/booking.js");
 
+// CSRF Protection Setup
+// Means: CSRF protection setup by csrf-csrf library
+// Explanation CSRF: Cross Site Request Forgery.
+// Purpose: to prevent unauthorized state-changing requests.
+// How: 
+//
+const secret = process.env.SECRET;
+const { doubleCsrf } = require("csrf-csrf");
+const {
+    doubleCsrfProtection,
+    generateCsrfToken,
+    invalidCsrfTokenError
+} = doubleCsrf({
+    getSecret: () => secret,
+    getSessionIdentifier: (req) => "",
+    cookieName: "x-csrf-token",
+    cookieOptions: {
+        sameSite: "lax",
+        secure: false, // set to true in production if using HTTPS
+        httpOnly: true,
+        signed: false,
+    },
+    getCsrfTokenFromRequest: (req) => req.body?._csrf || req.query?._csrf || req.headers["x-csrf-token"],
+});
+
+// View Engine & Static Files configuration
 app.set("trust proxy", 1);
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
-app.use(methodOverride("_method"))
 app.engine("ejs", ejsMate);
 
-const port = process.env.PORT || 8080;
-let mongodb_url = process.env.MONGODB_ATLAS;
-// let mongodb_url = 'mongodb://127.0.0.1/wanderlust';
+// HTTP Logging Middleware piped through Winston
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev", {
+    stream: { write: (message) => logger.info(message.trim()) }
+}));
 
-mongoose.connect(mongodb_url)
-    .then((res) => {
-        console.log("Connected");
-    }).catch((err) => {
-        console.log(err);
-    });
-
-app.get("/", (req, res) => {
-    res.redirect("/listings");
-});
-
-const secret = process.env.SECRET || "mysupersecretkey";
-
-const store = MongoStore.create({
-    mongoUrl: mongodb_url,
-    crypto:{
-        secret: secret,
+// Compression & Helmet Middleware
+app.use(compression());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", "https://api.mapbox.com", "https://*.tiles.mapbox.com", "https://events.mapbox.com", "https://api.razorpay.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://api.mapbox.com", "https://cdn.jsdelivr.net", "https://checkout.razorpay.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://api.mapbox.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
+            workerSrc: ["'self'", "blob:"],
+            childSrc: ["'self'", "blob:", "https://api.razorpay.com"],
+            frameSrc: ["'self'", "https://api.razorpay.com"],
+            objectSrc: [],
+            imgSrc: ["'self'", "blob:", "data:", "https://res.cloudinary.com", "https://images.unsplash.com", "https://api.mapbox.com", "https://*.tiles.mapbox.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
+        },
     },
-    touchAfter: 24 * 60 * 60
+    crossOriginEmbedderPolicy: false,
+}));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(methodOverride("_method"));
+app.use(cookieParser(secret));
+app.use(sessionMiddleware);
+app.use(flash());
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV === "test") {
+        return next();
+    }
+    doubleCsrfProtection(req, res, next);
 });
 
-store.on("error",(err)=>{
-    console.log("ERROR IN MONGO SESSION STORE",err);   
-})
-
-const SessionOptions = {
-    store,
-    secret: secret,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        httpOnly: true
-    }
-};
-
-
-app.use(session(SessionOptions));
-app.use(flash());
-
-// Aut and Aou
+// Passport Configuration
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
+configurePassport(passport);
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
-
-app.use((req,res,next)=>{
+// Expose flash messages, CSRF tokens, and current user to locals
+app.use((req, res, next) => {
+    res.locals.csrfToken = process.env.NODE_ENV === "test" ? "mock-csrf-token" : generateCsrfToken(req, res);
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user || null;
     next();
-})
+});
 
-app.use("/listings",router_listing);                            
-app.use("/listings/:id/reviews",router_reviews);
-app.use("/",router_user);
+// Root route redirect
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
 
-// 404 error handling for all the request.
+// Route mountings
+app.use("/listings", router_listing);
+app.use("/listings/:id/reviews", router_reviews);
+app.use("/", router_bookings);
+app.use("/", router_user);
+
+// 404 handler
 app.all("*", (req, res, next) => {
     next(new ExpressError(404, "Page Not Found"));
-})
+});
 
-// error handling for all the request.
+// CSRF Error Handler
 app.use((err, req, res, next) => {
-    let { statusCode = 500, message = "Something Went Wrong" } = err;
-    res.status(statusCode).render("error.ejs", { err });
-    // res.status(statusCode).send(message);
+    if (err === invalidCsrfTokenError) {
+        logger.warn(`CSRF FAILED! sessionID: ${req.sessionID} cookies: ${JSON.stringify(req.cookies)}`);
+        req.flash("error", "Session expired or invalid CSRF token. Please try again.");
+        return res.redirect(req.get("Referrer") || "/listings");
+    }
+    next(err);
 });
 
-app.listen(port, () => {
-    console.log(`Server Started in: ${port}`)
+// General Error Handler
+app.use((err, req, res, next) => {
+    let { statusCode = 500 } = err;
+    logger.error(`Error ${statusCode}: ${err.message}\n${err.stack}`);
+    res.status(statusCode).render("error.ejs", { err });
 });
-// Nodemon reload trigger
+
+module.exports = app;
+
+if (require.main === module) {
+    const port = process.env.PORT || 8080;
+    app.listen(port, () => {
+        logger.info(`Server Started in: ${port}`);
+    });
+}

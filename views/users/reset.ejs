@@ -1,0 +1,27 @@
+<% layout('layouts/boilerplate') -%>
+<link rel="stylesheet" href="/css/auth.css">
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <i class="fa-solid fa-lock d-block"></i>
+      <h4>Reset password</h4>
+      <p>Enter your new password below</p>
+    </div>
+
+    <form action="/reset-password/<%= token %>" method="post" class="needs-validation" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      
+      <div class="mb-3">
+        <label class="form-label" for="password">New Password</label>
+        <div class="d-flex">
+          <span class="input-group-icon"><i class="fa-solid fa-lock"></i></span>
+          <input type="password" name="password" id="password" class="form-control" placeholder="Enter new password" minlength="4" required>
+        </div>
+        <div class="invalid-feedback">Please enter a valid password.</div>
+      </div>
+
+      <button class="btn btn-auth mt-2">Reset Password</button>
+    </form>
+  </div>
+</div>

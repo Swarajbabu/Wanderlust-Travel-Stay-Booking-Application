@@ -1,11 +1,11 @@
 {
-  "name": "0-major-project-using-hcjne-stacks",
+  "name": "wanderlust",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --runInBand --detectOpenHandles --forceExit"
   },
   "keywords": [],
   "author": "",
@@ -13,23 +13,38 @@
   "type": "commonjs",
   "dependencies": {
     "@mapbox/mapbox-sdk": "^0.16.2",
+    "bcrypt": "^6.0.0",
     "cloudinary": "^2.10.0",
+    "compression": "^1.8.1",
     "connect-flash": "^0.1.1",
     "connect-mongo": "^6.0.0",
     "cookie-parser": "^1.4.7",
+    "csrf-csrf": "^4.0.3",
     "dotenv": "^17.4.2",
     "ejs": "^6.0.1",
     "ejs-mate": "^4.0.0",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.6.2",
     "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
     "joi": "^18.2.3",
     "method-override": "^3.0.0",
     "mongoose": "^9.7.4",
+    "morgan": "^1.11.0",
     "multer": "^2.2.0",
     "multer-storage-cloudinary": "^4.0.0",
-    "nodemon": "^3.1.14",
+    "nodemailer": "^9.0.5",
     "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^9.1.0"
+    "passport-local-mongoose": "^9.1.0",
+    "razorpay": "^2.9.8",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "mongodb-memory-server": "^11.2.0",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
   }
 }

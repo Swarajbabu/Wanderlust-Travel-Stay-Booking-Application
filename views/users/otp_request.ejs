@@ -1,0 +1,31 @@
+<% layout('layouts/boilerplate') -%>
+<link rel="stylesheet" href="/css/auth.css">
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <i class="fa-solid fa-paper-plane d-block"></i>
+      <h4>OTP Authentication</h4>
+      <p>Enter your email to request a 6-digit code</p>
+    </div>
+
+    <form action="/login/otp/request" method="post" class="needs-validation" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      
+      <div class="mb-3">
+        <label class="form-label" for="email">Email address</label>
+        <div class="d-flex">
+          <span class="input-group-icon"><i class="fa-solid fa-envelope"></i></span>
+          <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" required>
+        </div>
+        <div class="invalid-feedback">Please enter a valid email.</div>
+      </div>
+
+      <button class="btn btn-auth mt-2">Email Me a Code</button>
+    </form>
+
+    <div class="auth-divider">or</div>
+
+    <p class="auth-switch"><a href="/login"><i class="fa-solid fa-arrow-left me-1"></i>Back to Log In</a></p>
+  </div>
+</div>

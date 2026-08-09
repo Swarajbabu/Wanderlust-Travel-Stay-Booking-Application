@@ -22,6 +22,9 @@
             </div>
             
             <div class="navbar-nav ms-auto align-items-center">
+                <% if(typeof currUser !== 'undefined' && currUser){ %>
+                    <a class="nav-link me-3 fw-semibold text-secondary" href="/bookings">My Bookings</a>
+                <% } %>
                 <a class="nav-link nav-home-btn me-2" href="/listings/new">Wanderlust your home</a>
                 
                 <div class="dropdown">
@@ -38,6 +41,7 @@
                             <li><span class="dropdown-item-text text-muted">Hello, <b><%= currUser.username %></b></span></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/listings/new">Wanderlust your home</a></li>
+                            <li><a class="dropdown-item" href="/bookings">My Bookings</a></li>
                             <li><a class="dropdown-item fw-bold text-danger" href="/logout">Log out</a></li>
                         <% } %>
                     </ul>

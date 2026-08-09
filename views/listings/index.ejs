@@ -112,8 +112,43 @@
 
     </div>
   </a>
-  <% } %>
 </div>
+
+<!-- Pagination Section -->
+<% if (totalPages > 1) { %>
+  <nav aria-label="Page navigation" class="mt-4 mb-5">
+    <ul class="pagination justify-content-center">
+      <% 
+        // Build base query string with preserved params
+        let queryParams = [];
+        if (typeof q !== 'undefined' && q) queryParams.push(`q=${encodeURIComponent(q)}`);
+        if (typeof category !== 'undefined' && category) queryParams.push(`category=${encodeURIComponent(category)}`);
+        let baseQuery = queryParams.length > 0 ? queryParams.join('&') + '&' : '';
+      %>
+
+      <!-- Previous Page -->
+      <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+        <a class="page-link shadow-sm rounded-start-3" href="/listings?<%= baseQuery %>page=<%= currentPage - 1 %>" aria-label="Previous">
+          <span aria-hidden="true">&laquo; Previous</span>
+        </a>
+      </li>
+
+      <!-- Page Numbers -->
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+          <a class="page-link shadow-sm" href="/listings?<%= baseQuery %>page=<%= i %>"><%= i %></a>
+        </li>
+      <% } %>
+
+      <!-- Next Page -->
+      <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+        <a class="page-link shadow-sm rounded-end-3" href="/listings?<%= baseQuery %>page=<%= currentPage + 1 %>" aria-label="Next">
+          <span aria-hidden="true">Next &raquo;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+<% } %>
 
 <script>
     let taxSwitch = document.getElementById("taxSwitch");

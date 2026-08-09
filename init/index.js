@@ -3,13 +3,14 @@ require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
 const mongoose = require("mongoose");
 const initData = require("./data");
 const Listing = require("../modals/listing");
+const logger = require("../config/logger");
 
 let mongodb_url = process.env.MONGODB_ATLAS;
 mongoose.connect(mongodb_url)
     .then((res) => {
-        console.log("Connected to DB for initialization");
+        logger.info("Connected to DB for initialization");
     }).catch((err) => {
-        console.log(err);
+        logger.error("Database connection error in init: " + err.message);
     });
 
 const initDB = async () => {
@@ -24,7 +25,7 @@ const initDB = async () => {
         category: obj.category || "Rooms"
     }));
     await Listing.insertMany(initData.data);
-    console.log("Data was initialized successfully!");
+    logger.info("Data was initialized successfully!");
     mongoose.connection.close();
 };
 

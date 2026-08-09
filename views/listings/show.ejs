@@ -1,5 +1,7 @@
 <% layout('layouts/boilerplate') -%>
 <link rel="stylesheet" href="/css/show.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
 <script>
   const mapToken = "<%= process.env.MAP_TOKEN %>";
   const coordinates = <%- JSON.stringify(listings.geometry && listings.geometry.coordinates && listings.geometry.coordinates.length === 2 ? listings.geometry.coordinates : [78.4867, 17.3850]) %>;
@@ -41,6 +43,52 @@
     </div>
   </div>
 
+  <!-- Booking Form Section -->
+  <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-12 mb-4">
+    <div class="card border-0 shadow-sm p-4 bg-white rounded-4 border border-light-subtle">
+      <h4 class="fw-bold mb-3"><i class="fa-solid fa-calendar-days text-danger me-2"></i>Book this Stay</h4>
+      <form action="/listings/<%= listings._id %>/bookings" method="post" novalidate class="needs-validation">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6 col-12">
+            <label for="checkIn" class="form-label fw-semibold">Check-In Date</label>
+            <input type="text" name="booking[checkIn]" id="checkIn" class="form-control rounded-3" placeholder="Select Date" required readonly>
+            <div class="invalid-feedback">Please select a valid check-in date.</div>
+          </div>
+          <div class="col-md-6 col-12">
+            <label for="checkOut" class="form-label fw-semibold">Check-Out Date</label>
+            <input type="text" name="booking[checkOut]" id="checkOut" class="form-control rounded-3" placeholder="Select Date" required readonly>
+            <div class="invalid-feedback">Please select a valid check-out date.</div>
+          </div>
+        </div>
+        <div id="price-calc-box" class="my-3 p-3 bg-light rounded-3 d-none">
+          <div class="d-flex justify-content-between mb-1">
+            <span>Price per night:</span>
+            <span class="fw-bold">&#8377; <%= Number(listings.price).toLocaleString("en-IN") %></span>
+          </div>
+          <div class="d-flex justify-content-between mb-1">
+            <span>Number of nights:</span>
+            <span id="calc-nights" class="fw-bold">0</span>
+          </div>
+          <hr class="my-2">
+          <div class="d-flex justify-content-between fs-5 fw-bold text-danger">
+            <span>Total Price:</span>
+            <span>&#8377; <span id="calc-total">0</span></span>
+          </div>
+        </div>
+        <% if (currUser) { %>
+          <button class="btn btn-danger px-4 py-2 w-100 rounded-3 fw-bold shadow-sm">
+            <i class="fa-solid fa-credit-card me-2"></i>Book Now
+          </button>
+        <% } else { %>
+          <a href="/login" class="btn btn-outline-danger px-4 py-2 w-100 rounded-3 fw-bold shadow-sm">
+            <i class="fa-solid fa-right-to-bracket me-2"></i>Log in to Book
+          </a>
+        <% } %>
+      </form>
+    </div>
+  </div>
+
   <% if(currUser && currUser._id.equals(listings.owner._id)) { %>
   <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-12 mb-4">
     <div class="d-flex align-items-center gap-3">
@@ -48,10 +96,73 @@
         <i class="fa-solid fa-pen-to-square me-2"></i>Edit
       </a>
       <form action="/listings/<%= listings._id %>?_method=DELETE" method="post" class="m-0">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <button class="btn btn-danger px-4 py-2 rounded-3 shadow-sm">
           <i class="fa-solid fa-trash-can me-2"></i>Delete
         </button>
       </form>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Bookings for this listing (Visible only to owner) -->
+  <% if(currUser && currUser._id.equals(listings.owner._id) && typeof bookings !== 'undefined' && bookings.length > 0) { %>
+  <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-12 mb-4">
+    <div class="card border-0 shadow-sm p-4 bg-white rounded-4 border border-light-subtle">
+      <h4 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-list-check text-danger me-2"></i>Bookings for this Listing</h4>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th scope="col" class="fw-semibold">Guest</th>
+              <th scope="col" class="fw-semibold">Email</th>
+              <th scope="col" class="fw-semibold">Check-In</th>
+              <th scope="col" class="fw-semibold">Check-Out</th>
+              <th scope="col" class="fw-semibold">Total Price</th>
+              <th scope="col" class="fw-semibold">Status</th>
+              <th scope="col" class="fw-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for (booking of bookings) { %>
+              <tr>
+                <td><b><%= booking.guest.username %></b></td>
+                <td><%= booking.guest.email %></td>
+                <td><%= new Date(booking.checkIn).toLocaleDateString("en-IN") %></td>
+                <td><%= new Date(booking.checkOut).toLocaleDateString("en-IN") %></td>
+                <td>&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></td>
+                <td>
+                  <% if (booking.status === "confirmed") { %>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">Confirmed</span>
+                  <% } else if (booking.status === "cancelled") { %>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">Cancelled</span>
+                  <% } else { %>
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">Pending</span>
+                  <% } %>
+                </td>
+                <td>
+                  <div class="d-flex gap-2">
+                    <% if (booking.status === "pending") { %>
+                      <form action="/bookings/<%= booking._id %>/confirm?_method=PATCH" method="POST" class="m-0">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn btn-sm btn-success rounded-pill px-3">Confirm</button>
+                      </form>
+                    <% } %>
+                    <% if (booking.status !== "cancelled") { %>
+                      <form action="/bookings/<%= booking._id %>/cancel?_method=PATCH" method="POST" class="m-0">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Cancel</button>
+                      </form>
+                    <% } else { %>
+                      <span class="text-muted small">No actions</span>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
   <% } %>
@@ -64,6 +175,7 @@
     <div class="card border-0 shadow-sm p-4 mb-4 bg-white rounded-4 border border-light-subtle">
       <h4 class="fw-bold mb-3"><i class="fa-solid fa-star text-warning me-2"></i>Leave a Review</h4>
       <form action="/listings/<%= listings._id %>/reviews" method="post" novalidate class="needs-validation">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="mb-3">
           <label for="rating" class="form-label fw-semibold">Rating</label>
           <fieldset class="starability-slot">
@@ -112,6 +224,7 @@
           </div>
           <% if (currUser && review.author && currUser._id.equals(review.author._id)) { %>
           <form action="/listings/<%= listings._id %>/reviews/<%= review._id %>?_method=DELETE" class="m-0" method="post">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button class="btn btn-sm btn-outline-danger px-3 rounded-pill">
               <i class="fa-solid fa-trash-can me-1"></i>Delete
             </button>
@@ -133,3 +246,56 @@
 </div>
 
 <script src="/js/map.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    const pricePerNight = <%= listings.price %>;
+
+    // Fetch booked dates from the endpoint
+    fetch('/listings/<%= listings._id %>/bookings/booked-dates')
+      .then(res => res.json())
+      .then(bookings => {
+        const disableRanges = bookings.map(b => ({
+          from: new Date(b.checkIn),
+          to: new Date(b.checkOut)
+        }));
+
+        const checkInPicker = flatpickr("#checkIn", {
+          minDate: "today",
+          dateFormat: "Y-m-d",
+          disable: disableRanges,
+          onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+              const nextDay = new Date(selectedDates[0]);
+              nextDay.setDate(nextDay.getDate() + 1);
+              checkOutPicker.set("minDate", nextDay);
+              calculatePrice();
+            }
+          }
+        });
+
+        const checkOutPicker = flatpickr("#checkOut", {
+          minDate: new Date().setDate(new Date().getDate() + 1),
+          dateFormat: "Y-m-d",
+          disable: disableRanges,
+          onChange: function(selectedDates, dateStr, instance) {
+            calculatePrice();
+          }
+        });
+
+        function calculatePrice() {
+          const checkInVal = checkInPicker.selectedDates[0];
+          const checkOutVal = checkOutPicker.selectedDates[0];
+          if (checkInVal && checkOutVal) {
+            const timeDiff = checkOutVal - checkInVal;
+            const nights = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
+            const total = nights * pricePerNight;
+            
+            document.getElementById("calc-nights").innerText = nights;
+            document.getElementById("calc-total").innerText = total.toLocaleString("en-IN");
+            document.getElementById("price-calc-box").classList.remove("d-none");
+          } else {
+            document.getElementById("price-calc-box").classList.add("d-none");
+          }
+        }
+      });
+</script>

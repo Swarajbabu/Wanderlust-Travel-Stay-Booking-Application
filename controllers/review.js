@@ -1,5 +1,6 @@
 const Listing = require("../modals/listing");
 const Review = require("../modals/review"); 
+const Booking = require("../modals/booking");
 const ExpressError = require("../utility/ExpressError");
 
 module.exports.createReview = async (req, res) => {
@@ -8,9 +9,22 @@ module.exports.createReview = async (req, res) => {
     if (!listing) {
         throw new ExpressError(404, "Listing Not Found");
     }
+
+    // Restrict review to guests with a confirmed past booking
+    const bookingExists = await Booking.findOne({
+        listing: id,
+        guest: req.user._id,
+        status: "confirmed",
+        checkOut: { $lt: new Date() }
+    });
+
+    if (!bookingExists) {
+        req.flash("error", "You can only review stays you have already completed (confirmed booking with checkout in the past).");
+        return res.redirect(`/listings/${id}`);
+    }
+
     const newReview = new Review(req.body.review);
     newReview.author = req.user._id;
-    console.log(newReview);
     listing.reviews.push(newReview);
     await listing.save();
     await newReview.save();

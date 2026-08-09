@@ -567,7 +567,7 @@ To keep this README honest about the current state of the code:
 - No Docker/CI-CD configuration.
 - No admin dashboard or role-based access control.
 - No booking/payment flow — the app covers listings, discovery, and reviews, not an end-to-end reservation/checkout system.
-- No pagination on the listings index — `Listing.find()` returns the full (optionally filtered) result set.
+- MongoDB text search utilizes a text index on title, location, and country, falling back to case-insensitive regex search if no exact word match is found.
 - No LICENSE file is present in the repo, though `package.json` declares `ISC`.
 
 ---
@@ -575,7 +575,6 @@ To keep this README honest about the current state of the code:
 ## 🗺️ Roadmap
 
 - [ ] Add a booking/reservation and payment flow
-- [ ] Add pagination to the listings index
 - [ ] Add an admin dashboard for managing listings/users
 - [ ] Add automated tests (unit + integration)
 - [ ] Add Docker support and a CI/CD pipeline

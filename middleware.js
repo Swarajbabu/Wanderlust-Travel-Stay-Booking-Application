@@ -1,6 +1,7 @@
 const Listing = require("./modals/listing");
 const Review = require("./modals/review");
-const { ListingSchema, reviewSchema } = require("./schema.js");
+const Booking = require("./modals/booking");
+const { ListingSchema, reviewSchema, bookingSchema } = require("./schema.js");
 const ExpressError = require("./utility/ExpressError.js");
 
 // Middleware to check if the user is currently logged in.
@@ -12,6 +13,16 @@ module.exports.isLoggedIn = (req, res, next) => {
         req.session.redirectUrl = req.originalUrl;
         req.flash("error", "You must be logged in to create listing!");
         return res.redirect("/login");
+    }
+    next();
+};
+
+// 
+module.exports.isEmailVerified = (req, res, next) => {
+    if (req.user && !req.user.emailVerified) {
+        req.flash("error", "Please verify your email address to proceed. Check your inbox for the OTP code.");
+        req.session.otpEmail = req.user.email;
+        return res.redirect("/login/otp/verify");
     }
     next();
 };
@@ -82,6 +93,64 @@ module.exports.isReviewAuthor = async (req, res, next) => {
     if (!review.author.equals(res.locals.currUser._id)) {
         req.flash("error", "You do not have permission to delete this review!");
         return res.redirect(`/listings/${id}`);
+    }
+    next();
+};
+
+// Middleware to validate booking information sent in request body against bookingSchema Joi rules.
+module.exports.validateBooking = (req, res, next) => {
+    let { error } = bookingSchema.validate(req.body);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    } else {
+        next();
+    }
+};
+
+// Middleware to authorize booking modification by verifying if the logged-in user is the guest.
+module.exports.isBookingGuest = async (req, res, next) => {
+    let { bookingId } = req.params;
+    let booking = await Booking.findById(bookingId);
+    if (!booking) {
+        req.flash("error", "Booking you requested for does not exist!");
+        return res.redirect("/bookings");
+    }
+    if (!booking.guest.equals(res.locals.currUser._id)) {
+        req.flash("error", "You do not have permission to modify this booking!");
+        return res.redirect("/bookings");
+    }
+    next();
+};
+
+// Middleware to authorize booking modification by verifying if the logged-in user is the listing owner.
+module.exports.isBookingOwner = async (req, res, next) => {
+    let { bookingId } = req.params;
+    let booking = await Booking.findById(bookingId).populate("listing");
+    if (!booking) {
+        req.flash("error", "Booking you requested for does not exist!");
+        return res.redirect("/listings");
+    }
+    if (!booking.listing.owner.equals(res.locals.currUser._id)) {
+        req.flash("error", "You do not have permission to modify bookings for this listing!");
+        return res.redirect(`/listings/${booking.listing._id}`);
+    }
+    next();
+};
+
+// Middleware to authorize booking cancellation by verifying if the logged-in user is either the guest or the owner.
+module.exports.isBookingGuestOrOwner = async (req, res, next) => {
+    let { bookingId } = req.params;
+    let booking = await Booking.findById(bookingId).populate("listing");
+    if (!booking) {
+        req.flash("error", "Booking you requested for does not exist!");
+        return res.redirect("/bookings");
+    }
+    const isGuest = booking.guest.equals(res.locals.currUser._id);
+    const isOwner = booking.listing.owner.equals(res.locals.currUser._id);
+    if (!isGuest && !isOwner) {
+        req.flash("error", "You do not have permission to modify this booking!");
+        return res.redirect("/bookings");
     }
     next();
 };
