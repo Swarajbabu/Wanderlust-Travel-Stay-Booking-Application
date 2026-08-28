@@ -25,11 +25,28 @@
           <span class="text-secondary fw-semibold">Check-Out</span>
           <span class="fw-bold text-dark"><%= new Date(booking.checkOut).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
         </div>
+        <% 
+          const nights = Math.max(1, Math.ceil((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 60 * 60 * 24)));
+          const base = booking.basePrice || (booking.listing && booking.listing.price ? nights * booking.listing.price : Math.round(booking.totalPrice / 1.18));
+          const tax = booking.taxAmount || (booking.totalPrice - base);
+        %>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-secondary fw-semibold">Duration</span>
+          <span class="fw-bold text-dark"><%= nights %> <%= nights === 1 ? 'Night' : 'Nights' %></span>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-secondary fw-semibold">Base Stay</span>
+          <span class="fw-bold text-dark">&#8377; <%= Number(base).toLocaleString("en-IN") %></span>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+          <span class="text-secondary fw-semibold">GST (18%)</span>
+          <span class="fw-bold text-dark">&#8377; <%= Number(tax).toLocaleString("en-IN") %></span>
+        </div>
         <hr class="my-3 border-light-subtle">
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <span class="fw-bold text-dark fs-5">Total Amount</span>
-            <span class="text-muted small d-block">inclusive of all taxes</span>
+            <span class="text-muted small d-block">inclusive of 18% GST</span>
           </div>
           <span class="fw-bold fs-4 text-danger">&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></span>
         </div>

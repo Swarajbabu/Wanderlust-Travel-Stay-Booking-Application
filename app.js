@@ -8,7 +8,11 @@ if (process.env.NODE_ENV !== "test") {
 
 // DNS set servers for development
 if (process.env.NODE_ENV !== "production") {
-    require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
+    try {
+        require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
+    } catch (e) {
+        // Ignore if unsupported
+    }
 }
 
 const express = require("express");
@@ -43,30 +47,14 @@ const router_reviews = require("./routes/review.js");
 const router_user = require("./routes/user.js");
 const router_bookings = require("./routes/booking.js");
 
-// CSRF Protection Setup
-// Means: CSRF protection setup by csrf-csrf library
-// Explanation CSRF: Cross Site Request Forgery.
-// Purpose: to prevent unauthorized state-changing requests.
-// How: 
-//
 const secret = process.env.SECRET;
-const { doubleCsrf } = require("csrf-csrf");
+
+// CSRF Protection Setup
 const {
     doubleCsrfProtection,
     generateCsrfToken,
     invalidCsrfTokenError
-} = doubleCsrf({
-    getSecret: () => secret,
-    getSessionIdentifier: (req) => "",
-    cookieName: "x-csrf-token",
-    cookieOptions: {
-        sameSite: "lax",
-        secure: false, // set to true in production if using HTTPS
-        httpOnly: true,
-        signed: false,
-    },
-    getCsrfTokenFromRequest: (req) => req.body?._csrf || req.query?._csrf || req.headers["x-csrf-token"],
-});
+} = require("./config/csrf");
 
 // View Engine & Static Files configuration
 app.set("trust proxy", 1);
@@ -109,6 +97,10 @@ app.use((req, res, next) => {
     if (process.env.NODE_ENV === "test") {
         return next();
     }
+    // For multipart forms, if query/header doesn't have token, defer check until multer parses body
+    if (req.is("multipart/form-data") && !req.query?._csrf && !req.headers["x-csrf-token"]) {
+        return next();
+    }
     doubleCsrfProtection(req, res, next);
 });
 
@@ -124,6 +116,14 @@ app.use((req, res, next) => {
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user || null;
     next();
+});
+
+// Favicon handler (prevent 404/500 noise in logs)
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
+// Health check endpoint for deployment monitors
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "healthy", timestamp: new Date().toISOString() });
 });
 
 // Root route redirect

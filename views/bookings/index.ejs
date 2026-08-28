@@ -47,6 +47,38 @@
                 </div>
               </div>
               
+              <% if (booking.status === "cancelled") { %>
+                <div class="alert alert-danger-subtle border-danger-subtle py-2 px-3 small rounded-3 mb-3">
+                  <div class="fw-bold text-danger mb-1">
+                    <i class="fa-solid fa-circle-xmark me-1"></i>Cancelled
+                    <% if (booking.cancelledAt) { %>
+                      <span class="text-muted fw-normal">on <%= new Date(booking.cancelledAt).toLocaleDateString("en-IN") %></span>
+                    <% } %>
+                  </div>
+                  <% if (booking.cancellationReason) { %>
+                    <div class="text-secondary mb-1">
+                      <strong>Reason:</strong> <%= booking.cancellationReason %>
+                    </div>
+                  <% } %>
+                  <% if (booking.refundStatus === "processed") { %>
+                    <div class="text-success fw-semibold mt-1">
+                      <i class="fa-solid fa-money-bill-transfer me-1"></i>Refund of &#8377; <%= Number(booking.refundAmount || booking.totalPrice).toLocaleString("en-IN") %> credited to original payment account
+                      <% if (booking.refundId) { %>
+                        <span class="text-muted d-block small">(Refund ID: <%= booking.refundId %>)</span>
+                      <% } %>
+                    </div>
+                  <% } else if (booking.refundStatus === "failed") { %>
+                    <div class="text-danger fw-semibold mt-1">
+                      <i class="fa-solid fa-triangle-exclamation me-1"></i>Refund processing error. Please contact support.
+                    </div>
+                  <% } else if (booking.paymentId) { %>
+                    <div class="text-info fw-semibold mt-1">
+                      <i class="fa-solid fa-clock-rotate-left me-1"></i>Refund pending processing
+                    </div>
+                  <% } %>
+                </div>
+              <% } %>
+              
               <div class="d-flex justify-content-between align-items-center mt-auto">
                 <div>
                   <span class="text-muted small d-block">Paid Total</span>
@@ -59,12 +91,9 @@
                     </a>
                   <% } %>
                   <% if (booking.status !== "cancelled" && new Date(booking.checkIn) > new Date()) { %>
-                    <form action="/bookings/<%= booking._id %>/cancel?_method=PATCH" method="POST" class="m-0">
-                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                      <button class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-semibold">
-                        Cancel
-                      </button>
-                    </form>
+                    <button type="button" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-semibold" data-bs-toggle="modal" data-bs-target="#cancelModal<%= booking._id %>">
+                      Cancel
+                    </button>
                   <% } %>
                   <a href="/listings/<%= booking.listing._id %>" class="btn btn-outline-dark btn-sm px-3 rounded-pill fw-semibold">
                     View Stay
@@ -74,6 +103,63 @@
             </div>
           </div>
         </div>
+
+        <% if (booking.status !== "cancelled" && new Date(booking.checkIn) > new Date()) { %>
+          <!-- Cancel Booking Modal -->
+          <div class="modal fade" id="cancelModal<%= booking._id %>" tabindex="-1" aria-labelledby="cancelModalLabel<%= booking._id %>" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0 pb-0">
+                  <h5 class="modal-title fw-bold text-danger" id="cancelModalLabel<%= booking._id %>">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>Cancel Booking
+                  </h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/bookings/<%= booking._id %>/cancel?_method=PATCH" method="POST" class="needs-validation" novalidate>
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <div class="modal-body py-3">
+                    <p class="text-secondary mb-2">
+                      Are you sure you want to cancel your stay at <strong><%= booking.listing.title %></strong>?
+                    </p>
+                    
+                    <% if (booking.status === "confirmed" && booking.paymentId) { %>
+                      <div class="alert alert-success d-flex align-items-center py-2 px-3 rounded-3 small mb-3">
+                        <i class="fa-solid fa-money-bill-transfer fs-5 text-success me-2"></i>
+                        <div>
+                          <strong>Refund Notice:</strong> A full refund of <strong>&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></strong> will be automatically credited to your original payment account.
+                        </div>
+                      </div>
+                    <% } %>
+
+                    <div class="mb-3">
+                      <label for="cancellationReason<%= booking._id %>" class="form-label fw-bold small text-dark">
+                        Reason for Cancellation <span class="text-danger">*</span>
+                      </label>
+                      <textarea 
+                        class="form-control rounded-3" 
+                        id="cancellationReason<%= booking._id %>" 
+                        name="cancellationReason" 
+                        rows="3" 
+                        required 
+                        minlength="5" 
+                        maxlength="500" 
+                        placeholder="Please share the reason for cancelling your booking (minimum 5 characters)..."></textarea>
+                      <div class="invalid-feedback">
+                        Please provide a cancellation reason (at least 5 characters).
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Keep Booking</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">
+                      <i class="fa-solid fa-xmark me-1"></i>Confirm Cancellation
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% } %>
       <% } %>
     </div>
   <% } %>

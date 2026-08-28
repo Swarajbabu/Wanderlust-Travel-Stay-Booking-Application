@@ -27,3 +27,11 @@ module.exports.bookingSchema = Joi.object({
         totalPrice: Joi.number().optional(),
     }).required()
 });
+
+module.exports.cancelBookingSchema = Joi.object({
+    cancellationReason: Joi.string().trim().min(5).max(500).required().messages({
+        "string.empty": "Please provide a reason for cancelling this booking.",
+        "string.min": "Cancellation reason must be at least 5 characters long.",
+        "any.required": "Cancellation reason is required."
+    })
+});

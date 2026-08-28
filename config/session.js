@@ -17,6 +17,9 @@ store.on("error", (err) => {
     logger.error("ERROR IN MONGO SESSION STORE: " + err.message);
 });
 
+const isProduction = process.env.NODE_ENV === "production";
+const cookieSecure = process.env.COOKIE_SECURE === "true" || (isProduction && process.env.COOKIE_SECURE !== "false");
+
 const sessionOptions = {
     store,
     secret: secret,
@@ -25,7 +28,8 @@ const sessionOptions = {
     cookie: {
         expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        httpOnly: true
+        httpOnly: true,
+        secure: cookieSecure
     }
 };
 

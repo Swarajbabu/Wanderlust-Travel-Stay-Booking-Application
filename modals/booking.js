@@ -20,6 +20,14 @@ const bookingSchema = new Schema({
         type: Date,
         required: true
     },
+    basePrice: {
+        type: Number,
+        default: 0
+    },
+    taxAmount: {
+        type: Number,
+        default: 0
+    },
     totalPrice: {
         type: Number,
         required: true
@@ -32,6 +40,32 @@ const bookingSchema = new Schema({
     paymentId: {
         type: String,
         default: null
+    },
+    cancellationReason: {
+        type: String,
+        default: null
+    },
+    cancelledBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+    cancelledAt: {
+        type: Date,
+        default: null
+    },
+    refundId: {
+        type: String,
+        default: null
+    },
+    refundStatus: {
+        type: String,
+        enum: ["not_applicable", "processed", "pending", "failed"],
+        default: "not_applicable"
+    },
+    refundAmount: {
+        type: Number,
+        default: 0
     },
     createdAt: {
         type: Date,

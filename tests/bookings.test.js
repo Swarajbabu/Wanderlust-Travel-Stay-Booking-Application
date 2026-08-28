@@ -17,6 +17,18 @@ jest.mock("razorpay", () => {
                         currency: options.currency
                     });
                 })
+            },
+            payments: {
+                refund: jest.fn().mockImplementation((paymentId, options) => {
+                    return Promise.resolve({
+                        id: "rfnd_test_987654",
+                        entity: "refund",
+                        amount: options.amount,
+                        currency: "INR",
+                        payment_id: paymentId,
+                        status: "processed"
+                    });
+                })
             }
         };
     });
@@ -68,6 +80,8 @@ describe("Booking Business Logic Tests", () => {
         // Verify emails programmatically to allow booking & listing operations
         await User.updateMany({}, { emailVerified: true });
 
+        const ownerUser = await User.findOne({ username: "owner" });
+
         // Create listing (150 per night)
         listing = new Listing({
             title: "Booking Stay",
@@ -75,7 +89,8 @@ describe("Booking Business Logic Tests", () => {
             price: 150,
             location: "Goa",
             country: "India",
-            geometry: { type: "Point", coordinates: [73.8567, 15.2993] }
+            geometry: { type: "Point", coordinates: [73.8567, 15.2993] },
+            owner: ownerUser._id
         });
         await listing.save();
     });
@@ -100,8 +115,10 @@ describe("Booking Business Logic Tests", () => {
         const booking = await Booking.findOne({ listing: listing._id });
         expect(booking).toBeTruthy();
         expect(booking.status).toBe("pending");
-        // Total price should be calculated correctly server-side (3 nights * 150 = 450)
-        expect(booking.totalPrice).toBe(450);
+        // Total price should be calculated correctly server-side (3 nights * 150 = 450 base + 18% GST (81) = 531)
+        expect(booking.basePrice).toBe(450);
+        expect(booking.taxAmount).toBe(81);
+        expect(booking.totalPrice).toBe(531);
     });
 
     test("Overlapping bookings are rejected", async () => {
@@ -203,5 +220,98 @@ describe("Booking Business Logic Tests", () => {
         const updatedBooking = await Booking.findById(booking._id);
         expect(updatedBooking.status).toBe("confirmed");
         expect(updatedBooking.paymentId).toBe(razorpay_payment_id);
+    });
+
+    test("Cancelling a booking requires a cancellation reason", async () => {
+        const guestUser = await User.findOne({ username: "guest" });
+
+        const booking = new Booking({
+            listing: listing._id,
+            guest: guestUser._id,
+            checkIn: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+            checkOut: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+            totalPrice: 300,
+            status: "pending"
+        });
+        await booking.save();
+
+        // Attempt cancellation without cancellationReason
+        const resNoReason = await request(app)
+            .patch(`/bookings/${booking._id}/cancel`)
+            .set("Cookie", guestCookie)
+            .type("form")
+            .send({});
+
+        expect(resNoReason.status).toBe(302);
+
+        // Booking status must remain unchanged (pending)
+        const uncancelledBooking = await Booking.findById(booking._id);
+        expect(uncancelledBooking.status).toBe("pending");
+        expect(uncancelledBooking.cancellationReason).toBeNull();
+    });
+
+    test("Cancelling a confirmed booking triggers Razorpay refund and saves refund details", async () => {
+        const guestUser = await User.findOne({ username: "guest" });
+
+        const booking = new Booking({
+            listing: listing._id,
+            guest: guestUser._id,
+            checkIn: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+            checkOut: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+            totalPrice: 300,
+            status: "confirmed",
+            paymentId: "pay_confirmed_12345"
+        });
+        await booking.save();
+
+        const resCancel = await request(app)
+            .patch(`/bookings/${booking._id}/cancel`)
+            .set("Cookie", guestCookie)
+            .type("form")
+            .send({
+                cancellationReason: "Emergency schedule change, unable to travel"
+            });
+
+        expect(resCancel.status).toBe(302);
+
+        const cancelledBooking = await Booking.findById(booking._id);
+        expect(cancelledBooking.status).toBe("cancelled");
+        expect(cancelledBooking.cancellationReason).toBe("Emergency schedule change, unable to travel");
+        expect(cancelledBooking.refundId).toBe("rfnd_test_987654");
+        expect(cancelledBooking.refundStatus).toBe("processed");
+        expect(cancelledBooking.refundAmount).toBe(300);
+        expect(cancelledBooking.cancelledBy.toString()).toBe(guestUser._id.toString());
+        expect(cancelledBooking.cancelledAt).toBeTruthy();
+    });
+
+    test("Cancelling an unpaid pending booking records reason with no refund", async () => {
+        const guestUser = await User.findOne({ username: "guest" });
+
+        const booking = new Booking({
+            listing: listing._id,
+            guest: guestUser._id,
+            checkIn: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+            checkOut: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+            totalPrice: 300,
+            status: "pending",
+            paymentId: null
+        });
+        await booking.save();
+
+        const resCancel = await request(app)
+            .patch(`/bookings/${booking._id}/cancel`)
+            .set("Cookie", guestCookie)
+            .type("form")
+            .send({
+                cancellationReason: "Decided to book another property instead"
+            });
+
+        expect(resCancel.status).toBe(302);
+
+        const cancelledBooking = await Booking.findById(booking._id);
+        expect(cancelledBooking.status).toBe("cancelled");
+        expect(cancelledBooking.cancellationReason).toBe("Decided to book another property instead");
+        expect(cancelledBooking.refundStatus).toBe("not_applicable");
+        expect(cancelledBooking.refundId).toBeNull();
     });
 });

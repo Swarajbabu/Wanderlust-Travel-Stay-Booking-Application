@@ -5,7 +5,11 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
+    "seed": "node init/index.js",
     "test": "jest --runInBand --detectOpenHandles --forceExit"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "keywords": [],
   "author": "",

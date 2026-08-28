@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 
 const wrapAsync = require("../utility/wrapAsync");
-const { isLoggedIn, validateBooking, isBookingOwner, isBookingGuest, isBookingGuestOrOwner } = require("../middleware.js");
+const { isLoggedIn, validateBooking, validateCancellation, isBookingOwner, isBookingGuest, isBookingGuestOrOwner } = require("../middleware.js");
 const bookingController = require("../controllers/booking.js");
 
 // POST route to create a booking
@@ -15,7 +15,7 @@ router.get("/listings/:id/bookings/booked-dates", wrapAsync(bookingController.ge
 router.get("/bookings", isLoggedIn, wrapAsync(bookingController.myBookings));
 
 // PATCH route to cancel a booking (can be cancelled by either guest or listing owner)
-router.patch("/bookings/:bookingId/cancel", isLoggedIn, isBookingGuestOrOwner, wrapAsync(bookingController.cancelBooking));
+router.patch("/bookings/:bookingId/cancel", isLoggedIn, isBookingGuestOrOwner, validateCancellation, wrapAsync(bookingController.cancelBooking));
 
 // PATCH route to confirm a booking (can only be confirmed by listing owner)
 router.patch("/bookings/:bookingId/confirm", isLoggedIn, isBookingOwner, wrapAsync(bookingController.confirmBooking));

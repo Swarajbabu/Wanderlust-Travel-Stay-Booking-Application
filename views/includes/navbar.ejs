@@ -1,34 +1,38 @@
 <nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="/listings">
+    <div class="container-fluid px-lg-5 px-3">
+        <a class="navbar-brand d-flex align-items-center me-3" href="/listings">
             <i class="fa-solid fa-compass brand-icon me-2"></i>
             <span class="brand-text">wanderlust</span>
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-link" href="/listings">Explore</a>
+            <div class="navbar-nav align-items-center">
+                <a class="nav-link nav-pill-btn" href="/listings">Explore</a>
             </div>
 
-            <div class="navbar-nav mx-auto">
-                <form class="d-flex search-form" role="search" action="/listings" method="GET">
-                    <input class="form-control search-input" type="search" placeholder="Search destinations" name="q">
-                    <button class="btn btn-search" type="submit">
-                        <i class="fa-solid fa-magnifying-glass"></i>Search
-                    </button>
+            <div class="navbar-nav mx-auto my-2 my-lg-0">
+                <form class="search-form" role="search" action="/listings" method="GET">
+                    <div class="search-bar">
+                        <input class="form-control search-input" type="search" placeholder="Search destinations..." name="q" autocomplete="off">
+                        <button class="btn btn-search" type="submit" aria-label="Search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
                 </form>
             </div>
             
-            <div class="navbar-nav ms-auto align-items-center">
+            <div class="navbar-nav ms-auto align-items-center gap-1 gap-xl-2">
                 <% if(typeof currUser !== 'undefined' && currUser){ %>
-                    <a class="nav-link me-3 fw-semibold text-secondary" href="/bookings">My Bookings</a>
+                    <a class="nav-link nav-pill-btn" href="/bookings">
+                        <i class="fa-regular fa-calendar-check me-1 text-danger"></i>My Bookings
+                    </a>
                 <% } %>
-                <a class="nav-link nav-home-btn me-2" href="/listings/new">Wanderlust your home</a>
+                <a class="nav-link nav-pill-btn" href="/listings/new">Wanderlust your home</a>
                 
-                <div class="dropdown">
-                    <button class="btn btn-profile-menu dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="dropdown ms-lg-2">
+                    <button class="btn btn-profile-menu dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Menu">
                         <i class="fa-solid fa-bars me-2"></i>
                         <i class="fa-solid fa-circle-user profile-icon"></i>
                     </button>
@@ -40,9 +44,9 @@
                         <% if(typeof currUser !== 'undefined' && currUser){ %>
                             <li><span class="dropdown-item-text text-muted">Hello, <b><%= currUser.username %></b></span></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/listings/new">Wanderlust your home</a></li>
-                            <li><a class="dropdown-item" href="/bookings">My Bookings</a></li>
-                            <li><a class="dropdown-item fw-bold text-danger" href="/logout">Log out</a></li>
+                            <li><a class="dropdown-item" href="/listings/new"><i class="fa-solid fa-house-chimney me-2 text-secondary"></i>Wanderlust your home</a></li>
+                            <li><a class="dropdown-item" href="/bookings"><i class="fa-regular fa-calendar-check me-2 text-secondary"></i>My Bookings</a></li>
+                            <li><a class="dropdown-item fw-bold text-danger" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Log out</a></li>
                         <% } %>
                     </ul>
                 </div>

@@ -7,6 +7,7 @@ const listingController = require("../controllers/listing.js");
 
 const multer = require('multer')                   // File uploed we need to use
 const { storage } = require("../cloudconfig.js");     // cloude connection to store images
+const { doubleCsrfProtection } = require("../config/csrf.js");
 const upload = multer({ 
     storage,
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
@@ -27,12 +28,18 @@ const handleUpload = (req, res, next) => {
     });
 };
 
+const csrfCheckAfterUpload = (req, res, next) => {
+    if (process.env.NODE_ENV === "test") return next();
+    doubleCsrfProtection(req, res, next);
+};
+
 router.route("/")
     .get(wrapAsync(listingController.index))
     .post(
         isLoggedIn,
         isEmailVerified,
         handleUpload,
+        csrfCheckAfterUpload,
         validateListing,
         wrapAsync(listingController.createListing)
     );                                              // Creating the listing route
@@ -46,6 +53,7 @@ router.route("/:id")
         isLoggedIn,
         isOwner,
         handleUpload,
+        csrfCheckAfterUpload,
         validateListing,
         wrapAsync(listingController.updateListing)
     )  // Edit root or update

@@ -1,7 +1,7 @@
 const Listing = require("./modals/listing");
 const Review = require("./modals/review");
 const Booking = require("./modals/booking");
-const { ListingSchema, reviewSchema, bookingSchema } = require("./schema.js");
+const { ListingSchema, reviewSchema, bookingSchema, cancelBookingSchema } = require("./schema.js");
 const ExpressError = require("./utility/ExpressError.js");
 
 // Middleware to check if the user is currently logged in.
@@ -116,47 +116,73 @@ module.exports.validateBooking = (req, res, next) => {
 
 // Middleware to authorize booking modification by verifying if the logged-in user is the guest.
 module.exports.isBookingGuest = async (req, res, next) => {
-    let { bookingId } = req.params;
-    let booking = await Booking.findById(bookingId);
-    if (!booking) {
-        req.flash("error", "Booking you requested for does not exist!");
-        return res.redirect("/bookings");
+    try {
+        let { bookingId } = req.params;
+        let booking = await Booking.findById(bookingId);
+        if (!booking) {
+            req.flash("error", "Booking you requested for does not exist!");
+            return res.redirect("/bookings");
+        }
+        if (!booking.guest || !res.locals.currUser || !booking.guest.equals(res.locals.currUser._id)) {
+            req.flash("error", "You do not have permission to modify this booking!");
+            return res.redirect("/bookings");
+        }
+        next();
+    } catch (err) {
+        next(err);
     }
-    if (!booking.guest.equals(res.locals.currUser._id)) {
-        req.flash("error", "You do not have permission to modify this booking!");
-        return res.redirect("/bookings");
-    }
-    next();
 };
 
 // Middleware to authorize booking modification by verifying if the logged-in user is the listing owner.
 module.exports.isBookingOwner = async (req, res, next) => {
-    let { bookingId } = req.params;
-    let booking = await Booking.findById(bookingId).populate("listing");
-    if (!booking) {
-        req.flash("error", "Booking you requested for does not exist!");
-        return res.redirect("/listings");
+    try {
+        let { bookingId } = req.params;
+        let booking = await Booking.findById(bookingId).populate("listing");
+        if (!booking) {
+            req.flash("error", "Booking you requested for does not exist!");
+            return res.redirect("/listings");
+        }
+        if (!booking.listing || !booking.listing.owner || !res.locals.currUser || !booking.listing.owner.equals(res.locals.currUser._id)) {
+            req.flash("error", "You do not have permission to modify bookings for this listing!");
+            return res.redirect(booking.listing ? `/listings/${booking.listing._id}` : "/listings");
+        }
+        next();
+    } catch (err) {
+        next(err);
     }
-    if (!booking.listing.owner.equals(res.locals.currUser._id)) {
-        req.flash("error", "You do not have permission to modify bookings for this listing!");
-        return res.redirect(`/listings/${booking.listing._id}`);
-    }
-    next();
 };
 
 // Middleware to authorize booking cancellation by verifying if the logged-in user is either the guest or the owner.
 module.exports.isBookingGuestOrOwner = async (req, res, next) => {
-    let { bookingId } = req.params;
-    let booking = await Booking.findById(bookingId).populate("listing");
-    if (!booking) {
-        req.flash("error", "Booking you requested for does not exist!");
-        return res.redirect("/bookings");
+    try {
+        let { bookingId } = req.params;
+        let booking = await Booking.findById(bookingId).populate("listing");
+        if (!booking) {
+            req.flash("error", "Booking you requested for does not exist!");
+            return res.redirect("/bookings");
+        }
+        const isGuest = Boolean(booking.guest && res.locals.currUser && booking.guest.equals(res.locals.currUser._id));
+        const isOwner = Boolean(booking.listing && booking.listing.owner && res.locals.currUser && booking.listing.owner.equals(res.locals.currUser._id));
+        if (!isGuest && !isOwner) {
+            req.flash("error", "You do not have permission to modify this booking!");
+            return res.redirect("/bookings");
+        }
+        next();
+    } catch (err) {
+        next(err);
     }
-    const isGuest = booking.guest.equals(res.locals.currUser._id);
-    const isOwner = booking.listing.owner.equals(res.locals.currUser._id);
-    if (!isGuest && !isOwner) {
-        req.flash("error", "You do not have permission to modify this booking!");
-        return res.redirect("/bookings");
+};
+
+// Middleware to validate cancellation reason in request body against cancelBookingSchema Joi rules.
+module.exports.validateCancellation = (req, res, next) => {
+    const bodyCopy = { ...req.body };
+    delete bodyCopy._csrf;
+    delete bodyCopy._method;
+    let { error } = cancelBookingSchema.validate(bodyCopy);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        req.flash("error", errMsg);
+        return res.redirect(req.get("Referrer") || "/bookings");
     }
     next();
 };

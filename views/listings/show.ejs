@@ -70,11 +70,20 @@
             <span>Number of nights:</span>
             <span id="calc-nights" class="fw-bold">0</span>
           </div>
+          <div class="d-flex justify-content-between mb-1 text-secondary small">
+            <span>Base stay:</span>
+            <span>&#8377; <span id="calc-base">0</span></span>
+          </div>
+          <div class="d-flex justify-content-between mb-1 text-secondary small">
+            <span>GST (18%):</span>
+            <span>&#8377; <span id="calc-tax">0</span></span>
+          </div>
           <hr class="my-2">
           <div class="d-flex justify-content-between fs-5 fw-bold text-danger">
-            <span>Total Price:</span>
+            <span>Total Amount:</span>
             <span>&#8377; <span id="calc-total">0</span></span>
           </div>
+          <div class="text-muted small text-end mt-1">Includes all applicable taxes</div>
         </div>
         <% if (currUser) { %>
           <button class="btn btn-danger px-4 py-2 w-100 rounded-3 fw-bold shadow-sm">
@@ -136,6 +145,18 @@
                     <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">Confirmed</span>
                   <% } else if (booking.status === "cancelled") { %>
                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">Cancelled</span>
+                    <% if (booking.cancellationReason) { %>
+                      <div class="small text-muted mt-1" style="max-width: 180px;">
+                        <strong>Reason:</strong> <%= booking.cancellationReason %>
+                      </div>
+                    <% } %>
+                    <% if (booking.refundStatus === "processed") { %>
+                      <div class="mt-1">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small">
+                          <i class="fa-solid fa-money-bill-transfer me-1"></i>Refunded &#8377;<%= Number(booking.refundAmount || booking.totalPrice).toLocaleString("en-IN") %>
+                        </span>
+                      </div>
+                    <% } %>
                   <% } else { %>
                     <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">Pending</span>
                   <% } %>
@@ -149,14 +170,68 @@
                       </form>
                     <% } %>
                     <% if (booking.status !== "cancelled") { %>
-                      <form action="/bookings/<%= booking._id %>/cancel?_method=PATCH" method="POST" class="m-0">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Cancel</button>
-                      </form>
+                      <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#hostCancelModal<%= booking._id %>">
+                        Cancel
+                      </button>
                     <% } else { %>
                       <span class="text-muted small">No actions</span>
                     <% } %>
                   </div>
+
+                  <% if (booking.status !== "cancelled") { %>
+                    <!-- Host Cancel Modal -->
+                    <div class="modal fade" id="hostCancelModal<%= booking._id %>" tabindex="-1" aria-labelledby="hostCancelModalLabel<%= booking._id %>" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4 border-0 shadow">
+                          <div class="modal-header border-bottom-0 pb-0">
+                            <h5 class="modal-title fw-bold text-danger" id="hostCancelModalLabel<%= booking._id %>">
+                              <i class="fa-solid fa-triangle-exclamation me-2"></i>Cancel Guest Booking
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <form action="/bookings/<%= booking._id %>/cancel?_method=PATCH" method="POST" class="needs-validation" novalidate>
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <div class="modal-body py-3 text-start">
+                              <p class="text-secondary mb-2">
+                                Are you sure you want to cancel the booking for guest <strong><%= booking.guest.username %></strong> (<%= booking.guest.email %>)?
+                              </p>
+                              <% if (booking.status === "confirmed" && booking.paymentId) { %>
+                                <div class="alert alert-success d-flex align-items-center py-2 px-3 rounded-3 small mb-3">
+                                  <i class="fa-solid fa-money-bill-transfer fs-5 text-success me-2"></i>
+                                  <div>
+                                    <strong>Automated Refund:</strong> Since this booking is confirmed, a full refund of <strong>&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></strong> will be automatically credited to the guest's payment account.
+                                  </div>
+                                </div>
+                              <% } %>
+                              <div class="mb-3">
+                                <label for="hostCancellationReason<%= booking._id %>" class="form-label fw-bold small text-dark">
+                                  Reason for Cancellation <span class="text-danger">*</span>
+                                </label>
+                                <textarea 
+                                  class="form-control rounded-3" 
+                                  id="hostCancellationReason<%= booking._id %>" 
+                                  name="cancellationReason" 
+                                  rows="3" 
+                                  required 
+                                  minlength="5" 
+                                  maxlength="500" 
+                                  placeholder="Please provide the reason for cancelling this booking (minimum 5 characters)..."></textarea>
+                                <div class="invalid-feedback">
+                                  Please provide a cancellation reason (at least 5 characters).
+                                </div>
+                              </div>
+                            </div>
+                            <div class="modal-footer border-top-0 pt-0">
+                              <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+                              <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">
+                                <i class="fa-solid fa-xmark me-1"></i>Confirm Cancellation
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
                 </td>
               </tr>
             <% } %>
@@ -288,9 +363,13 @@
           if (checkInVal && checkOutVal) {
             const timeDiff = checkOutVal - checkInVal;
             const nights = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
-            const total = nights * pricePerNight;
+            const basePrice = nights * pricePerNight;
+            const taxAmount = Math.round(basePrice * 0.18);
+            const total = basePrice + taxAmount;
             
             document.getElementById("calc-nights").innerText = nights;
+            document.getElementById("calc-base").innerText = basePrice.toLocaleString("en-IN");
+            document.getElementById("calc-tax").innerText = taxAmount.toLocaleString("en-IN");
             document.getElementById("calc-total").innerText = total.toLocaleString("en-IN");
             document.getElementById("price-calc-box").classList.remove("d-none");
           } else {
