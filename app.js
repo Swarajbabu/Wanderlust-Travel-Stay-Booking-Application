@@ -122,7 +122,7 @@ app.use((req, res, next) => {
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
 // Health check endpoint for deployment monitors
-app.get("/health", (req, res) => {
+app.get(["/health", "/api/health"], (req, res) => {
     res.status(200).json({ status: "healthy", timestamp: new Date().toISOString() });
 });
 
