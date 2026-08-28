@@ -3,7 +3,7 @@ services:
     name: wanderlust
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install --legacy-peer-deps
     startCommand: node app.js
     healthCheckPath: /health
     envVars:
