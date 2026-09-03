@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="wlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff5460"/>
+      <stop offset="100%" stop-color="#fe424d"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle rounded background matching brand color -->
+  <rect width="64" height="64" rx="16" fill="url(#wlGrad)"/>
+
+  <!-- Compass outer ring -->
+  <circle cx="32" cy="32" r="21" fill="none" stroke="#ffffff" stroke-width="2.6" opacity="0.95" filter="url(#shadow)"/>
+
+  <!-- Cardinal ticks -->
+  <line x1="32" y1="12.5" x2="32" y2="16.5" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="32" y1="47.5" x2="32" y2="51.5" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="12.5" y1="32" x2="16.5" y2="32" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="47.5" y1="32" x2="51.5" y2="32" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
+
+  <!-- Compass needle (angled ~45 degrees pointing North-East) -->
+  <polygon points="32,32 28.5,23 45.5,18.5 41,35.5" fill="#ffffff"/>
+  <polygon points="32,32 35.5,41 18.5,45.5 23,28.5" fill="#ffffff" opacity="0.55"/>
+
+  <!-- Center pivot pin -->
+  <circle cx="32" cy="32" r="3.2" fill="#ffffff"/>
+  <circle cx="32" cy="32" r="1.6" fill="#fe424d"/>
+</svg>

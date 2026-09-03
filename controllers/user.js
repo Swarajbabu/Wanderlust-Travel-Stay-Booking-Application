@@ -6,7 +6,7 @@ const logger = require("../config/logger");
 const ExpressError = require("../utility/ExpressError");
 
 module.exports.renderSignupForm = (req, res) => {
-    res.render("./users/signup.ejs");
+    res.render("./users/signup.ejs", { title: "Sign Up" });
 };
 
 module.exports.Signup = async (req, res, next) => {
@@ -52,7 +52,7 @@ module.exports.Signup = async (req, res, next) => {
 };
 
 module.exports.renderLoginForm = (req, res) => {
-    res.render("./users/login.ejs");
+    res.render("./users/login.ejs", { title: "Log In" });
     // res.send("Working");
 };
 
@@ -73,7 +73,7 @@ module.exports.logout =  (req, res, next) => {
 };
 
 module.exports.renderForgotForm = (req, res) => {
-    res.render("./users/forgot.ejs");
+    res.render("./users/forgot.ejs", { title: "Forgot Password" });
 };
 
 module.exports.forgotPassword = async (req, res) => {
@@ -126,7 +126,7 @@ module.exports.renderResetForm = async (req, res) => {
         return res.redirect("/forgot-password");
     }
 
-    res.render("./users/reset.ejs", { token });
+    res.render("./users/reset.ejs", { token, title: "Reset Password" });
 };
 
 module.exports.resetPassword = async (req, res) => {

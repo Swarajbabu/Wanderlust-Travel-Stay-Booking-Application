@@ -4,7 +4,7 @@ const emailTransporter = require("../config/email");
 const logger = require("../config/logger");
 
 module.exports.renderRequestForm = (req, res) => {
-    res.render("./users/otp_request.ejs");
+    res.render("./users/otp_request.ejs", { title: "Request OTP" });
 };
 
 module.exports.requestOtp = async (req, res) => {
@@ -50,7 +50,7 @@ module.exports.requestOtp = async (req, res) => {
 
 module.exports.renderVerifyForm = (req, res) => {
     const email = req.session.otpEmail || "";
-    res.render("./users/otp_verify.ejs", { email });
+    res.render("./users/otp_verify.ejs", { email, title: "Verify OTP" });
 };
 
 module.exports.verifyOtp = async (req, res) => {

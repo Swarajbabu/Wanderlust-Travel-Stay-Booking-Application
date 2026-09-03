@@ -64,13 +64,14 @@ module.exports.index = async (req, res) => {
         currentPage: page, 
         totalPages: Math.ceil(totalCount / limit), 
         q, 
-        category 
+        category,
+        title: "Explore Vacation Stays"
     });
 };
 
 // rendering to the new listing form
 module.exports.renderNewForm = (req, res) => {
-    res.render("listings/new.ejs");
+    res.render("listings/new.ejs", { title: "Host Your Home" });
 };
 
 // creating the new listing
@@ -144,7 +145,7 @@ module.exports.showListing = async (req, res) => {
             .sort({ checkIn: 1 });
     }
 
-    res.render("listings/show.ejs", { listings, bookings });
+    res.render("listings/show.ejs", { listings, bookings, title: listings.title });
 };
 
 // Showing Edit Form
@@ -154,11 +155,12 @@ module.exports.renderEditForm = async (req, res) => {
     if (!listings) {
         req.flash("error", "Listing you requested for doesn't exist!");
         res.redirect("/listings");
+        return;
     }
 
     let originalImageUrl = listings.image.url;
     originalImageUrl = originalImageUrl.replace("/upload", "/upload/w_250");
-    res.render("listings/edit.ejs", { listings, originalImageUrl });
+    res.render("listings/edit.ejs", { listings, originalImageUrl, title: `Edit ${listings.title}` });
 };
 
 // Updating the listing

@@ -118,7 +118,7 @@ module.exports.myBookings = async (req, res) => {
             select: "title image price location country"
         })
         .sort({ checkIn: 1 });
-    res.render("bookings/index.ejs", { bookings });
+    res.render("bookings/index.ejs", { bookings, title: "My Bookings" });
 };
 
 module.exports.cancelBooking = async (req, res) => {
@@ -223,7 +223,8 @@ module.exports.renderCheckout = async (req, res) => {
         res.render("bookings/checkout.ejs", {
             booking,
             order,
-            razorpayKeyId: process.env.RAZORPAY_KEY_ID
+            razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+            title: "Checkout & Payment"
         });
     } catch (err) {
         throw new ExpressError(500, `Razorpay Order Creation Failed: ${err.message}`);
