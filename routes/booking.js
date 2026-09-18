@@ -35,4 +35,7 @@ router.patch("/bookings/:bookingId/guest-confirm", isLoggedIn, isBookingGuest, i
 // POST route to verify payment signature
 router.post("/bookings/:bookingId/verify-payment", isLoggedIn, isBookingGuest, wrapAsync(bookingController.verifyPayment));
 
+// DELETE route to clear all demo bookings for the guest evaluation account
+router.delete("/bookings/guest-clear", isLoggedIn, isGuestDemoUser, wrapAsync(bookingController.clearGuestBookings));
+
 module.exports = router;

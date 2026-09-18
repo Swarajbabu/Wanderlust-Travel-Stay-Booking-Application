@@ -13,12 +13,13 @@ A full-stack vacation rental platform — built end-to-end with session-based au
 [![Passport.js](https://img.shields.io/badge/Passport.js-34E27A?style=for-the-badge&logo=passport&logoColor=white)](https://www.passportjs.org/)
 [![Razorpay](https://img.shields.io/badge/Razorpay-0C2451?style=for-the-badge&logo=razorpay&logoColor=white)](https://razorpay.com/)
 [![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-wanderlust.swarajvecha.in-fe424d?style=for-the-badge&logo=google-chrome&logoColor=white)](https://wanderlust.swarajvecha.in/)
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application?style=flat-square)](https://github.com/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application/stargazers)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application?style=flat-square)](https://github.com/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application/commits/main)
 [![Open Issues](https://img.shields.io/github/issues/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application?style=flat-square)](https://github.com/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application/issues)
 
-[**Live Demo**](YOUR_DEPLOYMENT_URL) · [**Report Bug**](https://github.com/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application/issues) · [**Request Feature**](https://github.com/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application/issues)
+[**🌐 Live Demo**](https://wanderlust.swarajvecha.in/) · [**Report Bug**](https://github.com/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application/issues) · [**Request Feature**](https://github.com/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application/issues)
 
 </div>
 
@@ -594,17 +595,20 @@ Runs `jest --runInBand --detectOpenHandles --forceExit`. Tests spin up `mongodb-
 
 ## 🚀 Deployment
 
-The app isn't currently deployed at a public URL in this repository — the badge above is a placeholder until one exists. To deploy it on any Node-friendly host (Render, Railway, Fly.io, an EC2/VM, etc.):
+The live application is deployed and publicly accessible at:
+🌐 **[https://wanderlust.swarajvecha.in/](https://wanderlust.swarajvecha.in/)**
+
+To deploy your own instance on any Node-friendly host (Render, Railway, Fly.io, an EC2/VM, etc.):
 
 1. Provision a MongoDB Atlas cluster and set `MONGODB_ATLAS`.
 2. Set every variable listed in [Environment Variables](#-environment-variables) in your host's environment/secrets manager — never in source control.
 3. Set `NODE_ENV=production` (this switches Morgan/Winston to combined/JSON logging).
 4. Ensure the host allows outbound HTTPS to Cloudinary, Mapbox, and Razorpay — `app.js`'s Helmet CSP already allow-lists these domains.
-5. Set `app.set("trust proxy", 1)` is already configured for use behind a reverse proxy/load balancer.
+5. `app.set("trust proxy", 1)` is already configured for use behind a reverse proxy/load balancer.
 6. Once deployed over HTTPS, flip the CSRF cookie's `secure` flag to `true` in `app.js` (currently `false` for local HTTP development — see the code comment).
 7. Static assets are served from `public/` by Express; Cloudinary handles listing images independently.
 
-`[Live Demo](YOUR_DEPLOYMENT_URL)` — replace once deployed.
+- **Production URL:** [https://wanderlust.swarajvecha.in/](https://wanderlust.swarajvecha.in/)
 
 ---
 

@@ -2,9 +2,19 @@
 <div class="container mt-4">
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <h2 class="fw-bold m-0"><i class="fa-solid fa-suitcase-rolling text-danger me-2"></i>My Bookings</h2>
-    <a href="/listings" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-semibold">
-      <i class="fa-solid fa-compass me-1"></i>Explore More Stays
-    </a>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <% if (currUser && currUser.username === "guest_user" && bookings.length > 0) { %>
+        <form action="/bookings/guest-clear?_method=DELETE" method="POST" class="m-0" onsubmit="return confirm('Clear all demo bookings for this guest session?');">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-semibold small shadow-sm">
+            <i class="fa-solid fa-trash-can me-1"></i>Clear Demo Bookings
+          </button>
+        </form>
+      <% } %>
+      <a href="/listings" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-semibold">
+        <i class="fa-solid fa-compass me-1"></i>Explore More Stays
+      </a>
+    </div>
   </div>
 
   <% if (bookings.length === 0) { %>

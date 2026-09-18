@@ -32,9 +32,9 @@
             }
           %>
           <% if (displayRating !== "New") { %>
-            <strong><%= displayRating %></strong> &middot; <%= listing.reviews ? listing.reviews.length : 0 %> Reviews
+          <strong><%= displayRating %></strong> &middot; <%= listing.reviews ? listing.reviews.length : 0 %> Reviews
           <% } else { %>
-            <strong>New</strong> &middot; <%= listing.reviews ? listing.reviews.length : 0 %> Reviews
+          <strong>New</strong> &middot; <%= listing.reviews ? listing.reviews.length : 0 %> Reviews
           <% } %>
         </span>
         <span class="luxe-meta-item">
@@ -58,7 +58,7 @@
   <div class="row g-4">
     <!-- Left Column: Dates, Availability Calendar & Preferences -->
     <div class="col-lg-7 col-12">
-      
+
       <!-- STEP 1: DATES & AVAILABILITY -->
       <div class="luxe-card" id="cardStepDates">
         <div class="luxe-card-header">
@@ -250,7 +250,7 @@
     <!-- Right Column: Sticky Reservation Receipt & Payment Trigger -->
     <div class="col-lg-5 col-12">
       <div class="luxe-receipt-sticky">
-        
+
         <!-- Hero Stay Image Card (from Database) -->
         <div class="luxe-hero-preview">
           <img src="<%= listing.image && listing.image.url ? listing.image.url : '/images/default.jpg' %>" alt="<%= listing.title %>" class="luxe-hero-img">
@@ -313,21 +313,21 @@
 
             <!-- Submit Button Trigger -->
             <% if (typeof currUser !== 'undefined' && currUser) { %>
-              <button type="submit" id="btnConfirmReservation" class="luxe-btn-submit">
-                <i class="fa-solid fa-lock me-1"></i>
-                <span id="btnSubmitText">Confirm & Proceed to Payment</span>
-              </button>
+            <button type="submit" id="btnConfirmReservation" class="luxe-btn-submit">
+              <i class="fa-solid fa-lock me-1"></i>
+              <span id="btnSubmitText">Confirm & Proceed to Payment</span>
+            </button>
             <% } else { %>
-              <!-- Seamless 1-Click Guest Login & Reservation for Evaluators -->
-              <div class="d-grid gap-2">
-                <a href="/guest-login?redirectUrl=/listings/<%= listing._id %>/book" class="btn btn-dark py-3 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
-                  <i class="fa-solid fa-bolt text-warning"></i>
-                  <span>1-Click Guest Login & Reserve</span>
-                </a>
-                <a href="/login?redirectUrl=/listings/<%= listing._id %>/book" class="btn btn-outline-secondary py-2 rounded-3 small fw-semibold">
-                  Log in with credentials
-                </a>
-              </div>
+            <!-- Seamless 1-Click Guest Login & Reservation for Evaluators -->
+            <div class="d-grid gap-2">
+              <a href="/guest-login?redirectUrl=/listings/<%= listing._id %>/book" class="btn btn-dark py-3 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                <i class="fa-solid fa-bolt text-warning"></i>
+                <span>1-Click Guest Login & Reserve</span>
+              </a>
+              <a href="/login?redirectUrl=/listings/<%= listing._id %>/book" class="btn btn-outline-secondary py-2 rounded-3 small fw-semibold">
+                Log in with credentials
+              </a>
+            </div>
             <% } %>
           </form>
 
@@ -367,7 +367,7 @@
 <!-- Dynamic Dual-Month Calendar & Calculation Engine -->
 <script>
   const STAY_PRICE = Number("<%= listing.price %>");
-  
+
   // Safe parsing of booked date ranges from database
   const bookedRangesEl = document.getElementById("bookedRangesData");
   const BOOKED_RANGES = bookedRangesEl ? JSON.parse(bookedRangesEl.textContent || "[]") : [];
@@ -460,9 +460,9 @@
         cell.classList.add("range-day");
       }
 
-      const formattedCalPrice = STAY_PRICE >= 1000 
-        ? (STAY_PRICE % 1000 === 0 ? (STAY_PRICE / 1000) + 'k' : (STAY_PRICE / 1000).toFixed(1) + 'k')
-        : STAY_PRICE;
+      const formattedCalPrice = STAY_PRICE >= 1000 ?
+        (STAY_PRICE % 1000 === 0 ? (STAY_PRICE / 1000) + 'k' : (STAY_PRICE / 1000).toFixed(1) + 'k') :
+        STAY_PRICE;
 
       cell.innerHTML = `
         <span class="luxe-cal-day-num">${day}</span>
@@ -562,7 +562,11 @@
 
     const inObj = checkInVal ? new Date(checkInVal + "T00:00:00") : null;
     const outObj = checkOutVal ? new Date(checkOutVal + "T00:00:00") : null;
-    const opt = { day: 'numeric', month: 'short', year: 'numeric' };
+    const opt = {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    };
 
     if (inObj) {
       document.getElementById("dispCheckIn").innerText = inObj.toLocaleDateString("en-IN", opt);
@@ -687,9 +691,14 @@
       showDateAlert("Please pick both Check-In and Check-Out dates on the calendar first.");
       const card = document.getElementById("cardStepDates");
       if (card) {
-        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        card.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
         card.style.outline = "2px solid #fe424d";
-        setTimeout(() => { card.style.outline = "none"; }, 2000);
+        setTimeout(() => {
+          card.style.outline = "none";
+        }, 2000);
       }
       return false;
     }
@@ -698,7 +707,7 @@
     document.getElementById("submitCheckIn").value = checkInVal;
     document.getElementById("submitCheckOut").value = checkOutVal;
     document.getElementById("submitGuests").value = guestAdults + guestChildren;
-    
+
     const noteEl = document.getElementById("specialNote");
     if (noteEl) {
       document.getElementById("submitSpecialRequests").value = noteEl.value;

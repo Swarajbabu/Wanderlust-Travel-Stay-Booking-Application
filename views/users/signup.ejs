@@ -1,73 +1,255 @@
-<% layout('layouts/boilerplate') -%>
-<link rel="stylesheet" href="/css/auth.css">
+<% layout('layouts/auth') -%>
 
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <i class="fa-solid fa-compass d-block"></i>
-      <h4>Create your account</h4>
-      <p>Join Wanderlust and explore the world</p>
-    </div>
-
-    <!-- Instant 1-Click Guest Login -->
-    <div class="mb-4">
-      <a href="/guest-login" class="btn btn-guest-auth text-decoration-none">
-        <i class="fa-solid fa-bolt text-warning me-2"></i>
-        <span>Login as Guest</span>
-        <span class="badge bg-warning text-dark ms-2">Assessment Demo</span>
+<div class="auth-split-layout">
+  <!-- Left Column: Travel Hero Showcase -->
+  <aside class="auth-hero-pane auth-hero-signup" aria-label="Wanderlust Travel Inspiration">
+    <!-- Brand Header -->
+    <div class="auth-hero-content">
+      <a href="/listings" class="auth-hero-brand" title="Return to Wanderlust Explore">
+        <div class="brand-icon">
+          <i class="fa-solid fa-compass"></i>
+        </div>
+        <span class="brand-name">wanderlust</span>
+        <span class="brand-pill">Luxury Escapes</span>
       </a>
-      <div class="text-center text-muted small mt-2">
-        <i class="fa-solid fa-circle-check text-success me-1"></i>Skip registration for assessment review
+    </div>
+
+    <!-- Center Hero Story -->
+    <div class="auth-hero-content auth-hero-story">
+      <div class="auth-hero-badge">
+        <i class="fa-solid fa-compass"></i> Discover the Extraordinary
+      </div>
+      <h1>
+        Your journey into <span class="highlight-text">world-class escapes</span> starts here.
+      </h1>
+      <p>
+        Join over 500,000 mindful travelers discovering private islands, cliffside villas, and architectural wonders.
+      </p>
+
+      <!-- Floating Testimonial Card -->
+      <div class="auth-hero-testimonial">
+        <div class="auth-testimonial-header">
+          <span class="auth-testimonial-location">
+            <i class="fa-solid fa-location-dot text-danger"></i> Ubud, Bali &bull; Bamboo Eco Sanctuary
+          </span>
+          <span class="auth-testimonial-rating">
+            <i class="fa-solid fa-star"></i> 4.99
+          </span>
+        </div>
+        <p class="auth-testimonial-quote">
+          "Wanderlust made our sabbatical getaway completely unforgettable. Checking in took seconds, and the stay exceeded every dream."
+        </p>
+        <div class="auth-testimonial-author">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=120&auto=format&fit=crop" alt="Marcus & Priya Chen">
+          <div>
+            <div class="author-name">Marcus & Priya Chen</div>
+            <div class="author-badge">Members &bull; 8 trips booked</div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="auth-divider">or create a new account</div>
+    <!-- Trust Badges Footer -->
+    <div class="auth-hero-content auth-hero-footer">
+      <div class="auth-trust-item">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>100% Verified Stays</span>
+      </div>
+      <div class="auth-trust-item">
+        <i class="fa-solid fa-bolt"></i>
+        <span>Instant Confirmation</span>
+      </div>
+      <div class="auth-trust-item">
+        <i class="fa-solid fa-gem"></i>
+        <span>Direct Host Pricing</span>
+      </div>
+      <div class="auth-trust-item">
+        <i class="fa-solid fa-lock"></i>
+        <span>256-Bit SSL Security</span>
+      </div>
+    </div>
+  </aside>
 
-    <form action="/signup" method="post" class="needs-validation" novalidate>
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <div class="mb-3">
-        <label class="form-label" for="username">Username</label>
-        <div class="d-flex">
-          <span class="input-group-icon"><i class="fa-solid fa-user"></i></span>
-          <input type="text" name="username" id="username" class="form-control" placeholder="Choose a username" required>
-        </div>
-        <div class="valid-feedback">Looks good!</div>
+  <!-- Right Column: Interactive Auth Form -->
+  <main class="auth-form-pane">
+    <div class="auth-form-container">
+      <!-- Top Bar Navigation -->
+      <div class="auth-form-topbar">
+        <a href="/listings" class="auth-back-link">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Back to Explore</span>
+        </a>
+        <a href="/listings" class="auth-mobile-logo">
+          <i class="fa-solid fa-compass"></i>
+          <span>wanderlust</span>
+        </a>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label" for="email">Email</label>
-        <div class="d-flex">
-          <span class="input-group-icon"><i class="fa-solid fa-envelope"></i></span>
-          <input type="email" name="email" id="email" class="form-control" placeholder="you@example.com" required>
-        </div>
+      <!-- Segmented Tab Switcher -->
+      <div class="auth-tab-switcher" role="tablist">
+        <a href="/login" class="auth-tab-item" role="tab" aria-selected="false">
+          <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Log In
+        </a>
+        <a href="/signup" class="auth-tab-item active" role="tab" aria-selected="true">
+          <i class="fa-solid fa-user-plus me-1"></i> Create Account
+        </a>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label" for="password">Password</label>
-        <div class="d-flex">
-          <span class="input-group-icon"><i class="fa-solid fa-lock"></i></span>
-          <input type="password" name="password" id="password" class="form-control" placeholder="Create a password" required>
+      <!-- Flash Messages -->
+      <% if (typeof success !== 'undefined' && success && success.length) { %>
+        <div class="auth-alert auth-alert-success" role="alert">
+          <i class="fa-solid fa-circle-check"></i>
+          <div><%= success %></div>
         </div>
-        <div class="valid-feedback">Looks good!</div>
+      <% } %>
+      <% if (typeof error !== 'undefined' && error && error.length) { %>
+        <div class="auth-alert auth-alert-danger" role="alert">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <div><%= error %></div>
+        </div>
+      <% } %>
+
+      <!-- Heading -->
+      <div class="auth-heading">
+        <h2>Create your account</h2>
+        <p>Unlock members-only rates, saved collections, and easy trip planning</p>
       </div>
 
-      <button class="btn btn-auth mt-2">Sign Up</button>
-    </form>
+      <!-- ⚡ Instant 1-Click Guest Pass (Demo Reviewer) -->
+      <a href="/guest-login" class="auth-guest-banner" title="Explore instantly with 1-click Demo account">
+        <div class="auth-guest-left">
+          <div class="auth-guest-icon">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div class="auth-guest-info">
+            <h5>Instant Guest Demo Pass</h5>
+            <p>Skip sign-up &bull; Full reviewer access in 1 click</p>
+          </div>
+        </div>
+        <span class="auth-guest-badge">Instant Access &rarr;</span>
+      </a>
 
-    <div class="auth-divider">or</div>
-
-    <div class="d-grid mb-3">
-      <a href="/auth/google" class="btn btn-outline-dark py-2 fw-semibold rounded-3 d-flex align-items-center justify-content-center border-light-subtle shadow-sm bg-white hover-bg-light">
-        <svg class="me-2" style="width:18px; height:18px;" viewBox="0 0 24 24">
+      <!-- Google OAuth -->
+      <a href="/auth/google" class="btn-google-auth">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
           <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.68 1.54 14.98 1 12 1 7.35 1 3.37 3.67 1.39 7.56l3.89 3.02c.92-2.77 3.51-4.54 6.72-4.54z"/>
           <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.43c-.28 1.44-1.09 2.67-2.3 3.49l3.6 2.79c2.1-1.94 3.76-4.8 3.76-8.43z"/>
           <path fill="#FBBC05" d="M5.28 14.54c-.24-.72-.38-1.5-.38-2.3s.14-1.58.38-2.3L1.39 6.92C.5 8.7 0 10.7 0 12.8s.5 4.1 1.39 5.88l3.89-3.14z"/>
           <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.6-2.79c-1.01.68-2.3 1.09-3.96 1.09-3.21 0-5.8-1.77-6.72-4.54L1.39 16.9C3.37 20.78 7.35 23 12 23z"/>
         </svg>
-        Sign up with Google
+        <span>Sign up with Google</span>
       </a>
-    </div>
 
-    <p class="auth-switch">Already have an account? <a href="/login">Log in</a></p>
-  </div>
+      <!-- Divider -->
+      <div class="auth-divider-line">
+        <span>or sign up with email</span>
+      </div>
+
+      <!-- Registration Form -->
+      <form action="/signup" method="post" class="needs-validation auth-form" novalidate>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <!-- Username Input -->
+        <div class="auth-field-group">
+          <label for="username">Username</label>
+          <div class="auth-input-wrapper">
+            <span class="auth-input-icon"><i class="fa-solid fa-user"></i></span>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              class="auth-input-control"
+              placeholder="Choose a username"
+              required
+              autocomplete="username"
+            >
+          </div>
+          <div class="invalid-feedback">Please choose a username.</div>
+        </div>
+
+        <!-- Email Input -->
+        <div class="auth-field-group">
+          <label for="email">Email Address</label>
+          <div class="auth-input-wrapper">
+            <span class="auth-input-icon"><i class="fa-solid fa-envelope"></i></span>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              class="auth-input-control"
+              placeholder="you@example.com"
+              required
+              autocomplete="email"
+            >
+          </div>
+          <div class="invalid-feedback">Please enter a valid email address.</div>
+        </div>
+
+        <!-- Password Input with Eye Toggle & Strength Meter -->
+        <div class="auth-field-group">
+          <label for="password">Password</label>
+          <div class="auth-input-wrapper">
+            <span class="auth-input-icon"><i class="fa-solid fa-lock"></i></span>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              class="auth-input-control"
+              placeholder="Create a password"
+              required
+              autocomplete="new-password"
+            >
+            <button
+              type="button"
+              class="auth-input-action toggle-password-btn"
+              data-target="password"
+              aria-label="Toggle password visibility"
+              tabindex="-1"
+            >
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <div class="invalid-feedback">Please create a password.</div>
+
+          <!-- Dynamic Password Strength Meter -->
+          <div class="password-strength-container">
+            <div class="password-strength-bar-wrapper">
+              <div class="progress-bar" id="passwordStrengthMeter"></div>
+            </div>
+            <div class="password-strength-meta">
+              <span id="passwordStrengthLabel" class="password-strength-text text-muted">Enter a secure password</span>
+            </div>
+            <div class="password-requirements">
+              <span class="req-item" id="req-length">
+                <i class="fa-regular fa-circle"></i> At least 8 characters
+              </span>
+              <span class="req-item" id="req-case">
+                <i class="fa-regular fa-circle"></i> Uppercase & lowercase letters
+              </span>
+              <span class="req-item" id="req-number">
+                <i class="fa-regular fa-circle"></i> Number or special character
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-auth-submit">
+          <span class="btn-text">
+            <span>Create Account</span>
+            <i class="fa-solid fa-arrow-right ms-1"></i>
+          </span>
+          <span class="btn-spinner d-none">
+            <i class="fa-solid fa-circle-notch fa-spin me-2"></i> Creating account...
+          </span>
+        </button>
+      </form>
+
+      <!-- Terms Note -->
+      <p class="auth-terms-note">
+        By creating an account, you agree to Wanderlust's
+        <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+      </p>
+    </div>
+  </main>
 </div>

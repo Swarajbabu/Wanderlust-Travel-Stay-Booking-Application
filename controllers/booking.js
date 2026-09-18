@@ -380,3 +380,13 @@ module.exports.verifyPayment = async (req, res) => {
         throw new ExpressError(400, "Payment signature verification failed.");
     }
 };
+
+// Clear all demo bookings for the guest evaluation account
+module.exports.clearGuestBookings = async (req, res) => {
+    if (req.user && req.user.username === "guest_user") {
+        const result = await Booking.deleteMany({ guest: req.user._id });
+        logger.info(`Cleared ${result.deletedCount} demo bookings for guest_user`);
+        req.flash("success", "All demo bookings have been cleared.");
+    }
+    res.redirect("/bookings");
+};
