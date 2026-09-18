@@ -9,6 +9,20 @@
       <p>Log in to continue your journey</p>
     </div>
 
+    <!-- Instant 1-Click Guest Login -->
+    <div class="mb-4">
+      <a href="/guest-login" class="btn btn-guest-auth text-decoration-none">
+        <i class="fa-solid fa-bolt text-warning me-2"></i>
+        <span>Login as Guest</span>
+        <span class="badge bg-warning text-dark ms-2">Assessment Demo</span>
+      </a>
+      <div class="text-center text-muted small mt-2">
+        <i class="fa-solid fa-circle-check text-success me-1"></i>Instant 1-click access &bull; No password or verification needed
+      </div>
+    </div>
+
+    <div class="auth-divider">or log in with username</div>
+
     <form action="/login" method="post" class="needs-validation" novalidate>
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <div class="mb-3">

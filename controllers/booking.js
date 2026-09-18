@@ -62,7 +62,7 @@ module.exports.createBooking = async (req, res) => {
         throw new ExpressError(404, "Listing Not Found");
     }
 
-    let { checkIn, checkOut } = req.body.booking;
+    let { checkIn, checkOut, guests, specialRequests } = req.body.booking;
     const requestedCheckIn = new Date(checkIn);
     const requestedCheckOut = new Date(checkOut);
 
@@ -76,7 +76,7 @@ module.exports.createBooking = async (req, res) => {
 
     if (overlappingBooking) {
         req.flash("error", "This listing is already booked for the selected dates.");
-        return res.redirect(`/listings/${id}`);
+        return res.redirect(`/listings/${id}/book`);
     }
 
     // Calculate total price server-side (nights * price + 18% GST)
@@ -91,6 +91,8 @@ module.exports.createBooking = async (req, res) => {
         guest: req.user._id,
         checkIn: requestedCheckIn,
         checkOut: requestedCheckOut,
+        guests: guests ? Math.max(1, Number(guests)) : 1,
+        specialRequests: specialRequests ? String(specialRequests).trim() : "",
         basePrice,
         taxAmount,
         totalPrice,
@@ -111,14 +113,108 @@ module.exports.getBookedDates = async (req, res) => {
     res.json(bookings);
 };
 
+// Render dedicated separate booking page with date-wise availability
+module.exports.renderBookingPage = async (req, res) => {
+    let { id } = req.params;
+    const listing = await Listing.findById(id)
+        .populate("owner")
+        .populate({ path: "reviews", populate: { path: "author" } });
+    if (!listing) {
+        req.flash("error", "Listing you requested for does not exist!");
+        return res.redirect("/listings");
+    }
+
+    // Remember redirect url so user returns to this booking page if logging in
+    if (!req.user) {
+        req.session.redirectUrl = req.originalUrl;
+    }
+
+    const bookings = await Booking.find({
+        listing: id,
+        status: { $in: ["pending", "confirmed"] }
+    }).select("checkIn checkOut totalPrice status");
+
+    // Compute actual review count and average rating directly from database
+    let avgRating = "New";
+    if (listing.reviews && listing.reviews.length > 0) {
+        const sum = listing.reviews.reduce((acc, r) => acc + Number(r.rating || 5), 0);
+        avgRating = (sum / listing.reviews.length).toFixed(1);
+    }
+
+    res.render("bookings/book.ejs", {
+        listing,
+        bookings,
+        avgRating,
+        title: `Book Stay · ${listing.title}`
+    });
+};
+
 module.exports.myBookings = async (req, res) => {
     const bookings = await Booking.find({ guest: req.user._id })
         .populate({
             path: "listing",
-            select: "title image price location country"
+            select: "title image price location country description category"
         })
-        .sort({ checkIn: 1 });
+        .sort({ createdAt: -1 });
     res.render("bookings/index.ejs", { bookings, title: "My Bookings" });
+};
+
+// Edit / Modify existing booking dates
+module.exports.editBookingDates = async (req, res) => {
+    let { bookingId } = req.params;
+    let { checkIn, checkOut } = req.body.booking;
+    const booking = await Booking.findById(bookingId).populate("listing");
+    if (!booking) {
+        throw new ExpressError(404, "Booking Not Found");
+    }
+
+    const requestedCheckIn = new Date(checkIn);
+    const requestedCheckOut = new Date(checkOut);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (requestedCheckIn < today) {
+        req.flash("error", "Check-in date cannot be in the past.");
+        return res.redirect("/bookings");
+    }
+
+    if (requestedCheckOut <= requestedCheckIn) {
+        req.flash("error", "Check-out date must be after check-in date.");
+        return res.redirect("/bookings");
+    }
+
+    // Check overlap with other bookings for this listing
+    const overlapping = await Booking.findOne({
+        _id: { $ne: bookingId },
+        listing: booking.listing._id,
+        status: { $in: ["pending", "confirmed"] },
+        checkIn: { $lt: requestedCheckOut },
+        checkOut: { $gt: requestedCheckIn }
+    });
+
+    if (overlapping) {
+        req.flash("error", "This stay is already booked for these new dates. Please pick different dates.");
+        return res.redirect("/bookings");
+    }
+
+    const timeDiff = requestedCheckOut - requestedCheckIn;
+    const nights = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
+    const basePrice = nights * (booking.listing.price || 1000);
+    const taxAmount = Math.round(basePrice * 0.18);
+    const totalPrice = basePrice + taxAmount;
+
+    booking.checkIn = requestedCheckIn;
+    booking.checkOut = requestedCheckOut;
+    if (req.body.booking.guests) {
+        booking.guests = Math.max(1, Number(req.body.booking.guests));
+    }
+    booking.basePrice = basePrice;
+    booking.taxAmount = taxAmount;
+    booking.totalPrice = totalPrice;
+
+    await booking.save();
+    req.flash("success", `Booking dates updated to ${requestedCheckIn.toLocaleDateString("en-IN")} - ${requestedCheckOut.toLocaleDateString("en-IN")} (Total: ₹${totalPrice.toLocaleString("en-IN")})!`);
+    res.redirect("/bookings");
 };
 
 module.exports.cancelBooking = async (req, res) => {
@@ -229,6 +325,31 @@ module.exports.renderCheckout = async (req, res) => {
     } catch (err) {
         throw new ExpressError(500, `Razorpay Order Creation Failed: ${err.message}`);
     }
+};
+
+// Lets the demo "guest_user" evaluation account skip Razorpay entirely and
+// confirm a pending booking directly, so reviewers aren't forced through a
+// live payment gateway to see the full booking flow.
+module.exports.guestQuickConfirm = async (req, res) => {
+    let { bookingId } = req.params;
+    const booking = await Booking.findById(bookingId).populate("listing");
+    if (!booking) {
+        throw new ExpressError(404, "Booking Not Found");
+    }
+
+    if (booking.status !== "pending") {
+        req.flash("error", `This booking is already ${booking.status}.`);
+        return res.redirect("/bookings");
+    }
+
+    booking.status = "confirmed";
+    await booking.save();
+
+    // Send confirmation email (async)
+    sendBookingConfirmationEmail(booking._id).catch(err => logger.error(err));
+
+    req.flash("success", "Booking confirmed! (Payment skipped for the guest evaluation account.)");
+    res.redirect("/bookings");
 };
 
 module.exports.verifyPayment = async (req, res) => {

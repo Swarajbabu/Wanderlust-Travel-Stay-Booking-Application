@@ -24,6 +24,11 @@
             </div>
             
             <div class="navbar-nav ms-auto align-items-center gap-1 gap-xl-2">
+                <% if(typeof currUser === 'undefined' || !currUser){ %>
+                    <a class="btn btn-guest-nav" href="/guest-login" title="Instant 1-Click Guest Login for Assessment Review">
+                        <i class="fa-solid fa-bolt text-warning me-1"></i>Guest Login
+                    </a>
+                <% } %>
                 <% if(typeof currUser !== 'undefined' && currUser){ %>
                     <a class="nav-link nav-pill-btn" href="/bookings">
                         <i class="fa-regular fa-calendar-check me-1 text-danger"></i>My Bookings
@@ -38,11 +43,20 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
                         <% if(typeof currUser === 'undefined' || !currUser){ %>
-                            <li><a class="dropdown-item fw-bold" href="/signup">Sign up</a></li>
+                            <li><a class="dropdown-item fw-bold text-danger" href="/guest-login"><i class="fa-solid fa-bolt me-2"></i>Guest Login (1-Click)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item fw-semibold" href="/signup">Sign up</a></li>
                             <li><a class="dropdown-item" href="/login">Log in</a></li>
                         <% } %>
                         <% if(typeof currUser !== 'undefined' && currUser){ %>
-                            <li><span class="dropdown-item-text text-muted">Hello, <b><%= currUser.username %></b></span></li>
+                            <li>
+                                <span class="dropdown-item-text text-muted">
+                                    Hello, <b><%= currUser.username %></b>
+                                    <% if(currUser.username === "guest_user"){ %>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1">Guest Mode</span>
+                                    <% } %>
+                                </span>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/listings/new"><i class="fa-solid fa-house-chimney me-2 text-secondary"></i>Wanderlust your home</a></li>
                             <li><a class="dropdown-item" href="/bookings"><i class="fa-regular fa-calendar-check me-2 text-secondary"></i>My Bookings</a></li>

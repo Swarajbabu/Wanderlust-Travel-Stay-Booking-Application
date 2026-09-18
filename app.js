@@ -75,6 +75,7 @@ app.use(helmet({
             defaultSrc: [],
             connectSrc: ["'self'", "https://api.mapbox.com", "https://*.tiles.mapbox.com", "https://events.mapbox.com", "https://api.razorpay.com"],
             scriptSrc: ["'self'", "'unsafe-inline'", "https://api.mapbox.com", "https://cdn.jsdelivr.net", "https://checkout.razorpay.com"],
+            scriptSrcAttr: ["'unsafe-inline'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://api.mapbox.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
             workerSrc: ["'self'", "blob:"],
             childSrc: ["'self'", "blob:", "https://api.razorpay.com"],

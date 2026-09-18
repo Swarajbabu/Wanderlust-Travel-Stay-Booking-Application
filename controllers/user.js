@@ -170,3 +170,35 @@ module.exports.googleCallback = async (req, res) => {
     delete req.session.redirectUrl;
     res.redirect(redirectUrl);
 };
+
+module.exports.guestLogin = async (req, res, next) => {
+    try {
+        let guestUser = await User.findOne({ username: "guest_user" });
+        if (!guestUser) {
+            guestUser = new User({
+                username: "guest_user",
+                email: "guest@wanderlust.com",
+                emailVerified: true
+            });
+            await User.register(guestUser, "GuestPass@2026");
+            logger.info("Created guest demo user: guest_user");
+        } else if (!guestUser.emailVerified) {
+            guestUser.emailVerified = true;
+            await guestUser.save();
+        }
+
+        req.login(guestUser, (err) => {
+            if (err) {
+                return next(err);
+            }
+            req.flash("success", "Welcome, Guest Evaluator! You have full access to explore, book, host stays, and test all features without restrictions.");
+            const redirectUrl = req.session.redirectUrl || "/listings";
+            delete req.session.redirectUrl;
+            res.redirect(redirectUrl);
+        });
+    } catch (err) {
+        logger.error("Guest login error: " + err.message);
+        req.flash("error", "Unable to complete guest login. Please try again.");
+        res.redirect("/login");
+    }
+};

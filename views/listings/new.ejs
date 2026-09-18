@@ -31,13 +31,15 @@
       </div>
 
       <!-- Image Upload -->
-      <div class="form-section-title">Image</div>
+      <div class="form-section-title">Photos</div>
 
       <div class="mb-3 file-upload-area">
-        <label class="form-label form-icon-label" for="image">
-          <i class="fa-solid fa-image"></i> Upload Listing Image
+        <label class="form-label form-icon-label" for="images">
+          <i class="fa-solid fa-images"></i> Upload Listing Photos
         </label>
-        <input type="file" name="listing[image]" id="image" class="form-control" required>
+        <input type="file" name="listing[images]" id="images" class="form-control" accept="image/png,image/jpeg,image/jpg" multiple required>
+        <div class="form-text">Select 1 to 10 photos. Fewer than 3? We'll fill the rest of your gallery with default stay photos.</div>
+        <div id="imagePreviewGrid" class="image-preview-grid"></div>
       </div>
 
       <!-- Pricing & Location -->
@@ -77,3 +79,22 @@
 </div>
 
 <script src="/js/script.js"></script>
+<script>
+  (() => {
+    const input = document.getElementById("images");
+    const grid = document.getElementById("imagePreviewGrid");
+    if (!input || !grid) return;
+
+    input.addEventListener("change", () => {
+      grid.innerHTML = "";
+      const files = Array.from(input.files || []).slice(0, 10);
+      files.forEach((file) => {
+        const url = URL.createObjectURL(file);
+        const thumb = document.createElement("div");
+        thumb.className = "image-preview-thumb";
+        thumb.innerHTML = `<img src="${url}" alt="${file.name}">`;
+        grid.appendChild(thumb);
+      });
+    });
+  })();
+</script>

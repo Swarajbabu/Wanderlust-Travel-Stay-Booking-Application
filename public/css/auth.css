@@ -113,3 +113,28 @@
     border-left: none;
     border-radius: 0 10px 10px 0;
 }
+
+/* 1-Click Guest Login Button */
+.btn-guest-auth {
+    width: 100%;
+    background: linear-gradient(135deg, #1f2937, #111827);
+    border: 1px solid #374151;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+.btn-guest-auth:hover {
+    background: linear-gradient(135deg, #111827, #030712);
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+

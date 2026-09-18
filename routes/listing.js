@@ -13,13 +13,18 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-// Middleware to handle file upload errors (e.g., file size)
-// Explanation : The handleUpload function is used to handle file upload errors (e.g., file size). 
+// Middleware to handle file upload errors (e.g., file size, too many files)
+// Explanation : The handleUpload function is used to handle file upload errors (e.g., file size).
+// Listings support 3-10 gallery images, uploaded via the "listing[images]" multi-file input.
 const handleUpload = (req, res, next) => {
-    upload.single('listing[image]')(req, res, (err) => {
+    upload.array('listing[images]', 10)(req, res, (err) => {
         if (err) {
             if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
-                req.flash("error", "Image file size exceeds the 5MB limit. Please upload a smaller image.");
+                req.flash("error", "One of the images exceeds the 5MB limit. Please upload smaller images.");
+                return res.redirect(req.get("Referrer") || "/listings");
+            }
+            if (err instanceof multer.MulterError && err.code === 'LIMIT_UNEXPECTED_FILE') {
+                req.flash("error", "You can upload a maximum of 10 images per listing.");
                 return res.redirect(req.get("Referrer") || "/listings");
             }
             return next(err);

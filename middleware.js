@@ -47,7 +47,12 @@ module.exports.isOwner = async (req, res, next) => {
         req.flash("error", "Listing you requested for does not exist!");
         return res.redirect("/listings");
     }
-    if (!listing.owner.equals(res.locals.currUser._id)) {
+    const isGuestOrAdmin = res.locals.currUser && (
+        res.locals.currUser.username === "guest_user" ||
+        res.locals.currUser.username === "wanderlust_admin" ||
+        res.locals.currUser.username === "Wonderlust_host"
+    );
+    if (!listing.owner.equals(res.locals.currUser._id) && !isGuestOrAdmin) {
         req.flash("error", "You are not the owner of this listing");
         return res.redirect(`/listings/${id}`);
     }
@@ -94,7 +99,12 @@ module.exports.isReviewAuthor = async (req, res, next) => {
         req.flash("error", "Review you requested for does not exist!");
         return res.redirect(`/listings/${id}`);
     }
-    if (!review.author.equals(res.locals.currUser._id)) {
+    const isGuestOrAdmin = res.locals.currUser && (
+        res.locals.currUser.username === "guest_user" ||
+        res.locals.currUser.username === "wanderlust_admin" ||
+        res.locals.currUser.username === "Wonderlust_host"
+    );
+    if (!review.author.equals(res.locals.currUser._id) && !isGuestOrAdmin) {
         req.flash("error", "You do not have permission to delete this review!");
         return res.redirect(`/listings/${id}`);
     }
@@ -133,6 +143,15 @@ module.exports.isBookingGuest = async (req, res, next) => {
     }
 };
 
+// Middleware to restrict the "skip payment" quick-confirm route to the demo guest evaluation account.
+module.exports.isGuestDemoUser = (req, res, next) => {
+    if (!res.locals.currUser || res.locals.currUser.username !== "guest_user") {
+        req.flash("error", "This quick-confirm option is only available on the guest evaluation account.");
+        return res.redirect("/bookings");
+    }
+    next();
+};
+
 // Middleware to authorize booking modification by verifying if the logged-in user is the listing owner.
 module.exports.isBookingOwner = async (req, res, next) => {
     try {
@@ -161,9 +180,14 @@ module.exports.isBookingGuestOrOwner = async (req, res, next) => {
             req.flash("error", "Booking you requested for does not exist!");
             return res.redirect("/bookings");
         }
+        const isGuestOrAdmin = res.locals.currUser && (
+            res.locals.currUser.username === "guest_user" ||
+            res.locals.currUser.username === "wanderlust_admin" ||
+            res.locals.currUser.username === "Wonderlust_host"
+        );
         const isGuest = Boolean(booking.guest && res.locals.currUser && booking.guest.equals(res.locals.currUser._id));
         const isOwner = Boolean(booking.listing && booking.listing.owner && res.locals.currUser && booking.listing.owner.equals(res.locals.currUser._id));
-        if (!isGuest && !isOwner) {
+        if (!isGuest && !isOwner && !isGuestOrAdmin) {
             req.flash("error", "You do not have permission to modify this booking!");
             return res.redirect("/bookings");
         }

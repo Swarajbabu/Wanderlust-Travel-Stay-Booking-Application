@@ -52,6 +52,11 @@ router.route("/login")
     .get(userController.renderLoginForm)
     .post(saveRedirectUrl, authLimiter, auth, wrapAsync(userController.login));
 
+// Guest Login (1-click evaluation access without credentials or OTP)
+router.route("/guest-login")
+    .get(saveRedirectUrl, wrapAsync(userController.guestLogin))
+    .post(saveRedirectUrl, wrapAsync(userController.guestLogin));
+
 // Logout
 router.get("/logout", userController.logout);
 

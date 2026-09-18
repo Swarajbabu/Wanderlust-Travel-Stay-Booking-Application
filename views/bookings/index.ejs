@@ -1,6 +1,11 @@
 <% layout('layouts/boilerplate') -%>
 <div class="container mt-4">
-  <h2 class="fw-bold mb-4"><i class="fa-solid fa-plane-departure text-danger me-2"></i>My Bookings</h2>
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <h2 class="fw-bold m-0"><i class="fa-solid fa-suitcase-rolling text-danger me-2"></i>My Bookings</h2>
+    <a href="/listings" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-semibold">
+      <i class="fa-solid fa-compass me-1"></i>Explore More Stays
+    </a>
+  </div>
 
   <% if (bookings.length === 0) { %>
     <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-4 border border-light-subtle">
@@ -19,7 +24,7 @@
         <div class="col">
           <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white border border-light-subtle">
             <div class="position-relative" style="height: 200px;">
-              <img src="<%= booking.listing.image.url %>" class="w-100 h-100 object-fit-cover" alt="Listing Image">
+              <img src="<%= booking.listing && booking.listing.image && booking.listing.image.url ? booking.listing.image.url : '/images/default.jpg' %>" class="w-100 h-100 object-fit-cover" alt="Listing Image">
               <div class="position-absolute top-0 end-0 m-3">
                 <% if (booking.status === "confirmed") { %>
                   <span class="badge bg-success border border-success rounded-pill px-3 py-1 shadow-sm">Confirmed</span>
@@ -31,9 +36,9 @@
               </div>
             </div>
             <div class="card-body d-flex flex-column p-4">
-              <h5 class="card-title fw-bold text-dark mb-1"><%= booking.listing.title %></h5>
+              <h5 class="card-title fw-bold text-dark mb-1"><%= booking.listing ? booking.listing.title : 'Stay Reservation' %></h5>
               <p class="card-text text-muted mb-3">
-                <i class="fa-solid fa-location-dot me-1 text-danger"></i><%= booking.listing.location %>, <%= booking.listing.country %>
+                <i class="fa-solid fa-location-dot me-1 text-danger"></i><%= booking.listing ? booking.listing.location : '' %>, <%= booking.listing ? booking.listing.country : '' %>
               </p>
               
               <div class="bg-light rounded-3 p-3 mb-3 border border-light-subtle">
@@ -41,9 +46,13 @@
                   <span class="text-secondary small fw-semibold">Check-In:</span>
                   <span class="fw-bold text-dark small"><%= new Date(booking.checkIn).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
                 </div>
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between mb-2">
                   <span class="text-secondary small fw-semibold">Check-Out:</span>
                   <span class="fw-bold text-dark small"><%= new Date(booking.checkOut).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span class="text-secondary small fw-semibold">Guests:</span>
+                  <span class="fw-bold text-dark small"><%= booking.guests || 2 %> Guests</span>
                 </div>
               </div>
               
@@ -79,30 +88,124 @@
                 </div>
               <% } %>
               
-              <div class="d-flex justify-content-between align-items-center mt-auto">
+              <div class="d-flex justify-content-between align-items-center mt-auto pt-2">
                 <div>
-                  <span class="text-muted small d-block">Paid Total</span>
+                  <span class="text-muted small d-block">Total Price</span>
                   <span class="fw-bold fs-5 text-danger">&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></span>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="d-flex flex-wrap gap-1 justify-content-end">
                   <% if (booking.status === "pending") { %>
                     <a href="/bookings/<%= booking._id %>/checkout" class="btn btn-danger btn-sm px-3 rounded-pill fw-bold shadow-sm">
                       Pay Now
                     </a>
+                  <% } %>
+                  <% if (booking.status !== "cancelled") { %>
+                    <!-- Edit Dates Trigger -->
+                    <button type="button" class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-semibold" data-bs-toggle="modal" data-bs-target="#editDatesModal<%= booking._id %>">
+                      <i class="fa-regular fa-pen-to-square me-1"></i>Edit Dates
+                    </button>
                   <% } %>
                   <% if (booking.status !== "cancelled" && new Date(booking.checkIn) > new Date()) { %>
                     <button type="button" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-semibold" data-bs-toggle="modal" data-bs-target="#cancelModal<%= booking._id %>">
                       Cancel
                     </button>
                   <% } %>
-                  <a href="/listings/<%= booking.listing._id %>" class="btn btn-outline-dark btn-sm px-3 rounded-pill fw-semibold">
-                    View Stay
-                  </a>
+                  <% if (booking.listing && booking.listing._id) { %>
+                    <a href="/listings/<%= booking.listing._id %>" class="btn btn-outline-dark btn-sm px-3 rounded-pill fw-semibold">
+                      View Stay
+                    </a>
+                  <% } %>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <% if (booking.status !== "cancelled") { %>
+          <!-- Edit Dates Modal -->
+          <div class="modal fade" id="editDatesModal<%= booking._id %>" tabindex="-1" aria-labelledby="editDatesModalLabel<%= booking._id %>" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0 pb-0">
+                  <h5 class="modal-title fw-bold text-dark" id="editDatesModalLabel<%= booking._id %>">
+                    <i class="fa-solid fa-calendar-days text-primary me-2"></i>Modify Booking Dates
+                  </h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/bookings/<%= booking._id %>/edit-dates?_method=PATCH" method="POST" class="needs-validation" novalidate>
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <div class="modal-body py-3">
+                    <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3 mb-3 border">
+                      <img src="<%= booking.listing && booking.listing.image && booking.listing.image.url ? booking.listing.image.url : '/images/default.jpg' %>" style="width: 54px; height: 54px; object-fit: cover; border-radius: 8px;" alt="<%= booking.listing ? booking.listing.title : '' %>">
+                      <div>
+                        <div class="fw-bold text-dark"><%= booking.listing ? booking.listing.title : 'Stay' %></div>
+                        <div class="text-muted small">&#8377; <%= Number(booking.listing ? booking.listing.price : 1000).toLocaleString("en-IN") %> / night</div>
+                      </div>
+                    </div>
+
+                    <% 
+                      let checkInStr = "";
+                      let checkOutStr = "";
+                      try {
+                        checkInStr = new Date(booking.checkIn).toISOString().split('T')[0];
+                        checkOutStr = new Date(booking.checkOut).toISOString().split('T')[0];
+                      } catch(e) {}
+                      const todayStr = new Date().toISOString().split('T')[0];
+                      const stayRate = booking.listing ? Number(booking.listing.price) : 1000;
+                    %>
+
+                    <div class="row g-3 mb-3">
+                      <div class="col-6">
+                        <label for="editCheckIn<%= booking._id %>" class="form-label fw-bold small text-dark">New Check-In Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control rounded-3" id="editCheckIn<%= booking._id %>" name="booking[checkIn]" value="<%= checkInStr %>" min="<%= todayStr %>" required onchange="calculateModalPrice('<%= booking._id %>', <%= stayRate %>)">
+                        <div class="invalid-feedback">Please choose a valid check-in date.</div>
+                      </div>
+                      <div class="col-6">
+                        <label for="editCheckOut<%= booking._id %>" class="form-label fw-bold small text-dark">New Check-Out Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control rounded-3" id="editCheckOut<%= booking._id %>" name="booking[checkOut]" value="<%= checkOutStr %>" min="<%= todayStr %>" required onchange="calculateModalPrice('<%= booking._id %>', <%= stayRate %>)">
+                        <div class="invalid-feedback">Please choose a valid check-out date.</div>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="editGuests<%= booking._id %>" class="form-label fw-bold small text-dark">Total Guests</label>
+                      <input type="number" class="form-control rounded-3" id="editGuests<%= booking._id %>" name="booking[guests]" value="<%= booking.guests || 2 %>" min="1" max="10">
+                    </div>
+
+                    <!-- Live Price Calculation Box -->
+                    <div class="p-3 bg-light rounded-3 border" id="modalPriceBox<%= booking._id %>">
+                      <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Stay rate:</span>
+                        <span>&#8377; <%= Number(stayRate).toLocaleString("en-IN") %> / night</span>
+                      </div>
+                      <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Duration:</span>
+                        <span id="modalNights<%= booking._id %>" class="fw-semibold">
+                          <%= Math.max(1, Math.round((new Date(booking.checkOut) - new Date(booking.checkIn))/(1000*60*60*24))) %> nights
+                        </span>
+                      </div>
+                      <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>GST & Taxes (18%):</span>
+                        <span id="modalTax<%= booking._id %>">&#8377; <%= Number(booking.taxAmount || 0).toLocaleString("en-IN") %></span>
+                      </div>
+                      <hr class="my-2">
+                      <div class="d-flex justify-content-between fw-bold text-dark">
+                        <span>Updated Total:</span>
+                        <span class="text-danger fs-6" id="modalTotal<%= booking._id %>">&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+                      <i class="fa-solid fa-floppy-disk me-1"></i>Save New Dates
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% } %>
 
         <% if (booking.status !== "cancelled" && new Date(booking.checkIn) > new Date()) { %>
           <!-- Cancel Booking Modal -->
@@ -119,7 +222,7 @@
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <div class="modal-body py-3">
                     <p class="text-secondary mb-2">
-                      Are you sure you want to cancel your stay at <strong><%= booking.listing.title %></strong>?
+                      Are you sure you want to cancel your stay at <strong><%= booking.listing ? booking.listing.title : 'this stay' %></strong>?
                     </p>
                     
                     <% if (booking.status === "confirmed" && booking.paymentId) { %>
@@ -164,3 +267,28 @@
     </div>
   <% } %>
 </div>
+
+<script>
+  function calculateModalPrice(bookingId, pricePerNight) {
+    const inEl = document.getElementById("editCheckIn" + bookingId);
+    const outEl = document.getElementById("editCheckOut" + bookingId);
+    if (!inEl || !outEl || !inEl.value || !outEl.value) return;
+
+    const inD = new Date(inEl.value);
+    const outD = new Date(outEl.value);
+    if (outD <= inD) return;
+
+    const nights = Math.max(1, Math.ceil((outD - inD) / (1000 * 60 * 60 * 24)));
+    const base = nights * Number(pricePerNight || 1000);
+    const tax = Math.round(base * 0.18);
+    const total = base + tax;
+
+    const nightsEl = document.getElementById("modalNights" + bookingId);
+    const taxEl = document.getElementById("modalTax" + bookingId);
+    const totalEl = document.getElementById("modalTotal" + bookingId);
+
+    if (nightsEl) nightsEl.innerText = `${nights} night${nights > 1 ? 's' : ''}`;
+    if (taxEl) taxEl.innerText = `₹ ${tax.toLocaleString("en-IN")}`;
+    if (totalEl) totalEl.innerText = `₹ ${total.toLocaleString("en-IN")}`;
+  }
+</script>

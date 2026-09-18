@@ -31,22 +31,28 @@
       </div>
 
       <!-- Image -->
-      <div class="form-section-title">Image</div>
+      <div class="form-section-title">Photos</div>
 
       <div class="mb-3">
         <label class="form-label form-icon-label">
-          <i class="fa-solid fa-photo-film"></i> Current Image
+          <i class="fa-solid fa-photo-film"></i> Current Gallery (<%= galleryThumbs.length %> photo<%= galleryThumbs.length === 1 ? '' : 's' %>)
         </label>
-        <div>
-          <img src="<%= originalImageUrl %>" class="current-img-preview" alt="Current listing image">
+        <div class="image-preview-grid">
+          <% galleryThumbs.forEach(function(thumbUrl) { %>
+            <div class="image-preview-thumb">
+              <img src="<%= thumbUrl %>" alt="Current listing photo">
+            </div>
+          <% }); %>
         </div>
       </div>
 
       <div class="mb-3 file-upload-area">
-        <label class="form-label form-icon-label" for="image">
-          <i class="fa-solid fa-image"></i> Upload New Image
+        <label class="form-label form-icon-label" for="images">
+          <i class="fa-solid fa-images"></i> Replace Photos (optional)
         </label>
-        <input type="file" name="listing[image]" id="image" class="form-control">
+        <input type="file" name="listing[images]" id="images" class="form-control" accept="image/png,image/jpeg,image/jpg" multiple>
+        <div class="form-text">Leave empty to keep the current gallery, or select 1 to 10 new photos to replace it entirely. Fewer than 3? We'll fill the rest with default stay photos.</div>
+        <div id="imagePreviewGrid" class="image-preview-grid"></div>
       </div>
 
       <!-- Pricing & Location -->
@@ -86,3 +92,22 @@
 </div>
 
 <script src="/js/script.js"></script>
+<script>
+  (() => {
+    const input = document.getElementById("images");
+    const grid = document.getElementById("imagePreviewGrid");
+    if (!input || !grid) return;
+
+    input.addEventListener("change", () => {
+      grid.innerHTML = "";
+      const files = Array.from(input.files || []).slice(0, 10);
+      files.forEach((file) => {
+        const url = URL.createObjectURL(file);
+        const thumb = document.createElement("div");
+        thumb.className = "image-preview-thumb";
+        thumb.innerHTML = `<img src="${url}" alt="${file.name}">`;
+        grid.appendChild(thumb);
+      });
+    });
+  })();
+</script>

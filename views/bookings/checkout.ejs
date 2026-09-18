@@ -1,65 +1,157 @@
 <% layout('layouts/boilerplate') -%>
-<div class="row mt-4 mb-5">
-  <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2 col-12">
-    <div class="card shadow-sm border-0 rounded-4 p-4 bg-white border border-light-subtle">
-      <h3 class="fw-bold mb-4 text-center"><i class="fa-solid fa-credit-card text-danger me-2"></i>Secure Checkout</h3>
-      
-      <!-- Stay Details Card -->
-      <div class="d-flex gap-3 mb-4 p-3 bg-light rounded-3 border border-light-subtle">
-        <img src="<%= booking.listing.image.url %>" class="rounded-3 object-fit-cover" alt="Listing Image" style="width: 100px; height: 100px;">
-        <div>
-          <h5 class="fw-bold text-dark mb-1"><%= booking.listing.title %></h5>
-          <p class="text-muted small mb-0"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= booking.listing.location %>, <%= booking.listing.country %></p>
-          <span class="badge bg-warning text-dark mt-2">Payment Pending</span>
-        </div>
-      </div>
+<link rel="stylesheet" href="/css/booking.css">
+<link rel="stylesheet" href="/css/checkout.css">
 
-      <!-- Price details breakdown -->
-      <h5 class="fw-bold mb-3">Reservation Summary</h5>
-      <div class="mb-4">
-        <div class="d-flex justify-content-between mb-2">
-          <span class="text-secondary fw-semibold">Check-In</span>
-          <span class="fw-bold text-dark"><%= new Date(booking.checkIn).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
-        </div>
-        <div class="d-flex justify-content-between mb-3">
-          <span class="text-secondary fw-semibold">Check-Out</span>
-          <span class="fw-bold text-dark"><%= new Date(booking.checkOut).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
-        </div>
-        <% 
-          const nights = Math.max(1, Math.ceil((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 60 * 60 * 24)));
-          const base = booking.basePrice || (booking.listing && booking.listing.price ? nights * booking.listing.price : Math.round(booking.totalPrice / 1.18));
-          const tax = booking.taxAmount || (booking.totalPrice - base);
-        %>
-        <div class="d-flex justify-content-between mb-2">
-          <span class="text-secondary fw-semibold">Duration</span>
-          <span class="fw-bold text-dark"><%= nights %> <%= nights === 1 ? 'Night' : 'Nights' %></span>
-        </div>
-        <div class="d-flex justify-content-between mb-2">
-          <span class="text-secondary fw-semibold">Base Stay</span>
-          <span class="fw-bold text-dark">&#8377; <%= Number(base).toLocaleString("en-IN") %></span>
-        </div>
-        <div class="d-flex justify-content-between mb-3">
-          <span class="text-secondary fw-semibold">GST (18%)</span>
-          <span class="fw-bold text-dark">&#8377; <%= Number(tax).toLocaleString("en-IN") %></span>
-        </div>
-        <hr class="my-3 border-light-subtle">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <span class="fw-bold text-dark fs-5">Total Amount</span>
-            <span class="text-muted small d-block">inclusive of 18% GST</span>
+<div class="container my-4">
+  <!-- Breadcrumb Navigation -->
+  <div class="luxe-breadcrumb-bar">
+    <a href="/listings" class="luxe-breadcrumb-link">Explore Stays</a>
+    <span class="luxe-breadcrumb-separator"><i class="fa-solid fa-chevron-right fs-6"></i></span>
+    <a href="/listings/<%= booking.listing._id %>" class="luxe-breadcrumb-link"><%= booking.listing.title %></a>
+    <span class="luxe-breadcrumb-separator"><i class="fa-solid fa-chevron-right fs-6"></i></span>
+    <span class="luxe-breadcrumb-current">Secure Checkout</span>
+  </div>
+
+  <!-- Booking Progress Steps -->
+  <div class="checkout-steps">
+    <div class="checkout-step completed">
+      <span class="checkout-step-num"><i class="fa-solid fa-check"></i></span>
+      <span class="checkout-step-label">Reservation</span>
+    </div>
+    <div class="checkout-step-line completed"></div>
+    <div class="checkout-step active">
+      <span class="checkout-step-num">2</span>
+      <span class="checkout-step-label">Payment</span>
+    </div>
+    <div class="checkout-step-line"></div>
+    <div class="checkout-step">
+      <span class="checkout-step-num">3</span>
+      <span class="checkout-step-label">Confirmed</span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Stay Details & Price Breakdown -->
+    <div class="col-lg-7 col-12">
+      <div class="checkout-card">
+        <div class="checkout-hero">
+          <img src="<%= booking.listing.image.url %>" alt="<%= booking.listing.title %>" class="checkout-hero-img">
+          <div class="checkout-hero-overlay">
+            <span class="checkout-status-badge"><i class="fa-solid fa-clock me-1"></i>Payment Pending</span>
+            <h3 class="checkout-hero-title"><%= booking.listing.title %></h3>
+            <div class="checkout-hero-location">
+              <i class="fa-solid fa-location-dot me-1"></i><%= booking.listing.location %>, <%= booking.listing.country %>
+            </div>
           </div>
-          <span class="fw-bold fs-4 text-danger">&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></span>
+        </div>
+
+        <div class="checkout-body">
+          <h5 class="fw-bold text-dark mb-3">Your Trip</h5>
+
+          <div class="checkout-date-pills">
+            <div class="checkout-date-pill">
+              <div class="checkout-date-pill-label"><i class="fa-regular fa-calendar-check me-1"></i>Check-In</div>
+              <div class="checkout-date-pill-value"><%= new Date(booking.checkIn).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %></div>
+            </div>
+            <div class="checkout-date-pill-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+            <div class="checkout-date-pill">
+              <div class="checkout-date-pill-label"><i class="fa-regular fa-calendar-xmark me-1"></i>Check-Out</div>
+              <div class="checkout-date-pill-value"><%= new Date(booking.checkOut).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %></div>
+            </div>
+          </div>
+
+          <%
+            const nights = Math.max(1, Math.ceil((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 60 * 60 * 24)));
+            const base = booking.basePrice || (booking.listing && booking.listing.price ? nights * booking.listing.price : Math.round(booking.totalPrice / 1.18));
+            const tax = booking.taxAmount || (booking.totalPrice - base);
+          %>
+
+          <div class="checkout-info-strip">
+            <div>
+              <i class="fa-solid fa-moon text-danger me-2"></i>
+              <span class="fw-semibold"><%= nights %> <%= nights === 1 ? 'Night' : 'Nights' %></span>
+            </div>
+            <% if (booking.guests) { %>
+              <div>
+                <i class="fa-solid fa-user-group text-danger me-2"></i>
+                <span class="fw-semibold"><%= booking.guests %> Guest<%= booking.guests === 1 ? '' : 's' %></span>
+              </div>
+            <% } %>
+          </div>
+
+          <h5 class="fw-bold text-dark mb-3 mt-4">Price Breakdown</h5>
+          <div class="luxe-price-breakdown">
+            <div class="luxe-price-line">
+              <span>Base Stay</span>
+              <span class="fw-bold text-dark">&#8377; <%= Number(base).toLocaleString("en-IN") %></span>
+            </div>
+            <div class="luxe-price-line">
+              <span>GST & Hospitality Taxes (18%)</span>
+              <span class="fw-bold text-dark">&#8377; <%= Number(tax).toLocaleString("en-IN") %></span>
+            </div>
+            <div class="luxe-price-line">
+              <span>Wanderlust Booking Fee</span>
+              <span class="text-success fw-bold"><del class="text-muted fw-normal me-1">&#8377; 499</del> FREE</span>
+            </div>
+            <div class="luxe-price-line total-line">
+              <span>Total Due Now</span>
+              <span class="luxe-total-price-val">&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></span>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Payment buttons -->
-      <div class="d-grid gap-2">
-        <button id="rzp-button" class="btn btn-danger py-3 rounded-3 fw-bold shadow-sm btn-lg">
-          <i class="fa-solid fa-shield-halved me-2"></i>Pay Now
-        </button>
-        <a href="/bookings" class="btn btn-outline-secondary py-2 rounded-3 fw-semibold">
-          Pay Later / Back to Bookings
-        </a>
+    <!-- Right Column: Sticky Payment Card -->
+    <div class="col-lg-5 col-12">
+      <div class="checkout-pay-card">
+        <div class="checkout-pay-total">
+          <span class="checkout-pay-total-label">Total Amount</span>
+          <span class="checkout-pay-total-value">&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></span>
+          <span class="checkout-pay-total-sub">Inclusive of 18% GST &middot; No hidden fees</span>
+        </div>
+
+        <% if (currUser && currUser.username === "guest_user") { %>
+          <div class="checkout-guest-note">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>You're on the guest evaluation account &mdash; pick how you'd like to complete this booking.</span>
+          </div>
+
+          <div class="d-grid gap-2 mt-3">
+            <form action="/bookings/<%= booking._id %>/guest-confirm?_method=PATCH" method="POST" class="m-0">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit" class="checkout-confirm-btn">
+                <i class="fa-solid fa-circle-check me-2"></i>Confirm Booking (Skip Payment)
+              </button>
+            </form>
+            <button id="rzp-button" class="checkout-pay-btn">
+              <i class="fa-solid fa-shield-halved me-2"></i>Continue with Razorpay (Test Mode)
+            </button>
+            <a href="/bookings" class="checkout-later-btn">
+              Pay Later &middot; Back to My Bookings
+            </a>
+          </div>
+        <% } else { %>
+          <div class="d-grid gap-2 mt-4">
+            <button id="rzp-button" class="checkout-pay-btn">
+              <i class="fa-solid fa-shield-halved me-2"></i>Pay Now
+            </button>
+            <a href="/bookings" class="checkout-later-btn">
+              Pay Later &middot; Back to My Bookings
+            </a>
+          </div>
+        <% } %>
+
+        <div class="checkout-guarantee">
+          <i class="fa-solid fa-lock"></i>
+          <span>Your payment is encrypted and processed securely by Razorpay. You can cancel for a full refund before check-in.</span>
+        </div>
+
+        <div class="checkout-trust-badges">
+          <span><i class="fa-solid fa-lock me-1"></i>256-Bit SSL Encrypted</span>
+          <span>&bull;</span>
+          <span><i class="fa-solid fa-shield-halved me-1"></i>Razorpay Verified</span>
+        </div>
       </div>
     </div>
   </div>
@@ -80,7 +172,7 @@
           const form = document.createElement("form");
           form.method = "POST";
           form.action = "/bookings/<%= booking._id %>/verify-payment";
-          
+
           // CSRF token
           const csrfInput = document.createElement("input");
           csrfInput.type = "hidden";
@@ -117,7 +209,7 @@
           color: "#fe424d"
       }
   };
-  
+
   const rzp1 = new Razorpay(options);
   document.getElementById("rzp-button").onclick = function (e) {
       rzp1.open();

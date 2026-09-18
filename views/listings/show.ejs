@@ -1,380 +1,463 @@
 <% layout('layouts/boilerplate') -%>
 <link rel="stylesheet" href="/css/show.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
 <script>
   const mapToken = "<%= process.env.MAP_TOKEN %>";
   const coordinates = JSON.parse('<%- JSON.stringify(listings.geometry && listings.geometry.coordinates && listings.geometry.coordinates.length === 2 ? listings.geometry.coordinates : [78.4867, 17.3850]) %>');
   const listingTitle = "<%= listings.title %>";
 </script>
 
+<%
+  let avgRatingVal = null;
+  if (listings.reviews && listings.reviews.length > 0) {
+    const sum = listings.reviews.reduce((acc, r) => acc + Number(r.rating || 5), 0);
+    avgRatingVal = (sum / listings.reviews.length).toFixed(1);
+  }
+  const isOwnerOrAdmin = currUser && (currUser._id.equals(listings.owner._id) || currUser.username === "guest_user" || currUser.username === "wanderlust_admin" || currUser.username === "Wonderlust_host");
+%>
+
 <div class="row mt-4">
-  <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-12">
+  <div class="col-lg-10 offset-lg-1 col-md-10 offset-md-1 col-12">
+    <!-- Breadcrumb Navigation -->
+    <nav class="luxe-breadcrumb-bar" aria-label="Breadcrumb">
+      <a href="/listings" class="luxe-breadcrumb-link">Explore Stays</a>
+      <span class="luxe-breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
+      <% if (listings.category) { %>
+        <a href="/listings?category=<%= encodeURIComponent(listings.category) %>" class="luxe-breadcrumb-link"><%= listings.category %></a>
+        <span class="luxe-breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
+      <% } else if (listings.location) { %>
+        <a href="/listings?q=<%= encodeURIComponent(listings.location) %>" class="luxe-breadcrumb-link"><%= listings.location %></a>
+        <span class="luxe-breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
+      <% } %>
+      <span class="luxe-breadcrumb-current"><%= listings.title %></span>
+    </nav>
+
     <h2 class="show-title fw-bold mb-3"><%= listings.title %></h2>
   </div>
 
-  <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-12">
-    <div class="card show-card listing-card border-0">
-      <img src="<%= listings.image.url %>" class="card-img-top show-img shadow-sm mb-4" alt="Listing-Image">
-      <div class="card-body p-0">
-        <p class="card-text text-muted mb-2">
-          <i class="fa-solid fa-circle-user me-1 text-danger"></i> Hosted by <b><%= listings.owner.username %></b>
-        </p>
-        <p class="card-text description-text fs-5 text-secondary mb-3">
-          <%= listings.description %>
-        </p>
-        
-        <div class="d-flex flex-wrap gap-4 my-4 p-3 bg-light rounded-3 shadow-sm border border-light-subtle">
-          <div class="d-flex align-items-center gap-2">
-            <i class="fa-solid fa-indian-rupee-sign text-danger fs-5"></i>
-            <div>
-              <span class="fw-bold fs-5">&#8377; <%= Number(listings.price).toLocaleString("en-IN") %></span>
-              <span class="text-muted"> / night</span>
-            </div>
-          </div>
-          <div class="d-flex align-items-center gap-2 border-start ps-4 mobile-no-border mobile-no-padding">
-            <i class="fa-solid fa-location-dot text-danger fs-5"></i>
-            <div>
-              <span class="fw-semibold"><%= listings.location %>, <%= listings.country %></span>
-            </div>
-          </div>
-        </div>
+  <div class="col-lg-10 offset-lg-1 col-md-10 offset-md-1 col-12">
+    <div class="gallery-wrap mb-4">
+      <div class="gallery-main" data-index="0" role="button" tabindex="0" aria-label="View photo 1">
+        <img src="<%= gallery[0].url %>" alt="<%= listings.title %> - photo 1">
       </div>
-    </div>
-  </div>
-
-  <!-- Booking Form Section -->
-  <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-12 mb-4">
-    <div class="card border-0 shadow-sm p-4 bg-white rounded-4 border border-light-subtle">
-      <h4 class="fw-bold mb-3"><i class="fa-solid fa-calendar-days text-danger me-2"></i>Book this Stay</h4>
-      <form action="/listings/<%= listings._id %>/bookings" method="post" novalidate class="needs-validation">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <div class="row g-3 mb-3">
-          <div class="col-md-6 col-12">
-            <label for="checkIn" class="form-label fw-semibold">Check-In Date</label>
-            <input type="text" name="booking[checkIn]" id="checkIn" class="form-control rounded-3" placeholder="Select Date" required readonly>
-            <div class="invalid-feedback">Please select a valid check-in date.</div>
-          </div>
-          <div class="col-md-6 col-12">
-            <label for="checkOut" class="form-label fw-semibold">Check-Out Date</label>
-            <input type="text" name="booking[checkOut]" id="checkOut" class="form-control rounded-3" placeholder="Select Date" required readonly>
-            <div class="invalid-feedback">Please select a valid check-out date.</div>
-          </div>
-        </div>
-        <div id="price-calc-box" class="my-3 p-3 bg-light rounded-3 d-none">
-          <div class="d-flex justify-content-between mb-1">
-            <span>Price per night:</span>
-            <span class="fw-bold">&#8377; <%= Number(listings.price).toLocaleString("en-IN") %></span>
-          </div>
-          <div class="d-flex justify-content-between mb-1">
-            <span>Number of nights:</span>
-            <span id="calc-nights" class="fw-bold">0</span>
-          </div>
-          <div class="d-flex justify-content-between mb-1 text-secondary small">
-            <span>Base stay:</span>
-            <span>&#8377; <span id="calc-base">0</span></span>
-          </div>
-          <div class="d-flex justify-content-between mb-1 text-secondary small">
-            <span>GST (18%):</span>
-            <span>&#8377; <span id="calc-tax">0</span></span>
-          </div>
-          <hr class="my-2">
-          <div class="d-flex justify-content-between fs-5 fw-bold text-danger">
-            <span>Total Amount:</span>
-            <span>&#8377; <span id="calc-total">0</span></span>
-          </div>
-          <div class="text-muted small text-end mt-1">Includes all applicable taxes</div>
-        </div>
-        <% if (currUser) { %>
-          <button class="btn btn-danger px-4 py-2 w-100 rounded-3 fw-bold shadow-sm">
-            <i class="fa-solid fa-credit-card me-2"></i>Book Now
-          </button>
-        <% } else { %>
-          <a href="/login" class="btn btn-outline-danger px-4 py-2 w-100 rounded-3 fw-bold shadow-sm">
-            <i class="fa-solid fa-right-to-bracket me-2"></i>Log in to Book
-          </a>
-        <% } %>
-      </form>
-    </div>
-  </div>
-
-  <% if(currUser && currUser._id.equals(listings.owner._id)) { %>
-  <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-12 mb-4">
-    <div class="d-flex align-items-center gap-3">
-      <a href="/listings/<%= listings._id %>/edit" class="btn btn-dark edit-btn px-4 py-2 rounded-3 shadow-sm">
-        <i class="fa-solid fa-pen-to-square me-2"></i>Edit
-      </a>
-      <form action="/listings/<%= listings._id %>?_method=DELETE" method="post" class="m-0">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <button class="btn btn-danger px-4 py-2 rounded-3 shadow-sm">
-          <i class="fa-solid fa-trash-can me-2"></i>Delete
-        </button>
-      </form>
-    </div>
-  </div>
-  <% } %>
-
-  <!-- Bookings for this listing (Visible only to owner) -->
-  <% if(currUser && currUser._id.equals(listings.owner._id) && typeof bookings !== 'undefined' && bookings.length > 0) { %>
-  <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-12 mb-4">
-    <div class="card border-0 shadow-sm p-4 bg-white rounded-4 border border-light-subtle">
-      <h4 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-list-check text-danger me-2"></i>Bookings for this Listing</h4>
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th scope="col" class="fw-semibold">Guest</th>
-              <th scope="col" class="fw-semibold">Email</th>
-              <th scope="col" class="fw-semibold">Check-In</th>
-              <th scope="col" class="fw-semibold">Check-Out</th>
-              <th scope="col" class="fw-semibold">Total Price</th>
-              <th scope="col" class="fw-semibold">Status</th>
-              <th scope="col" class="fw-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% for (let booking of bookings) { %>
-              <tr>
-                <td><b><%= booking.guest.username %></b></td>
-                <td><%= booking.guest.email %></td>
-                <td><%= new Date(booking.checkIn).toLocaleDateString("en-IN") %></td>
-                <td><%= new Date(booking.checkOut).toLocaleDateString("en-IN") %></td>
-                <td>&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></td>
-                <td>
-                  <% if (booking.status === "confirmed") { %>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">Confirmed</span>
-                  <% } else if (booking.status === "cancelled") { %>
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">Cancelled</span>
-                    <% if (booking.cancellationReason) { %>
-                      <div class="small text-muted mt-1" style="max-width: 180px;">
-                        <strong>Reason:</strong> <%= booking.cancellationReason %>
-                      </div>
-                    <% } %>
-                    <% if (booking.refundStatus === "processed") { %>
-                      <div class="mt-1">
-                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small">
-                          <i class="fa-solid fa-money-bill-transfer me-1"></i>Refunded &#8377;<%= Number(booking.refundAmount || booking.totalPrice).toLocaleString("en-IN") %>
-                        </span>
-                      </div>
-                    <% } %>
-                  <% } else { %>
-                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">Pending</span>
-                  <% } %>
-                </td>
-                <td>
-                  <div class="d-flex gap-2">
-                    <% if (booking.status === "pending") { %>
-                      <form action="/bookings/<%= booking._id %>/confirm?_method=PATCH" method="POST" class="m-0">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button class="btn btn-sm btn-success rounded-pill px-3">Confirm</button>
-                      </form>
-                    <% } %>
-                    <% if (booking.status !== "cancelled") { %>
-                      <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#hostCancelModal<%= booking._id %>">
-                        Cancel
-                      </button>
-                    <% } else { %>
-                      <span class="text-muted small">No actions</span>
-                    <% } %>
-                  </div>
-
-                  <% if (booking.status !== "cancelled") { %>
-                    <!-- Host Cancel Modal -->
-                    <div class="modal fade" id="hostCancelModal<%= booking._id %>" tabindex="-1" aria-labelledby="hostCancelModalLabel<%= booking._id %>" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content rounded-4 border-0 shadow">
-                          <div class="modal-header border-bottom-0 pb-0">
-                            <h5 class="modal-title fw-bold text-danger" id="hostCancelModalLabel<%= booking._id %>">
-                              <i class="fa-solid fa-triangle-exclamation me-2"></i>Cancel Guest Booking
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <form action="/bookings/<%= booking._id %>/cancel?_method=PATCH" method="POST" class="needs-validation" novalidate>
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <div class="modal-body py-3 text-start">
-                              <p class="text-secondary mb-2">
-                                Are you sure you want to cancel the booking for guest <strong><%= booking.guest.username %></strong> (<%= booking.guest.email %>)?
-                              </p>
-                              <% if (booking.status === "confirmed" && booking.paymentId) { %>
-                                <div class="alert alert-success d-flex align-items-center py-2 px-3 rounded-3 small mb-3">
-                                  <i class="fa-solid fa-money-bill-transfer fs-5 text-success me-2"></i>
-                                  <div>
-                                    <strong>Automated Refund:</strong> Since this booking is confirmed, a full refund of <strong>&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></strong> will be automatically credited to the guest's payment account.
-                                  </div>
-                                </div>
-                              <% } %>
-                              <div class="mb-3">
-                                <label for="hostCancellationReason<%= booking._id %>" class="form-label fw-bold small text-dark">
-                                  Reason for Cancellation <span class="text-danger">*</span>
-                                </label>
-                                <textarea 
-                                  class="form-control rounded-3" 
-                                  id="hostCancellationReason<%= booking._id %>" 
-                                  name="cancellationReason" 
-                                  rows="3" 
-                                  required 
-                                  minlength="5" 
-                                  maxlength="500" 
-                                  placeholder="Please provide the reason for cancelling this booking (minimum 5 characters)..."></textarea>
-                                <div class="invalid-feedback">
-                                  Please provide a cancellation reason (at least 5 characters).
-                                </div>
-                              </div>
-                            </div>
-                            <div class="modal-footer border-top-0 pt-0">
-                              <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Close</button>
-                              <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">
-                                <i class="fa-solid fa-xmark me-1"></i>Confirm Cancellation
-                              </button>
-                            </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                  <% } %>
-                </td>
-              </tr>
-            <% } %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  <% } %>
-
-  <!-- Review Section -->
-  <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-12 mb-4">
-    <hr class="my-4" />
-    
-    <% if (currUser) { %>
-    <div class="card border-0 shadow-sm p-4 mb-4 bg-white rounded-4 border border-light-subtle">
-      <h4 class="fw-bold mb-3"><i class="fa-solid fa-star text-warning me-2"></i>Leave a Review</h4>
-      <form action="/listings/<%= listings._id %>/reviews" method="post" novalidate class="needs-validation">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <div class="mb-3">
-          <label for="rating" class="form-label fw-semibold">Rating</label>
-          <fieldset class="starability-slot">
-            <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
-            <input type="radio" id="first-rate1" name="review[rating]" value="1" />
-            <label for="first-rate1" title="Terrible">1 star</label>
-            <input type="radio" id="first-rate2" name="review[rating]" value="2" />
-            <label for="first-rate2" title="Not good">2 stars</label>
-            <input type="radio" id="first-rate3" name="review[rating]" value="3" />
-            <label for="first-rate3" title="Average">3 stars</label>
-            <input type="radio" id="first-rate4" name="review[rating]" value="4" />
-            <label for="first-rate4" title="Very good">4 stars</label>
-            <input type="radio" id="first-rate5" name="review[rating]" value="5" />
-            <label for="first-rate5" title="Amazing">5 stars</label>
-          </fieldset>
-        </div>
-
-        <div class="mb-3">
-          <label for="comment" class="form-label fw-semibold">Comments</label>
-          <textarea name="review[comment]" id="comment" cols="30" rows="4" class="form-control rounded-3" placeholder="Write your review here..." required></textarea>
-          <div class="invalid-feedback">Please add some comments for review.</div>
-        </div>
-        <button class="btn btn-outline-dark px-4 py-2 rounded-3 fw-semibold">Submit Review</button>
-      </form>
-    </div>
-    <hr class="my-4" />
-    <% } %>
-
-    <!-- Displaying the Stars / Guest Feedback -->
-    <% if (listings.reviews.length > 0) { %>
-    <h4 class="fw-bold mb-4"><i class="fa-solid fa-comments me-2 text-secondary"></i>Guest Reviews</h4>
-    <div class="row g-3">
-      <% for(let review of listings.reviews) { %>
-      <div class="col-md-6 col-12">
-        <div class="card h-100 review-card shadow-sm border-0 rounded-4 p-3 bg-white border border-light-subtle">
-          <div class="card-body p-0">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <span class="fw-bold text-dark">
-                <i class="fa-regular fa-circle-user me-2 text-danger"></i>@<%= review.author && review.author.username ? review.author.username : "anonymous" %>
-              </span>
-              <p class="starability-result m-0" data-rating="<%= review.rating %>"></p>
+      <div class="gallery-side-grid">
+        <% for (let i = 1; i <= 4; i++) { %>
+          <% if (gallery[i]) { %>
+            <div class="gallery-thumb" data-index="<%= i %>" role="button" tabindex="0" aria-label="View photo <%= i + 1 %>">
+              <img src="<%= gallery[i].url %>" alt="<%= listings.title %> - photo <%= i + 1 %>">
+              <% if (i === 4 && gallery.length > 5) { %>
+                <div class="gallery-more-overlay">+<%= gallery.length - 5 %></div>
+              <% } %>
             </div>
-            <p class="card-text text-secondary comment-text mb-3">
-              <%= review.comment %>
-            </p>
-          </div>
-          <% if (currUser && review.author && currUser._id.equals(review.author._id)) { %>
-          <form action="/listings/<%= listings._id %>/reviews/<%= review._id %>?_method=DELETE" class="m-0" method="post">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button class="btn btn-sm btn-outline-danger px-3 rounded-pill">
-              <i class="fa-solid fa-trash-can me-1"></i>Delete
-            </button>
-          </form>
+          <% } else { %>
+            <div class="gallery-thumb gallery-thumb-empty"></div>
           <% } %>
-        </div>
+        <% } %>
       </div>
+      <% if (gallery.length > 1) { %>
+        <button type="button" class="gallery-show-all-btn" id="showAllPhotosBtn">
+          <i class="fa-solid fa-grip me-2"></i>Show all <%= gallery.length %> photos
+        </button>
       <% } %>
     </div>
-    <hr class="my-4" />
-    <% } %>
   </div>
 
-  <!-- Map Integration -->
-  <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-12 mb-5">
-    <h4 class="fw-bold mb-3"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Where you'll be</h4>
-    <div id="map" class="shadow-sm rounded-4 border border-light-subtle"></div>
+  <div class="col-lg-10 offset-lg-1 col-md-10 offset-md-1 col-12">
+    <div class="row g-4">
+
+      <!-- LEFT: Listing details, reviews, map -->
+      <div class="col-lg-7 col-12">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+          <div>
+            <h4 class="fw-bold mb-1"><%= listings.location %>, <%= listings.country %></h4>
+            <p class="card-text text-muted mb-0">
+              <i class="fa-solid fa-circle-user me-1 text-danger"></i> Hosted by <b><%= listings.owner.username %></b>
+              <% if (listings.category) { %>
+                <span class="mx-2 text-muted">&bull;</span>
+                <i class="fa-solid fa-tag text-success me-1"></i><%= listings.category %>
+              <% } %>
+            </p>
+          </div>
+          <% if (avgRatingVal) { %>
+            <div class="rating-pill">
+              <i class="fa-solid fa-star text-warning me-1"></i>
+              <span class="fw-bold"><%= avgRatingVal %></span>
+              <span class="text-muted small ms-1">(<%= listings.reviews.length %> review<%= listings.reviews.length === 1 ? '' : 's' %>)</span>
+            </div>
+          <% } %>
+        </div>
+
+        <hr class="my-4" />
+
+        <p class="card-text description-text fs-5 text-secondary mb-4">
+          <%= listings.description %>
+        </p>
+
+        <% if (isOwnerOrAdmin) { %>
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="/listings/<%= listings._id %>/edit" class="btn btn-dark edit-btn px-4 py-2 rounded-3 shadow-sm">
+              <i class="fa-solid fa-pen-to-square me-2"></i>Edit
+            </a>
+            <form action="/listings/<%= listings._id %>?_method=DELETE" method="post" class="m-0">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="btn btn-danger px-4 py-2 rounded-3 shadow-sm">
+                <i class="fa-solid fa-trash-can me-2"></i>Delete
+              </button>
+            </form>
+          </div>
+        <% } %>
+
+        <!-- Bookings for this listing (Visible to owner & guest evaluator) -->
+        <% if(isOwnerOrAdmin && typeof bookings !== 'undefined' && bookings.length > 0) { %>
+        <div class="card border-0 shadow-sm p-4 mb-4 bg-white rounded-4 border border-light-subtle">
+          <h4 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-list-check text-danger me-2"></i>Bookings for this Listing</h4>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col" class="fw-semibold">Guest</th>
+                  <th scope="col" class="fw-semibold">Email</th>
+                  <th scope="col" class="fw-semibold">Check-In</th>
+                  <th scope="col" class="fw-semibold">Check-Out</th>
+                  <th scope="col" class="fw-semibold">Total Price</th>
+                  <th scope="col" class="fw-semibold">Status</th>
+                  <th scope="col" class="fw-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for (let booking of bookings) { %>
+                  <tr>
+                    <td><b><%= booking.guest.username %></b></td>
+                    <td><%= booking.guest.email %></td>
+                    <td><%= new Date(booking.checkIn).toLocaleDateString("en-IN") %></td>
+                    <td><%= new Date(booking.checkOut).toLocaleDateString("en-IN") %></td>
+                    <td>&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></td>
+                    <td>
+                      <% if (booking.status === "confirmed") { %>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">Confirmed</span>
+                      <% } else if (booking.status === "cancelled") { %>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">Cancelled</span>
+                        <% if (booking.cancellationReason) { %>
+                          <div class="small text-muted mt-1" style="max-width: 180px;">
+                            <strong>Reason:</strong> <%= booking.cancellationReason %>
+                          </div>
+                        <% } %>
+                        <% if (booking.refundStatus === "processed") { %>
+                          <div class="mt-1">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small">
+                              <i class="fa-solid fa-money-bill-transfer me-1"></i>Refunded &#8377;<%= Number(booking.refundAmount || booking.totalPrice).toLocaleString("en-IN") %>
+                            </span>
+                          </div>
+                        <% } %>
+                      <% } else { %>
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">Pending</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <div class="d-flex gap-2">
+                        <% if (booking.status === "pending") { %>
+                          <form action="/bookings/<%= booking._id %>/confirm?_method=PATCH" method="POST" class="m-0">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button class="btn btn-sm btn-success rounded-pill px-3">Confirm</button>
+                          </form>
+                        <% } %>
+                        <% if (booking.status !== "cancelled") { %>
+                          <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#hostCancelModal<%= booking._id %>">
+                            Cancel
+                          </button>
+                        <% } else { %>
+                          <span class="text-muted small">No actions</span>
+                        <% } %>
+                      </div>
+
+                      <% if (booking.status !== "cancelled") { %>
+                        <!-- Host Cancel Modal -->
+                        <div class="modal fade" id="hostCancelModal<%= booking._id %>" tabindex="-1" aria-labelledby="hostCancelModalLabel<%= booking._id %>" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content rounded-4 border-0 shadow">
+                              <div class="modal-header border-bottom-0 pb-0">
+                                <h5 class="modal-title fw-bold text-danger" id="hostCancelModalLabel<%= booking._id %>">
+                                  <i class="fa-solid fa-triangle-exclamation me-2"></i>Cancel Guest Booking
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <form action="/bookings/<%= booking._id %>/cancel?_method=PATCH" method="POST" class="needs-validation" novalidate>
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <div class="modal-body py-3 text-start">
+                                  <p class="text-secondary mb-2">
+                                    Are you sure you want to cancel the booking for guest <strong><%= booking.guest.username %></strong> (<%= booking.guest.email %>)?
+                                  </p>
+                                  <% if (booking.status === "confirmed" && booking.paymentId) { %>
+                                    <div class="alert alert-success d-flex align-items-center py-2 px-3 rounded-3 small mb-3">
+                                      <i class="fa-solid fa-money-bill-transfer fs-5 text-success me-2"></i>
+                                      <div>
+                                        <strong>Automated Refund:</strong> Since this booking is confirmed, a full refund of <strong>&#8377; <%= Number(booking.totalPrice).toLocaleString("en-IN") %></strong> will be automatically credited to the guest's payment account.
+                                      </div>
+                                    </div>
+                                  <% } %>
+                                  <div class="mb-3">
+                                    <label for="hostCancellationReason<%= booking._id %>" class="form-label fw-bold small text-dark">
+                                      Reason for Cancellation <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea
+                                      class="form-control rounded-3"
+                                      id="hostCancellationReason<%= booking._id %>"
+                                      name="cancellationReason"
+                                      rows="3"
+                                      required
+                                      minlength="5"
+                                      maxlength="500"
+                                      placeholder="Please provide the reason for cancelling this booking (minimum 5 characters)..."></textarea>
+                                    <div class="invalid-feedback">
+                                      Please provide a cancellation reason (at least 5 characters).
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="modal-footer border-top-0 pt-0">
+                                  <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+                                  <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">
+                                    <i class="fa-solid fa-xmark me-1"></i>Confirm Cancellation
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <% } %>
+
+        <!-- Review Section -->
+        <hr class="my-4" />
+
+        <% if (currUser) { %>
+        <div class="card border-0 shadow-sm p-4 mb-4 bg-white rounded-4 border border-light-subtle">
+          <h4 class="fw-bold mb-3"><i class="fa-solid fa-star text-warning me-2"></i>Leave a Review</h4>
+          <form action="/listings/<%= listings._id %>/reviews" method="post" novalidate class="needs-validation">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="mb-3">
+              <label for="rating" class="form-label fw-semibold">Rating</label>
+              <fieldset class="starability-slot">
+                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
+                <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                <label for="first-rate1" title="Terrible">1 star</label>
+                <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                <label for="first-rate2" title="Not good">2 stars</label>
+                <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                <label for="first-rate3" title="Average">3 stars</label>
+                <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                <label for="first-rate4" title="Very good">4 stars</label>
+                <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                <label for="first-rate5" title="Amazing">5 stars</label>
+              </fieldset>
+            </div>
+
+            <div class="mb-3">
+              <label for="comment" class="form-label fw-semibold">Comments</label>
+              <textarea name="review[comment]" id="comment" cols="30" rows="4" class="form-control rounded-3" placeholder="Write your review here..." required></textarea>
+              <div class="invalid-feedback">Please add some comments for review.</div>
+            </div>
+            <button class="btn btn-outline-dark px-4 py-2 rounded-3 fw-semibold">Submit Review</button>
+          </form>
+        </div>
+        <hr class="my-4" />
+        <% } %>
+
+        <!-- Displaying the Stars / Guest Feedback -->
+        <% if (listings.reviews.length > 0) { %>
+        <h4 class="fw-bold mb-4"><i class="fa-solid fa-comments me-2 text-secondary"></i>Guest Reviews</h4>
+        <div class="row g-3">
+          <% for(let review of listings.reviews) { %>
+          <div class="col-md-6 col-12">
+            <div class="card h-100 review-card shadow-sm border-0 rounded-4 p-3 bg-white border border-light-subtle">
+              <div class="card-body p-0">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="fw-bold text-dark">
+                    <i class="fa-regular fa-circle-user me-2 text-danger"></i>@<%= review.author && review.author.username ? review.author.username : "anonymous" %>
+                  </span>
+                  <p class="starability-result m-0" data-rating="<%= review.rating %>"></p>
+                </div>
+                <p class="card-text text-secondary comment-text mb-3">
+                  <%= review.comment %>
+                </p>
+              </div>
+              <% if (currUser && review.author && (currUser._id.equals(review.author._id) || currUser.username === "guest_user" || currUser.username === "wanderlust_admin" || currUser.username === "Wonderlust_host")) { %>
+              <form action="/listings/<%= listings._id %>/reviews/<%= review._id %>?_method=DELETE" class="m-0" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button class="btn btn-sm btn-outline-danger px-3 rounded-pill">
+                  <i class="fa-solid fa-trash-can me-1"></i>Delete
+                </button>
+              </form>
+              <% } %>
+            </div>
+          </div>
+          <% } %>
+        </div>
+        <hr class="my-4" />
+        <% } %>
+
+        <!-- Map Integration -->
+        <h4 class="fw-bold mb-3"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Where you'll be</h4>
+        <div id="map" class="shadow-sm rounded-4 border border-light-subtle mb-4"></div>
+      </div>
+
+      <!-- RIGHT: Sticky Reserve Card -->
+      <div class="col-lg-5 col-12">
+        <div class="reserve-card">
+          <div class="reserve-card-top">
+            <div class="reserve-price">
+              <span class="reserve-price-amount">&#8377; <%= Number(listings.price).toLocaleString("en-IN") %></span>
+              <span class="reserve-price-unit">/ night</span>
+            </div>
+            <% if (avgRatingVal) { %>
+              <div class="reserve-rating">
+                <i class="fa-solid fa-star text-warning"></i>
+                <span class="fw-bold"><%= avgRatingVal %></span>
+                <span class="text-muted">&middot; <%= listings.reviews.length %> review<%= listings.reviews.length === 1 ? '' : 's' %></span>
+              </div>
+            <% } else { %>
+              <div class="reserve-rating text-muted">
+                <i class="fa-regular fa-star"></i>
+                <span>New listing</span>
+              </div>
+            <% } %>
+          </div>
+
+          <a href="/listings/<%= listings._id %>/book" class="reserve-btn">
+            <i class="fa-solid fa-calendar-check me-2"></i>Reserve
+          </a>
+
+          <p class="reserve-note">You won't be charged yet &mdash; pick your dates and guests on the next step.</p>
+
+          <div class="reserve-divider"></div>
+
+          <div class="reserve-meta-row">
+            <span><i class="fa-solid fa-location-dot text-danger me-2"></i>Location</span>
+            <span class="fw-semibold text-end"><%= listings.location %>, <%= listings.country %></span>
+          </div>
+          <% if (listings.category) { %>
+          <div class="reserve-meta-row">
+            <span><i class="fa-solid fa-tag text-success me-2"></i>Category</span>
+            <span class="fw-semibold"><%= listings.category %></span>
+          </div>
+          <% } %>
+
+          <div class="reserve-guarantee">
+            <i class="fa-solid fa-shield-check"></i>
+            <span>Free cancellation before check-in &middot; Secure payment via Razorpay</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
+<!-- Full-Screen Photo Lightbox -->
+<div class="photo-lightbox" id="photoLightbox" aria-hidden="true">
+  <div class="lightbox-topbar">
+    <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Close gallery">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <span class="lightbox-counter" id="lightboxCounter">1 / 1</span>
+  </div>
+  <div class="lightbox-stage">
+    <button type="button" class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Previous photo">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <img src="" alt="" class="lightbox-image" id="lightboxImage">
+    <button type="button" class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Next photo">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
+  <div class="lightbox-thumbstrip" id="lightboxThumbstrip"></div>
+</div>
+
 <script src="/js/map.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    const pricePerNight = Number("<%= listings.price %>");
+    // ---- Photo Gallery Lightbox ----
+    (() => {
+      const galleryUrls = <%- JSON.stringify(gallery.map(img => img.url)) %>;
+      const lightbox = document.getElementById("photoLightbox");
+      const lightboxImage = document.getElementById("lightboxImage");
+      const lightboxCounter = document.getElementById("lightboxCounter");
+      const lightboxThumbstrip = document.getElementById("lightboxThumbstrip");
+      let currentIndex = 0;
 
-    // Fetch booked dates from the endpoint
-    fetch('/listings/<%= listings._id %>/bookings/booked-dates')
-      .then(res => res.json())
-      .then(bookings => {
-        const disableRanges = bookings.map(b => ({
-          from: new Date(b.checkIn),
-          to: new Date(b.checkOut)
-        }));
+      if (!lightbox || galleryUrls.length === 0) return;
 
-        const checkInPicker = flatpickr("#checkIn", {
-          minDate: "today",
-          dateFormat: "Y-m-d",
-          disable: disableRanges,
-          onChange: function(selectedDates, dateStr, instance) {
-            if (selectedDates.length > 0) {
-              const nextDay = new Date(selectedDates[0]);
-              nextDay.setDate(nextDay.getDate() + 1);
-              checkOutPicker.set("minDate", nextDay);
-              calculatePrice();
-            }
+      lightboxThumbstrip.innerHTML = galleryUrls.map((url, i) =>
+        `<img src="${url}" data-index="${i}" alt="Photo ${i + 1} thumbnail">`
+      ).join("");
+
+      function renderLightbox() {
+        lightboxImage.src = galleryUrls[currentIndex];
+        lightboxImage.alt = `Photo ${currentIndex + 1} of ${galleryUrls.length}`;
+        lightboxCounter.innerText = `${currentIndex + 1} / ${galleryUrls.length}`;
+        lightboxThumbstrip.querySelectorAll("img").forEach((thumb, i) => {
+          thumb.classList.toggle("active", i === currentIndex);
+        });
+      }
+
+      function openLightbox(index) {
+        currentIndex = index;
+        renderLightbox();
+        lightbox.classList.add("open");
+        lightbox.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove("open");
+        lightbox.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      }
+
+      function showPrev() {
+        currentIndex = (currentIndex - 1 + galleryUrls.length) % galleryUrls.length;
+        renderLightbox();
+      }
+
+      function showNext() {
+        currentIndex = (currentIndex + 1) % galleryUrls.length;
+        renderLightbox();
+      }
+
+      document.querySelectorAll(".gallery-main, .gallery-thumb").forEach((el) => {
+        el.addEventListener("click", () => openLightbox(Number(el.dataset.index) || 0));
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openLightbox(Number(el.dataset.index) || 0);
           }
         });
-
-        const checkOutPicker = flatpickr("#checkOut", {
-          minDate: new Date().setDate(new Date().getDate() + 1),
-          dateFormat: "Y-m-d",
-          disable: disableRanges,
-          onChange: function(selectedDates, dateStr, instance) {
-            calculatePrice();
-          }
-        });
-
-        function calculatePrice() {
-          const checkInVal = checkInPicker.selectedDates[0];
-          const checkOutVal = checkOutPicker.selectedDates[0];
-          if (checkInVal && checkOutVal) {
-            const timeDiff = checkOutVal - checkInVal;
-            const nights = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
-            const basePrice = nights * pricePerNight;
-            const taxAmount = Math.round(basePrice * 0.18);
-            const total = basePrice + taxAmount;
-            
-            document.getElementById("calc-nights").innerText = nights;
-            document.getElementById("calc-base").innerText = basePrice.toLocaleString("en-IN");
-            document.getElementById("calc-tax").innerText = taxAmount.toLocaleString("en-IN");
-            document.getElementById("calc-total").innerText = total.toLocaleString("en-IN");
-            document.getElementById("price-calc-box").classList.remove("d-none");
-          } else {
-            document.getElementById("price-calc-box").classList.add("d-none");
-          }
-        }
       });
+
+      const showAllBtn = document.getElementById("showAllPhotosBtn");
+      if (showAllBtn) showAllBtn.addEventListener("click", () => openLightbox(0));
+
+      document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
+      document.getElementById("lightboxPrev").addEventListener("click", showPrev);
+      document.getElementById("lightboxNext").addEventListener("click", showNext);
+      lightboxThumbstrip.addEventListener("click", (e) => {
+        const img = e.target.closest("img");
+        if (img) openLightbox(Number(img.dataset.index));
+      });
+
+      lightbox.addEventListener("click", (e) => {
+        if (e.target === lightbox) closeLightbox();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (!lightbox.classList.contains("open")) return;
+        if (e.key === "Escape") closeLightbox();
+        else if (e.key === "ArrowLeft") showPrev();
+        else if (e.key === "ArrowRight") showNext();
+      });
+    })();
 </script>

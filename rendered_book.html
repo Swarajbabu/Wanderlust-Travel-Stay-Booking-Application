@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Stay · Cozy Beachfront Cottage · Wanderlust</title>
+  <meta name="description" content="Explore and book unique stays, vacation rentals, cabins, and beach houses on Wanderlust.">
+  <meta name="theme-color" content="#fe424d">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/rating.css">
+
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
+
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container-fluid px-lg-5 px-3">
+        <a class="navbar-brand d-flex align-items-center me-3" href="/listings">
+            <i class="fa-solid fa-compass brand-icon me-2"></i>
+            <span class="brand-text">wanderlust</span>
+        </a>
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav align-items-center">
+                <a class="nav-link nav-pill-btn" href="/listings">Explore</a>
+            </div>
+
+            <div class="navbar-nav mx-auto my-2 my-lg-0">
+                <form class="search-form" role="search" action="/listings" method="GET">
+                    <div class="search-bar">
+                        <input class="form-control search-input" type="search" placeholder="Search destinations..." name="q" autocomplete="off">
+                        <button class="btn btn-search" type="submit" aria-label="Search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="navbar-nav ms-auto align-items-center gap-1 gap-xl-2">
+                
+                    <a class="btn btn-guest-nav" href="/guest-login" title="Instant 1-Click Guest Login for Assessment Review">
+                        <i class="fa-solid fa-bolt text-warning me-1"></i>Guest Login
+                    </a>
+                
+                
+                <a class="nav-link nav-pill-btn" href="/listings/new">Wanderlust your home</a>
+                
+                <div class="dropdown ms-lg-2">
+                    <button class="btn btn-profile-menu dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Menu">
+                        <i class="fa-solid fa-bars me-2"></i>
+                        <i class="fa-solid fa-circle-user profile-icon"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        
+                            <li><a class="dropdown-item fw-bold text-danger" href="/guest-login"><i class="fa-solid fa-bolt me-2"></i>Guest Login (1-Click)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item fw-semibold" href="/signup">Sign up</a></li>
+                            <li><a class="dropdown-item" href="/login">Log in</a></li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+  <div class="container">
+    
+
+
+
+
+    <link rel="stylesheet" href="/css/booking.css">
+
+<div class="container my-4">
+  <!-- Breadcrumb Navigation -->
+  <div class="luxe-breadcrumb-bar">
+    <a href="/listings" class="luxe-breadcrumb-link">Explore Stays</a>
+    <span class="luxe-breadcrumb-separator"><i class="fa-solid fa-chevron-right fs-6"></i></span>
+    <a href="/listings/6a99b9b78073eeae9ca25375" class="luxe-breadcrumb-link">Cozy Beachfront Cottage</a>
+    <span class="luxe-breadcrumb-separator"><i class="fa-solid fa-chevron-right fs-6"></i></span>
+    <span class="luxe-breadcrumb-current">Confirm & Book</span>
+  </div>
+
+  <!-- Header Card (100% Dynamic Database Data) -->
+  <div class="luxe-header-card">
+    <div>
+      <h1 class="luxe-header-title">Reserve Your Stay</h1>
+      <div class="luxe-header-meta">
+        <span class="luxe-meta-item">
+          <i class="fa-solid fa-location-dot text-danger"></i>
+          <strong>Malibu, United States</strong>
+        </span>
+        <span class="luxe-meta-item">
+          <i class="fa-solid fa-star text-warning"></i>
+          
+          
+            <strong>New</strong> &middot; 0 Reviews
+          
+        </span>
+        <span class="luxe-meta-item">
+          <i class="fa-solid fa-tag text-success"></i>
+          <strong>Rooms</strong>
+        </span>
+        <span class="luxe-meta-item">
+          <i class="fa-solid fa-user-check text-primary"></i>
+          Hosted by <strong>wanderlust_admin</strong>
+        </span>
+      </div>
+    </div>
+    <div>
+      <span class="luxe-badge-verified">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Verified Stay & Best Price Guaranteed</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Dates, Availability Calendar & Preferences -->
+    <div class="col-lg-7 col-12">
+      
+      <!-- STEP 1: DATES & AVAILABILITY -->
+      <div class="luxe-card" id="cardStepDates">
+        <div class="luxe-card-header">
+          <div>
+            <h3 class="luxe-card-title">
+              <span class="luxe-card-step">1</span>
+              <span>Choose Your Dates & Check Availability</span>
+            </h3>
+            <div class="luxe-card-subtitle">Real-time availability calendar from database &middot; Tap any open date to select</div>
+          </div>
+        </div>
+
+        <!-- Inline alert if user tries to submit without dates -->
+        <div id="dateAlertBox" class="alert alert-danger py-2 px-3 rounded-3 small d-none mb-3" role="alert">
+          <i class="fa-solid fa-circle-exclamation me-1"></i>
+          <span id="dateAlertMsg">Please select both Check-In and Check-Out dates on the calendar.</span>
+        </div>
+
+        <!-- Interactive Date Slot Selector -->
+        <div class="luxe-date-selector-box" id="selectorBoxContainer">
+          <div class="luxe-date-slot active-picking" id="slotCheckIn" onclick="setPickingSlot('checkIn')" role="button" tabindex="0" title="Click to choose Check-In Date">
+            <div class="luxe-date-slot-label">Check-In Date</div>
+            <div class="luxe-date-slot-value" id="dispCheckIn">Select Date</div>
+            <div class="luxe-date-slot-sub" id="dispCheckInSub">From 3:00 PM</div>
+          </div>
+
+          <div class="luxe-duration-arrow">
+            <span class="luxe-nights-pill" id="dispNightsPill">0 Nights Stay</span>
+          </div>
+
+          <div class="luxe-date-slot" id="slotCheckOut" onclick="setPickingSlot('checkOut')" role="button" tabindex="0" title="Click to choose Check-Out Date">
+            <div class="luxe-date-slot-label">Check-Out Date</div>
+            <div class="luxe-date-slot-value" id="dispCheckOut">Select Date</div>
+            <div class="luxe-date-slot-sub" id="dispCheckOutSub">Until 11:00 AM</div>
+          </div>
+        </div>
+
+        <!-- Quick Stay Presets -->
+        <div class="luxe-presets-container">
+          <span class="luxe-preset-label"><i class="fa-solid fa-bolt text-warning me-1"></i>Quick Select:</span>
+          <button type="button" class="luxe-preset-btn" id="btnPreset1" onclick="applyQuickPreset(1)">1 Night</button>
+          <button type="button" class="luxe-preset-btn" id="btnPreset2" onclick="applyQuickPreset(2)">Weekend (2N)</button>
+          <button type="button" class="luxe-preset-btn" id="btnPreset3" onclick="applyQuickPreset(3)">Long Weekend (3N)</button>
+          <button type="button" class="luxe-preset-btn" id="btnPreset7" onclick="applyQuickPreset(7)">Full Week (7N)</button>
+          <button type="button" class="luxe-reset-btn" id="btnResetDates" onclick="resetCalendarSelection()">
+            <i class="fa-solid fa-rotate-left me-1"></i>Reset Dates
+          </button>
+        </div>
+
+        <!-- Dual Month Calendar Grid -->
+        <div class="luxe-calendars-wrapper">
+          <!-- Month 1 -->
+          <div class="luxe-cal-month-box">
+            <div class="luxe-cal-month-header">
+              <button type="button" class="luxe-cal-nav-btn" onclick="navigateCal(-1)" title="Previous Month">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <span class="luxe-cal-month-title" id="monthTitle1">Month 1</span>
+              <div style="width: 34px;"></div>
+            </div>
+            <div class="luxe-cal-grid" id="gridMonth1"></div>
+          </div>
+
+          <!-- Month 2 -->
+          <div class="luxe-cal-month-box">
+            <div class="luxe-cal-month-header">
+              <div style="width: 34px;"></div>
+              <span class="luxe-cal-month-title" id="monthTitle2">Month 2</span>
+              <button type="button" class="luxe-cal-nav-btn" onclick="navigateCal(1)" title="Next Month">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+            <div class="luxe-cal-grid" id="gridMonth2"></div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="luxe-legend-bar">
+          <div class="luxe-legend-item">
+            <span class="luxe-dot dot-avail"></span>
+            <span>Available</span>
+          </div>
+          <div class="luxe-legend-item">
+            <span class="luxe-dot dot-booked"></span>
+            <span>Reserved / Booked</span>
+          </div>
+          <div class="luxe-legend-item">
+            <span class="luxe-dot dot-checkin"></span>
+            <span>Check-In</span>
+          </div>
+          <div class="luxe-legend-item">
+            <span class="luxe-dot dot-checkout"></span>
+            <span>Check-Out</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: GUESTS SELECTION -->
+      <div class="luxe-card">
+        <div class="luxe-card-header">
+          <div>
+            <h3 class="luxe-card-title">
+              <span class="luxe-card-step">2</span>
+              <span>Guests & Traveling Party</span>
+            </h3>
+            <div class="luxe-card-subtitle">Choose the number of guests staying with you</div>
+          </div>
+        </div>
+
+        <!-- Adults Stepper -->
+        <div class="luxe-guest-row">
+          <div>
+            <div class="fw-bold text-dark">Adults</div>
+            <div class="text-muted small">Ages 13 and above</div>
+          </div>
+          <div class="luxe-stepper-control">
+            <button type="button" class="luxe-step-btn" id="btnAdultMinus" onclick="stepGuest('adults', -1)">-</button>
+            <span class="luxe-step-count" id="countAdults">2</span>
+            <button type="button" class="luxe-step-btn" id="btnAdultPlus" onclick="stepGuest('adults', 1)">+</button>
+          </div>
+        </div>
+
+        <!-- Children Stepper -->
+        <div class="luxe-guest-row">
+          <div>
+            <div class="fw-bold text-dark">Children</div>
+            <div class="text-muted small">Ages 2 to 12</div>
+          </div>
+          <div class="luxe-stepper-control">
+            <button type="button" class="luxe-step-btn" id="btnChildMinus" onclick="stepGuest('children', -1)">-</button>
+            <span class="luxe-step-count" id="countChildren">0</span>
+            <button type="button" class="luxe-step-btn" id="btnChildPlus" onclick="stepGuest('children', 1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: STAY HIGHLIGHTS & SPECIAL REQUESTS -->
+      <div class="luxe-card">
+        <div class="luxe-card-header">
+          <div>
+            <h3 class="luxe-card-title">
+              <span class="luxe-card-step">3</span>
+              <span>Stay Highlights & Special Requests</span>
+            </h3>
+            <div class="luxe-card-subtitle">Verified property amenities and optional host requests</div>
+          </div>
+        </div>
+
+        <!-- Dynamic Category & Amenities Grid from Database -->
+        <div class="luxe-perks-grid mb-4">
+          <div class="luxe-perk-item">
+            <i class="fa-solid fa-house-chimney luxe-perk-icon"></i>
+            <div>
+              <div class="fw-bold text-dark small">Rooms</div>
+              <div class="text-muted small">Verified property category and private comfort</div>
+            </div>
+          </div>
+          <div class="luxe-perk-item">
+            <i class="fa-solid fa-wifi luxe-perk-icon"></i>
+            <div>
+              <div class="fw-bold text-dark small">High-Speed Wi-Fi</div>
+              <div class="text-muted small">Reliable connectivity for work and leisure</div>
+            </div>
+          </div>
+          <div class="luxe-perk-item">
+            <i class="fa-solid fa-key luxe-perk-icon"></i>
+            <div>
+              <div class="fw-bold text-dark small">Seamless Check-In</div>
+              <div class="text-muted small">Direct host assistance with wanderlust_admin</div>
+            </div>
+          </div>
+          <div class="luxe-perk-item">
+            <i class="fa-solid fa-location-dot luxe-perk-icon"></i>
+            <div>
+              <div class="fw-bold text-dark small">Prime Location</div>
+              <div class="text-muted small">Situated in Malibu, United States</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label small fw-bold text-dark" for="specialNote">Special Requests for Host (Optional)</label>
+          <textarea class="form-control rounded-3" id="specialNote" rows="2" placeholder="Let your host know about estimated arrival time, accessibility needs, or special preferences..." oninput="syncSpecialRequests(this.value)"></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Sticky Reservation Receipt & Payment Trigger -->
+    <div class="col-lg-5 col-12">
+      <div class="luxe-receipt-sticky">
+        
+        <!-- Hero Stay Image Card (from Database) -->
+        <div class="luxe-hero-preview">
+          <img src="https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHRyYXZlbHxlbnwwfHwwfHx8MA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=60" alt="Cozy Beachfront Cottage" class="luxe-hero-img">
+          <div class="luxe-hero-overlay">
+            <h4 class="luxe-hero-title">Cozy Beachfront Cottage</h4>
+            <div class="luxe-hero-location">
+              <i class="fa-solid fa-location-dot me-1 text-danger"></i>Malibu, United States
+            </div>
+          </div>
+        </div>
+
+        <div class="luxe-receipt-body">
+          <h5 class="fw-bold text-dark mb-3">Reservation Summary</h5>
+
+          <!-- Itinerary Summary Box -->
+          <div class="luxe-selected-summary-box">
+            <div class="luxe-summary-row">
+              <span>Dates Selected:</span>
+              <span class="luxe-summary-val" id="receiptDates">Please select dates</span>
+            </div>
+            <div class="luxe-summary-row">
+              <span>Total Stay Duration:</span>
+              <span class="luxe-summary-val" id="receiptDuration">0 Nights</span>
+            </div>
+            <div class="luxe-summary-row">
+              <span>Guests:</span>
+              <span class="luxe-summary-val" id="receiptGuests">2 Adults</span>
+            </div>
+          </div>
+
+          <!-- Price Calculation Form -->
+          <form action="/listings/6a99b9b78073eeae9ca25375/bookings" method="POST" id="mainBookingForm" onsubmit="return validateAndSubmitBooking(event)">
+            <input type="hidden" name="_csrf" value="25f2e449c2f9a4a00f3282fb3c3f68c055a88d8fc24f26c50f537d1df3bd0857.34f329de9295306e0ed6aad3587dc5dc25462bea2783cc234c4ab23a7596a2ed">
+            <input type="hidden" name="booking[checkIn]" id="submitCheckIn">
+            <input type="hidden" name="booking[checkOut]" id="submitCheckOut">
+            <input type="hidden" name="booking[guests]" id="submitGuests" value="2">
+            <input type="hidden" name="booking[specialRequests]" id="submitSpecialRequests" value="">
+
+            <div class="luxe-price-breakdown">
+              <div class="luxe-price-line">
+                <span>&#8377; 1,500 &times; <span id="numNightsText">0</span> nights</span>
+                <span class="fw-bold text-dark">&#8377; <span id="baseFareVal">0</span></span>
+              </div>
+
+              <div class="luxe-price-line">
+                <span>GST & Hospitality Taxes (18%)</span>
+                <span class="fw-bold text-dark">&#8377; <span id="taxFareVal">0</span></span>
+              </div>
+
+              <div class="luxe-price-line">
+                <span>Wanderlust Booking Fee</span>
+                <span class="text-success fw-bold"><del class="text-muted fw-normal me-1">&#8377; 499</del> FREE</span>
+              </div>
+
+              <div class="luxe-price-line total-line">
+                <span>Total Due Now</span>
+                <span class="luxe-total-price-val">&#8377; <span id="totalFareVal">0</span></span>
+              </div>
+            </div>
+
+            <!-- Submit Button Trigger -->
+            
+              <!-- Seamless 1-Click Guest Login & Reservation for Evaluators -->
+              <div class="d-grid gap-2">
+                <a href="/guest-login?redirectUrl=/listings/6a99b9b78073eeae9ca25375/book" class="btn btn-dark py-3 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                  <i class="fa-solid fa-bolt text-warning"></i>
+                  <span>1-Click Guest Login & Reserve</span>
+                </a>
+                <a href="/login?redirectUrl=/listings/6a99b9b78073eeae9ca25375/book" class="btn btn-outline-secondary py-2 rounded-3 small fw-semibold">
+                  Log in with credentials
+                </a>
+              </div>
+            
+          </form>
+
+          <!-- Guarantee Card -->
+          <div class="luxe-guarantee-card">
+            <i class="fa-solid fa-shield-check luxe-guarantee-icon"></i>
+            <div class="luxe-guarantee-text">
+              <strong>Free Cancellation Guarantee</strong><br>
+              Change of plans? Cancel before your check-in date for an immediate 100% automated refund to your account.
+            </div>
+          </div>
+
+          <!-- Trust Badges -->
+          <div class="luxe-trust-badges">
+            <span><i class="fa-solid fa-lock me-1 text-secondary"></i>256-Bit SSL Encrypted</span>
+            <span>&bull;</span>
+            <span><i class="fa-solid fa-shield-halved me-1 text-secondary"></i>Razorpay Verified</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dynamic Dual-Month Calendar & Calculation Engine -->
+<script>
+  const STAY_PRICE = Number("1500");
+  
+  // Safe parsing of booked date ranges from database
+  const BOOKED_RANGES = [{"checkIn":"2026-09-21","checkOut":"2026-09-24"}];
+
+  let checkInVal = null;
+  let checkOutVal = null;
+  let calBaseDate = new Date();
+  let guestAdults = 2;
+  let guestChildren = 0;
+  let pickingMode = 'checkIn'; // 'checkIn' or 'checkOut'
+
+  function syncSpecialRequests(val) {
+    const el = document.getElementById("submitSpecialRequests");
+    if (el) el.value = val;
+  }
+
+  function isBooked(dateKey) {
+    const target = new Date(dateKey + "T00:00:00");
+    for (const b of BOOKED_RANGES) {
+      const s = new Date(b.checkIn + "T00:00:00");
+      const e = new Date(b.checkOut + "T00:00:00");
+      if (target >= s && target < e) return true;
+    }
+    return false;
+  }
+
+  function formatDateStr(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function setPickingSlot(slot) {
+    pickingMode = slot;
+    if (slot === 'checkIn') {
+      document.getElementById("slotCheckIn").classList.add("active-picking");
+      document.getElementById("slotCheckOut").classList.remove("active-picking");
+    } else {
+      document.getElementById("slotCheckIn").classList.remove("active-picking");
+      document.getElementById("slotCheckOut").classList.add("active-picking");
+    }
+  }
+
+  // Render a single calendar grid into a container
+  function renderSingleMonth(year, month, titleId, gridId) {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const titleEl = document.getElementById(titleId);
+    if (titleEl) titleEl.innerText = `${monthNames[month]} ${year}`;
+
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    weekDays.forEach(w => {
+      const d = document.createElement("div");
+      d.className = "luxe-cal-weekday";
+      d.innerText = w;
+      grid.appendChild(d);
+    });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < firstDay; i++) {
+      const emp = document.createElement("div");
+      emp.className = "luxe-cal-day empty";
+      grid.appendChild(emp);
+    }
+
+    for (let day = 1; day <= totalDays; day++) {
+      const curr = new Date(year, month, day);
+      const key = formatDateStr(curr);
+      const past = curr < today;
+      const booked = isBooked(key);
+      const disabled = past || booked;
+
+      const cell = document.createElement("div");
+      cell.className = "luxe-cal-day" + (disabled ? " disabled" : "");
+      cell.dataset.date = key;
+
+      if (checkInVal === key) {
+        cell.classList.add("checkin-day");
+      } else if (checkOutVal === key) {
+        cell.classList.add("checkout-day");
+      } else if (checkInVal && checkOutVal && key > checkInVal && key < checkOutVal) {
+        cell.classList.add("range-day");
+      }
+
+      cell.innerHTML = `
+        <span>${day}</span>
+        ${!disabled ? `<span class="luxe-cal-price">&#8377;${Math.round(STAY_PRICE / 1000)}k</span>` : ''}
+      `;
+
+      if (!disabled) {
+        cell.setAttribute("role", "button");
+        cell.setAttribute("tabindex", "0");
+        cell.addEventListener("click", () => handleSlotClick(key));
+        cell.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleSlotClick(key);
+          }
+        });
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  function renderBothMonths() {
+    const y1 = calBaseDate.getFullYear();
+    const m1 = calBaseDate.getMonth();
+    renderSingleMonth(y1, m1, "monthTitle1", "gridMonth1");
+
+    const nextDate = new Date(y1, m1 + 1, 1);
+    const y2 = nextDate.getFullYear();
+    const m2 = nextDate.getMonth();
+    renderSingleMonth(y2, m2, "monthTitle2", "gridMonth2");
+  }
+
+  function navigateCal(delta) {
+    calBaseDate.setMonth(calBaseDate.getMonth() + delta);
+    renderBothMonths();
+  }
+
+  function handleSlotClick(key) {
+    hideDateAlert();
+
+    if (!checkInVal || (checkInVal && checkOutVal)) {
+      // Start fresh selection
+      checkInVal = key;
+      checkOutVal = null;
+      setPickingSlot('checkOut');
+    } else if (checkInVal && !checkOutVal) {
+      if (key <= checkInVal) {
+        // Clicked date is before or same as check-in, set new check-in
+        checkInVal = key;
+        checkOutVal = null;
+        setPickingSlot('checkOut');
+      } else {
+        // Validate no booked dates between check-in and check-out
+        let hasOverlap = false;
+        let c = new Date(checkInVal + "T00:00:00");
+        const t = new Date(key + "T00:00:00");
+        while (c < t) {
+          c.setDate(c.getDate() + 1);
+          if (isBooked(formatDateStr(c)) && formatDateStr(c) !== key) {
+            hasOverlap = true;
+            break;
+          }
+        }
+
+        if (hasOverlap) {
+          showDateAlert("The selected stay includes already reserved dates. Please choose continuous open dates.");
+          checkInVal = key;
+          checkOutVal = null;
+          setPickingSlot('checkOut');
+        } else {
+          checkOutVal = key;
+          setPickingSlot('none');
+        }
+      }
+    }
+
+    refreshUI();
+  }
+
+  function showDateAlert(msg) {
+    const alertBox = document.getElementById("dateAlertBox");
+    const alertMsg = document.getElementById("dateAlertMsg");
+    if (alertBox && alertMsg) {
+      alertMsg.innerText = msg;
+      alertBox.classList.remove("d-none");
+    }
+  }
+
+  function hideDateAlert() {
+    const alertBox = document.getElementById("dateAlertBox");
+    if (alertBox) alertBox.classList.add("d-none");
+  }
+
+  function refreshUI() {
+    renderBothMonths();
+
+    const inObj = checkInVal ? new Date(checkInVal + "T00:00:00") : null;
+    const outObj = checkOutVal ? new Date(checkOutVal + "T00:00:00") : null;
+    const opt = { day: 'numeric', month: 'short', year: 'numeric' };
+
+    if (inObj) {
+      document.getElementById("dispCheckIn").innerText = inObj.toLocaleDateString("en-IN", opt);
+      document.getElementById("submitCheckIn").value = checkInVal;
+    } else {
+      document.getElementById("dispCheckIn").innerText = "Select Date";
+      document.getElementById("submitCheckIn").value = "";
+    }
+
+    if (outObj) {
+      document.getElementById("dispCheckOut").innerText = outObj.toLocaleDateString("en-IN", opt);
+      document.getElementById("submitCheckOut").value = checkOutVal;
+    } else {
+      document.getElementById("dispCheckOut").innerText = "Select Date";
+      document.getElementById("submitCheckOut").value = "";
+    }
+
+    // Calculations
+    if (inObj && outObj) {
+      const diffTime = outObj - inObj;
+      const nights = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+      const base = nights * STAY_PRICE;
+      const tax = Math.round(base * 0.18);
+      const total = base + tax;
+
+      document.getElementById("dispNightsPill").innerText = `${nights} ${nights === 1 ? 'Night' : 'Nights'} Stay`;
+      document.getElementById("receiptDates").innerText = `${inObj.toLocaleDateString("en-IN", { month: 'short', day: 'numeric' })} - ${outObj.toLocaleDateString("en-IN", { month: 'short', day: 'numeric' })}`;
+      document.getElementById("receiptDuration").innerText = `${nights} ${nights === 1 ? 'Night' : 'Nights'}`;
+
+      document.getElementById("numNightsText").innerText = nights;
+      document.getElementById("baseFareVal").innerText = base.toLocaleString("en-IN");
+      document.getElementById("taxFareVal").innerText = tax.toLocaleString("en-IN");
+      document.getElementById("totalFareVal").innerText = total.toLocaleString("en-IN");
+    } else {
+      document.getElementById("dispNightsPill").innerText = "0 Nights Stay";
+      document.getElementById("receiptDates").innerText = "Please select dates";
+      document.getElementById("receiptDuration").innerText = "0 Nights";
+
+      document.getElementById("numNightsText").innerText = "0";
+      document.getElementById("baseFareVal").innerText = "0";
+      document.getElementById("taxFareVal").innerText = "0";
+      document.getElementById("totalFareVal").innerText = "0";
+    }
+
+    // Update guest text & hidden input
+    const totalGuests = guestAdults + guestChildren;
+    document.getElementById("receiptGuests").innerText = `${guestAdults} Adult${guestAdults > 1 ? 's' : ''}${guestChildren > 0 ? `, ${guestChildren} Child${guestChildren > 1 ? 'ren' : ''}` : ''}`;
+    const submitGuestsInput = document.getElementById("submitGuests");
+    if (submitGuestsInput) submitGuestsInput.value = totalGuests;
+  }
+
+  function applyQuickPreset(nights) {
+    hideDateAlert();
+
+    // Clear active styling on other preset buttons
+    [1, 2, 3, 7].forEach(n => {
+      const b = document.getElementById(`btnPreset${n}`);
+      if (b) b.classList.remove("active");
+    });
+    const activeBtn = document.getElementById(`btnPreset${nights}`);
+    if (activeBtn) activeBtn.classList.add("active");
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let offset = 0; offset < 45; offset++) {
+      const start = new Date(today);
+      start.setDate(today.getDate() + offset);
+      let ok = true;
+
+      for (let n = 0; n < nights; n++) {
+        const cur = new Date(start);
+        cur.setDate(start.getDate() + n);
+        if (isBooked(formatDateStr(cur))) {
+          ok = false;
+          break;
+        }
+      }
+
+      if (ok) {
+        checkInVal = formatDateStr(start);
+        const end = new Date(start);
+        end.setDate(start.getDate() + nights);
+        checkOutVal = formatDateStr(end);
+        setPickingSlot('none');
+        refreshUI();
+        return;
+      }
+    }
+
+    showDateAlert(`No continuous ${nights}-night available opening found in the next 45 days.`);
+  }
+
+  function resetCalendarSelection() {
+    hideDateAlert();
+    checkInVal = null;
+    checkOutVal = null;
+    setPickingSlot('checkIn');
+    [1, 2, 3, 7].forEach(n => {
+      const b = document.getElementById(`btnPreset${n}`);
+      if (b) b.classList.remove("active");
+    });
+    refreshUI();
+  }
+
+  function stepGuest(type, change) {
+    if (type === 'adults') {
+      guestAdults = Math.max(1, Math.min(10, guestAdults + change));
+      document.getElementById("countAdults").innerText = guestAdults;
+      document.getElementById("btnAdultMinus").disabled = guestAdults <= 1;
+    } else if (type === 'children') {
+      guestChildren = Math.max(0, Math.min(6, guestChildren + change));
+      document.getElementById("countChildren").innerText = guestChildren;
+      document.getElementById("btnChildMinus").disabled = guestChildren <= 0;
+    }
+    refreshUI();
+  }
+
+  function validateAndSubmitBooking(e) {
+    if (!checkInVal || !checkOutVal) {
+      if (e) e.preventDefault();
+      showDateAlert("Please pick both Check-In and Check-Out dates on the calendar first.");
+      const card = document.getElementById("cardStepDates");
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        card.style.outline = "2px solid #fe424d";
+        setTimeout(() => { card.style.outline = "none"; }, 2000);
+      }
+      return false;
+    }
+
+    // Ensure hidden inputs are updated
+    document.getElementById("submitCheckIn").value = checkInVal;
+    document.getElementById("submitCheckOut").value = checkOutVal;
+    document.getElementById("submitGuests").value = guestAdults + guestChildren;
+    
+    const noteEl = document.getElementById("specialNote");
+    if (noteEl) {
+      document.getElementById("submitSpecialRequests").value = noteEl.value;
+    }
+
+    const btn = document.getElementById("btnConfirmReservation");
+    if (btn) {
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin me-2"></i><span>Reserving Stay...</span>`;
+      btn.disabled = true;
+    }
+
+    return true;
+  }
+
+  // Initial Load: auto-apply 2 nights stay for immediate interactive experience
+  document.addEventListener("DOMContentLoaded", () => {
+    applyQuickPreset(2);
+  });
+</script>
+
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+        <div class="row gy-4">
+            <!-- Brand Column -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <div class="footer-brand d-flex align-items-center mb-3">
+                    <i class="fa-solid fa-compass footer-brand-icon me-2"></i>
+                    <span class="footer-brand-text">wanderlust</span>
+                </div>
+                <p class="footer-desc">Discover unique stays and experiences around the world. Your next adventure starts here.</p>
+                <div class="footer-socials mt-3">
+                    <a href="#" class="footer-social-link" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="footer-social-link" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="footer-social-link" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#" class="footer-social-link" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="footer-heading">Explore</h6>
+                <ul class="footer-links">
+                    <li><a href="/listings">All Listings</a></li>
+                    <li><a href="/listings?category=Trending">Trending</a></li>
+                    <li><a href="/listings">Mountains</a></li>
+                    <li><a href="/listings">Iconic Cities</a></li>
+                </ul>
+            </div>
+
+            <!-- Hosting -->
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="footer-heading">Hosting</h6>
+                <ul class="footer-links">
+                    <li><a href="/listings/new">Wanderlust your home</a></li>
+                    <li><a href="#">Host Resources</a></li>
+                    <li><a href="#">Community Forum</a></li>
+                    <li><a href="#">Responsible Hosting</a></li>
+                </ul>
+            </div>
+
+            <!-- Support -->
+            <div class="col-lg-2 col-md-6 col-6">
+                <h6 class="footer-heading">Support</h6>
+                <ul class="footer-links">
+                    <li><a href="#">Help Centre</a></li>
+                    <li><a href="#">Safety Info</a></li>
+                    <li><a href="#">Cancellation Options</a></li>
+                    <li><a href="#">Report a Concern</a></li>
+                </ul>
+            </div>
+
+            <!-- Legal -->
+            <div class="col-lg-2 col-md-6 col-6">
+                <h6 class="footer-heading">Legal</h6>
+                <ul class="footer-links">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                    <li><a href="#">Sitemap</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="footer-bottom">
+            <p class="mb-0">&copy; 2026 Wanderlust Private Limited &middot; All rights reserved</p>
+            <p class="mb-0 footer-bottom-links">
+                <a href="#">Privacy</a>
+                <span class="mx-2">&middot;</span>
+                <a href="#">Terms</a>
+                <span class="mx-2">&middot;</span>
+                <a href="#">Sitemap</a>
+            </p>
+        </div>
+    </div>
+</footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="/js/script.js"></script>
+
+</body>
+
+</html>
