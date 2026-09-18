@@ -353,18 +353,24 @@
   </div>
 </div>
 
-<!-- Dynamic Dual-Month Calendar & Calculation Engine -->
-<script>
-  const STAY_PRICE = Number("<%= listing.price %>");
-  
-  // Safe parsing of booked date ranges from database
-  const BOOKED_RANGES = <%- JSON.stringify((bookings || []).map(b => {
+<!-- Booked Dates Data for Calendar Engine -->
+<script id="bookedRangesData" type="application/json">
+  <%- JSON.stringify((bookings || []).map(b => {
     try {
       const inD = b.checkIn ? new Date(b.checkIn).toISOString().split('T')[0] : null;
       const outD = b.checkOut ? new Date(b.checkOut).toISOString().split('T')[0] : null;
       return inD && outD ? { checkIn: inD, checkOut: outD } : null;
     } catch(e) { return null; }
-  }).filter(Boolean)) %>;
+  }).filter(Boolean)) %>
+</script>
+
+<!-- Dynamic Dual-Month Calendar & Calculation Engine -->
+<script>
+  const STAY_PRICE = Number("<%= listing.price %>");
+  
+  // Safe parsing of booked date ranges from database
+  const bookedRangesEl = document.getElementById("bookedRangesData");
+  const BOOKED_RANGES = bookedRangesEl ? JSON.parse(bookedRangesEl.textContent || "[]") : [];
 
   let checkInVal = null;
   let checkOutVal = null;
