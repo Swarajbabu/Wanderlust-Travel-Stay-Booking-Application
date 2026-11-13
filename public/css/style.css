@@ -1,3 +1,8 @@
+html,
+body {
+    overflow-x: hidden;
+}
+
 body {
     font-family: "Plus Jakarta Sans", sans-serif !important;
     display: flex;
@@ -50,7 +55,7 @@ body {
     color: #fe424d !important;
 }
 .nav-pill-btn {
-    padding: 0.55rem 0.95rem !important;
+    padding: 0.45rem 0.72rem !important;
     border-radius: 24px;
     transition: all 0.2s ease;
     white-space: nowrap !important;
@@ -235,6 +240,9 @@ body {
     border-radius: 1rem !important;
     width: 100% !important;
     object-fit: cover !important;
+    background-color: #f1f3f5;
+    min-height: 20rem;
+    display: block;
 }
 
 .cardcard-body {
@@ -292,7 +300,8 @@ body {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
-    max-width: 380px;
+    width: 100%;
+    max-width: 280px;
 }
 .search-bar:hover {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
@@ -310,7 +319,8 @@ body {
     font-weight: 500 !important;
     color: #222222 !important;
     box-shadow: none !important;
-    width: 210px !important;
+    width: 100% !important;
+    min-width: 130px;
 }
 .search-input::placeholder {
     color: #717171;
@@ -342,7 +352,7 @@ body {
 }
 
 /* Mobile & Medium Device Responsiveness for Navbar */
-@media (max-width: 991.98px) {
+@media (max-width: 1199.98px) {
     .navbar-collapse {
         background-color: white;
         padding: 1rem 0 0.5rem;
@@ -383,5 +393,430 @@ body {
         box-shadow: none !important;
         border: 1px solid #eee !important;
         margin-top: 0.5rem !important;
+    }
+}
+
+/* Prevent horizontal viewport overflow without breaking position: sticky */
+html,
+body {
+    overflow-x: clip;
+    max-width: 100%;
+}
+
+
+/* Wanderlust Floating Travel Chatbot */
+.wl-chat-fab {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1060;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fe424d;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.72rem 1.15rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(254, 66, 77, 0.35);
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wl-chat-fab:hover {
+    background: #e33640;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(254, 66, 77, 0.42);
+}
+
+.wl-chat-panel {
+    position: fixed;
+    right: 20px;
+    bottom: 80px;
+    z-index: 1065;
+    width: min(390px, calc(100vw - 24px));
+    height: min(560px, calc(100vh - 110px));
+    background: #ffffff;
+    border: 1px solid #e7e7eb;
+    border-radius: 1.15rem;
+    box-shadow: 0 18px 46px rgba(18, 22, 33, 0.18);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.wl-chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    background: linear-gradient(135deg, #222222 0%, #34343c 100%);
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.wl-chat-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.wl-chat-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #fe424d;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.wl-chat-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.wl-chat-subtitle-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.wl-chat-subtitle {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.wl-chat-loc-pill {
+    font-size: 0.68rem;
+    font-weight: 600;
+    background: rgba(254, 66, 77, 0.25);
+    color: #ffd3d6;
+    border: 1px solid rgba(254, 66, 77, 0.45);
+    padding: 0.08rem 0.45rem;
+    border-radius: 999px;
+}
+
+.wl-chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.wl-chat-icon-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+}
+
+.wl-chat-icon-btn:hover,
+.wl-chat-icon-btn.active {
+    background: #fe424d;
+}
+
+.wl-chat-suggestions-drawer {
+    padding: 0.65rem 0.85rem;
+    background: #fafafa;
+    border-bottom: 1px solid #ececef;
+    flex-shrink: 0;
+    max-height: 145px;
+    overflow-y: auto;
+}
+
+.wl-chat-suggestions-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 0.45rem;
+}
+
+.wl-chat-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.wl-chat-chip {
+    border: 1px solid #e2e2e8;
+    background: #ffffff;
+    color: #222222;
+    font-size: 0.76rem;
+    line-height: 1.25;
+    padding: 0.32rem 0.62rem;
+    border-radius: 999px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.wl-chat-chip:hover {
+    border-color: #fe424d;
+    background: #fff5f6;
+    color: #c82333;
+}
+
+.wl-chat-chip-related {
+    background: #fff8f8;
+    border-color: #f8cfd2;
+}
+
+.wl-chat-messages {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0.85rem;
+    background: #f6f7fb;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.wl-chat-msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 90%;
+}
+
+.wl-chat-msg-user {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.wl-chat-msg-bot {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.wl-chat-bubble {
+    padding: 0.62rem 0.85rem;
+    border-radius: 0.95rem;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.wl-chat-msg-user .wl-chat-bubble {
+    background: #fe424d;
+    color: #ffffff;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.wl-chat-msg-bot .wl-chat-bubble {
+    background: #ffffff;
+    color: #222222;
+    border: 1px solid #e8e8ee;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.wl-chat-p {
+    margin: 0 0 0.35rem 0;
+}
+
+.wl-chat-p:last-child {
+    margin-bottom: 0;
+}
+
+.wl-chat-list {
+    margin: 0.25rem 0 0.35rem 1.05rem;
+    padding: 0;
+}
+
+.wl-chat-list:last-child {
+    margin-bottom: 0;
+}
+
+.wl-chat-list li {
+    margin-bottom: 0.22rem;
+}
+
+.wl-chat-related {
+    margin-top: 0.45rem;
+}
+
+.wl-chat-related-label {
+    font-size: 0.71rem;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 0.28rem;
+}
+
+.wl-chat-typing {
+    font-style: italic;
+    color: #666 !important;
+}
+
+.wl-chat-input-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 0.75rem;
+    background: #ffffff;
+    border-top: 1px solid #e9e9ef;
+    flex-shrink: 0;
+}
+
+.wl-chat-input {
+    border-radius: 999px !important;
+    font-size: 0.87rem !important;
+    padding: 0.48rem 0.9rem !important;
+    border: 1px solid #dcdce2 !important;
+}
+
+.wl-chat-input:focus {
+    border-color: #fe424d !important;
+    box-shadow: 0 0 0 0.15rem rgba(254, 66, 77, 0.16) !important;
+}
+
+.wl-chat-send-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50% !important;
+    background: #fe424d !important;
+    color: #ffffff !important;
+    border: none !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.wl-chat-send-btn:hover {
+    background: #e33640 !important;
+}
+
+@media (max-width: 575.98px) {
+    .wl-chat-fab {
+        right: 12px;
+        bottom: 12px;
+        padding: 0.65rem 0.95rem;
+    }
+    .wl-chat-panel {
+        right: 12px;
+        bottom: 68px;
+        width: calc(100vw - 24px);
+        height: min(520px, calc(100vh - 96px));
+    }
+}
+
+@keyframes wlLineFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wl-chat-line-enter {
+    animation: wlLineFadeIn 0.22s ease forwards;
+}
+
+.wl-chat-start-suggestions {
+    background: #ffffff;
+    border: 1px solid #e8e8ee;
+    border-radius: 0.9rem;
+    padding: 0.65rem 0.75rem;
+    margin-top: 0.15rem;
+}
+
+/* Itinerary Day Selector Pills */
+#dayTabs {
+    display: flex;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.4rem;
+    scrollbar-width: thin;
+}
+#dayTabs::-webkit-scrollbar {
+    height: 4px;
+}
+#dayTabs::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
+}
+
+.itinerary-day-tab {
+    background-color: #f8f9fa !important;
+    color: #222222 !important;
+    border: 1px solid #dee2e6 !important;
+    padding: 0.45rem 1.05rem !important;
+    white-space: nowrap !important;
+    flex-shrink: 0;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.itinerary-day-tab:hover {
+    background-color: #fff5f6 !important;
+    color: #fe424d !important;
+    border-color: #f5c2c7 !important;
+}
+
+.itinerary-day-tab.active,
+.itinerary-day-tab.active:hover {
+    background-color: #fe424d !important;
+    color: #ffffff !important;
+    border-color: #fe424d !important;
+}
+
+/* Responsive Utilities Across Mobile, Tablet, Laptop & Large Screens */
+@media (max-width: 991.98px) {
+    .sticky-top-lg-only {
+        position: static !important;
+        top: auto !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .wl-chat-fab {
+        right: 14px;
+        bottom: 14px;
+        padding: 0.6rem 0.95rem;
+        font-size: 0.85rem;
+    }
+    .wl-chat-panel {
+        right: 10px;
+        left: 10px;
+        width: auto !important;
+        max-width: calc(100vw - 20px) !important;
+        bottom: 64px;
+        height: min(540px, calc(100vh - 80px));
+        border-radius: 1rem;
+    }
+    .card-img-top {
+        min-height: 18rem;
+        height: 18rem !important;
+    }
+}
+
+@media (max-width: 379.98px) {
+    .brand-text {
+        font-size: 1.15rem;
+    }
+    .brand-icon {
+        font-size: 1.7rem;
     }
 }

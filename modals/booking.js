@@ -50,6 +50,14 @@ const bookingSchema = new Schema({
         type: String,
         default: null
     },
+    razorpayOrderId: {
+        type: String,
+        default: null
+    },
+    expiresAt: {
+        type: Date,
+        default: null
+    },
     cancellationReason: {
         type: String,
         default: null
@@ -76,6 +84,15 @@ const bookingSchema = new Schema({
         type: Number,
         default: 0
     },
+    isSharedBooking: {
+        type: Boolean,
+        default: false
+    },
+    roomSharePool: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "RoomSharePool",
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -88,6 +105,9 @@ bookingSchema.pre("save", function () {
         throw new Error("checkOut date must be after checkIn date.");
     }
 });
+
+bookingSchema.index({ guest: 1, createdAt: -1 });
+bookingSchema.index({ listing: 1, status: 1, checkIn: 1, checkOut: 1 });
 
 const Booking = mongoose.model("Booking", bookingSchema);
 module.exports = Booking;

@@ -1,9 +1,11 @@
 const User = require("../modals/user.js");
+const Listing = require("../modals/listing.js");
+const Booking = require("../modals/booking.js");
+const mongoose = require("mongoose");
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const emailTransporter = require("../config/email");
 const logger = require("../config/logger");
-const ExpressError = require("../utility/ExpressError");
 
 module.exports.renderSignupForm = (req, res) => {
     res.render("./users/signup.ejs", { title: "Sign Up" });
@@ -11,8 +13,9 @@ module.exports.renderSignupForm = (req, res) => {
 
 module.exports.Signup = async (req, res, next) => {
     try {
-        let { username, email, password } = req.body;
-        const newUser = new User({ username, email, emailVerified: false });
+        const { username, email, password } = req.body;
+        const normalizedEmail = (email || "").toLowerCase().trim();
+        const newUser = new User({ username, email: normalizedEmail, emailVerified: false });
         const registeredUser = await User.register(newUser, password);
 
         // Generate verification OTP
@@ -43,7 +46,7 @@ module.exports.Signup = async (req, res, next) => {
         });
     } catch (e) {
         if (e.code === 11000) {
-            req.flash("error", "A user with that email is already registered.");
+            req.flash("error", "A user with that email or username is already registered.");
         } else {
             req.flash("error", e.message);
         }
@@ -53,23 +56,22 @@ module.exports.Signup = async (req, res, next) => {
 
 module.exports.renderLoginForm = (req, res) => {
     res.render("./users/login.ejs", { title: "Log In" });
-    // res.send("Working");
 };
 
 module.exports.login = async (req, res) => {
     req.flash("success", "Welcome back to Wanderlust! You are logged in!");
-    let redirectUrl = res.locals.redirectUrl || "/listings";
+    const redirectUrl = res.locals.redirectUrl || "/listings";
     res.redirect(redirectUrl);
 };
 
-module.exports.logout =  (req, res, next) => {
-    req.logOut((err) => {                 //inbuilt pasport npms check doc
+module.exports.logout = (req, res, next) => {
+    req.logOut((err) => {
         if (err) {
-            next(err);
+            return next(err);
         }
         req.flash("success", "you are logged out!");
         res.redirect("/listings");
-    })
+    });
 };
 
 module.exports.renderForgotForm = (req, res) => {
@@ -78,10 +80,12 @@ module.exports.renderForgotForm = (req, res) => {
 
 module.exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
-    const user = await User.findOne({ email });
+    const normalizedEmail = (email || "").toLowerCase().trim();
+    const genericMsg = "If an account with that email address exists, password reset instructions have been sent.";
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
-        req.flash("error", "No account with that email address exists.");
-        return res.redirect("/forgot-password");
+        req.flash("success", genericMsg);
+        return res.redirect("/login");
     }
 
     const token = crypto.randomBytes(20).toString("hex");
@@ -102,7 +106,7 @@ module.exports.forgotPassword = async (req, res) => {
 
     try {
         await emailTransporter.sendMail(mailOptions);
-        req.flash("success", `An email has been sent to ${user.email} with reset instructions.`);
+        req.flash("success", genericMsg);
     } catch (err) {
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
@@ -166,7 +170,7 @@ module.exports.resetPassword = async (req, res) => {
 };
 
 module.exports.googleCallback = async (req, res) => {
-    let redirectUrl = req.session.redirectUrl || "/listings";
+    const redirectUrl = req.session.redirectUrl || "/listings";
     delete req.session.redirectUrl;
     res.redirect(redirectUrl);
 };
@@ -178,9 +182,10 @@ module.exports.guestLogin = async (req, res, next) => {
             guestUser = new User({
                 username: "guest_user",
                 email: "guest@wanderlust.com",
-                emailVerified: true
+                emailVerified: true,
+                role: "user"
             });
-            await User.register(guestUser, "GuestPass@2026");
+            await User.register(guestUser, process.env.DEMO_GUEST_PASSWORD || "GuestPass@2026");
             logger.info("Created guest demo user: guest_user");
         } else if (!guestUser.emailVerified) {
             guestUser.emailVerified = true;
@@ -191,7 +196,7 @@ module.exports.guestLogin = async (req, res, next) => {
             if (err) {
                 return next(err);
             }
-            req.flash("success", "Welcome, Guest Evaluator! You have full access to explore, book, host stays, and test all features without restrictions.");
+            req.flash("success", "Welcome, Guest Evaluator! You can explore, book stays, and test the platform.");
             const redirectUrl = req.session.redirectUrl || "/listings";
             delete req.session.redirectUrl;
             res.redirect(redirectUrl);
@@ -201,4 +206,110 @@ module.exports.guestLogin = async (req, res, next) => {
         req.flash("error", "Unable to complete guest login. Please try again.");
         res.redirect("/login");
     }
+};
+
+module.exports.toggleWishlist = async (req, res) => {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid listing ID" });
+    }
+    const listingExists = await Listing.exists({ _id: id });
+    if (!listingExists) {
+        return res.status(404).json({ error: "Listing not found" });
+    }
+
+    const user = await User.findById(req.user._id);
+    const alreadySaved = (user.wishlist || []).some((wId) => wId.equals(id));
+    if (alreadySaved) {
+        await User.findByIdAndUpdate(req.user._id, { $pull: { wishlist: id } });
+    } else {
+        await User.findByIdAndUpdate(req.user._id, { $addToSet: { wishlist: id } });
+    }
+
+    const updated = await User.findById(req.user._id).select("wishlist");
+    res.json({
+        saved: !alreadySaved,
+        count: updated && updated.wishlist ? updated.wishlist.length : 0
+    });
+};
+
+module.exports.renderWishlist = async (req, res) => {
+    const user = await User.findById(req.user._id).populate("wishlist");
+    const savedListings = (user && user.wishlist ? user.wishlist : []).filter(Boolean);
+    res.render("./users/wishlist.ejs", { savedListings, title: "Saved Stays" });
+};
+
+module.exports.renderProfile = async (req, res) => {
+    const [listingCount, bookingCount] = await Promise.all([
+        Listing.countDocuments({ owner: req.user._id }),
+        Booking.countDocuments({ guest: req.user._id })
+    ]);
+    res.render("./users/profile.ejs", {
+        profileUser: req.user,
+        listingCount,
+        bookingCount,
+        title: "My Profile"
+    });
+};
+
+module.exports.updateProfile = async (req, res) => {
+    const {
+        bio,
+        phone,
+        currentPassword,
+        newPassword,
+        gender,
+        preferredCompanionGender,
+        travelStyle,
+        sleepSchedule,
+        smokingPreference,
+        interests,
+        languages
+    } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        req.flash("error", "User not found.");
+        return res.redirect("/login");
+    }
+
+    user.bio = typeof bio === "string" ? bio.trim().slice(0, 300) : user.bio;
+    user.phone = typeof phone === "string" ? phone.trim().slice(0, 30) : user.phone;
+
+    if (req.body._travelProfileSubmitted) {
+        const cleanInterests = Array.isArray(interests)
+            ? interests.map((s) => String(s).trim()).filter(Boolean)
+            : (typeof interests === "string" && interests.trim() ? [interests.trim()] : []);
+        const cleanLanguages = typeof languages === "string"
+            ? languages.split(",").map((s) => s.trim()).filter(Boolean)
+            : (Array.isArray(languages) ? languages.filter(Boolean) : ["English"]);
+
+        user.travelProfile = {
+            gender: ["prefer_not_to_say", "male", "female", "non_binary"].includes(gender) ? gender : "prefer_not_to_say",
+            preferredCompanionGender: ["any", "same_gender"].includes(preferredCompanionGender) ? preferredCompanionGender : "any",
+            travelStyle: ["budget", "balanced", "comfort", "adventure"].includes(travelStyle) ? travelStyle : "balanced",
+            sleepSchedule: ["early_bird", "night_owl", "flexible"].includes(sleepSchedule) ? sleepSchedule : "flexible",
+            smokingPreference: ["non_smoker", "smoker", "no_preference"].includes(smokingPreference) ? smokingPreference : "no_preference",
+            interests: cleanInterests.slice(0, 10),
+            languages: cleanLanguages.length > 0 ? cleanLanguages.slice(0, 6) : ["English"]
+        };
+    }
+
+    await user.save();
+
+    if (currentPassword && newPassword) {
+        if (newPassword.length < 6) {
+            req.flash("error", "New password must be at least 6 characters long.");
+            return res.redirect("/profile");
+        }
+        try {
+            await user.changePassword(currentPassword, newPassword);
+            await user.save();
+        } catch (err) {
+            req.flash("error", "Current password is incorrect or password change failed.");
+            return res.redirect("/profile");
+        }
+    }
+
+    req.flash("success", "Profile updated successfully!");
+    res.redirect("/profile");
 };

@@ -1,0 +1,59 @@
+<% layout('layouts/boilerplate') -%>
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8 col-12">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white border border-light-subtle">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h3 class="fw-bold m-0"><i class="fa-solid fa-shield-halved text-success me-2"></i>Split Share Checkout</h3>
+          <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">Solo Split</span>
+        </div>
+        <p class="text-muted mb-4">Paying your split share for <strong><%= pool.listing ? pool.listing.title : 'Shared Stay' %></strong> (<%= new Date(pool.checkIn).toLocaleDateString('en-IN') %> – <%= new Date(pool.checkOut).toLocaleDateString('en-IN') %>).</p>
+
+        <div class="bg-light rounded-3 p-3 border border-light-subtle mb-4">
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-secondary">Full Stay Total (incl. 18% GST)</span>
+            <span>&#8377;<%= Number(pool.totalPrice).toLocaleString('en-IN') %></span>
+          </div>
+          <div class="d-flex justify-content-between fw-bold fs-5 text-dark">
+            <span>Your Split Share</span>
+            <span class="text-success">&#8377;<%= Number(participant.amountDue).toLocaleString('en-IN') %></span>
+          </div>
+        </div>
+
+        <button id="rzp-share-pay-btn" type="button" class="btn btn-danger w-100 rounded-pill py-2 fw-semibold shadow-sm">
+          <i class="fa-solid fa-lock me-2"></i>Pay &#8377;<%= Number(participant.amountDue).toLocaleString('en-IN') %> with Razorpay
+        </button>
+
+        <form id="sharePaymentVerifyForm" action="/room-shares/<%= pool._id %>/verify-payment" method="POST" class="d-none">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="razorpay_payment_id" id="rzp_payment_id">
+          <input type="hidden" name="razorpay_order_id" id="rzp_order_id">
+          <input type="hidden" name="razorpay_signature" id="rzp_signature">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.getElementById("rzp-share-pay-btn").addEventListener("click", function () {
+    const options = {
+      key: "<%= razorpayKeyId %>",
+      amount: "<%= order.amount %>",
+      currency: "INR",
+      name: "Wanderlust Room Share",
+      description: "Split accommodation payment",
+      order_id: "<%= order.id %>",
+      handler: function (response) {
+        document.getElementById("rzp_payment_id").value = response.razorpay_payment_id;
+        document.getElementById("rzp_order_id").value = response.razorpay_order_id;
+        document.getElementById("rzp_signature").value = response.razorpay_signature;
+        document.getElementById("sharePaymentVerifyForm").submit();
+      },
+      theme: { color: "#fe424d" }
+    };
+    const rzp = new Razorpay(options);
+    rzp.open();
+  });
+</script>

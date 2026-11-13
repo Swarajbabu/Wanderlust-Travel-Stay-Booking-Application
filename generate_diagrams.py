@@ -24,131 +24,138 @@ ax.text(50, 96, "FIGURE 1: THREE-TIER SYSTEM ARCHITECTURE & PERSISTENCE PIPELINE
 rect_client = patches.FancyBboxPatch((5, 75), 90, 16, boxstyle="square,pad=0.3",
                                     ec="black", fc="#f8f8f8", lw=1.5)
 ax.add_patch(rect_client)
-ax.text(7, 88, "CLIENT TIER (Presentation Layer)", fontsize=9, fontweight='bold', color='black')
-ax.text(50, 81, "Web Browser (HTML5 / Modern CSS3 / JavaScript ES6+ / Responsive Bootstrap)\nInteractive Mapbox GL JS Maps  |  Flatpickr Date-Range Calendar  |  Razorpay Checkout Modal", 
-        ha='center', va='center', fontsize=8.5, color='black')
+ax.text(7, 88, "CLIENT TIER (Presentation Layer - HTML5 / EJS-Mate / Bootstrap 5 / JS ES6+)", fontsize=8.5, fontweight='bold', color='black')
+ax.text(50, 81, "Explore Listing Feed  |  Interactive Mapbox GL Maps  |  Flatpickr Date-Range Calendar  |  Razorpay Checkout Modal\nContextual AI Chatbot Drawer (Gemini)  |  Cascading Location Filter  |  Host Analytics Dashboard  |  Room Share Portal", 
+        ha='center', va='center', fontsize=7.8, color='black')
 
 # Arrow Client -> Server
 ax.annotate("", xy=(50, 65), xytext=(50, 75),
             arrowprops=dict(arrowstyle="<->", color="black", lw=1.2))
-ax.text(52, 70, "HTTPS (REST API / HTML / JSON / Double-Submit CSRF)", fontsize=7.5, color='black')
+ax.text(52, 70, "HTTPS (RESTful Endpoints / EJS Render / JSON APIs / Double-Submit CSRF)", fontsize=7.5, color='black')
 
 # Tier 2: Application Tier
 rect_server = patches.FancyBboxPatch((5, 34), 90, 31, boxstyle="square,pad=0.3",
                                      ec="black", fc="white", lw=1.5)
 ax.add_patch(rect_server)
-ax.text(7, 61, "APPLICATION TIER (Node.js & Express.js Engine)", fontsize=9, fontweight='bold', color='black')
+ax.text(7, 61, "APPLICATION TIER (Node.js & Express.js Multi-Module Architecture)", fontsize=8.5, fontweight='bold', color='black')
 
 # Sub-boxes in Server
 # Middleware Pipeline
-rect_mid = patches.Rectangle((8, 37), 25, 20, ec="black", fc="#f2f2f2", lw=1)
+rect_mid = patches.Rectangle((7, 37), 21, 20, ec="black", fc="#f2f2f2", lw=1)
 ax.add_patch(rect_mid)
-ax.text(20.5, 54, "Security & Middleware", ha='center', fontsize=8, fontweight='bold', color='black')
-ax.text(20.5, 45, "• Helmet CSP Security\n• csrf-csrf Cookie Shield\n• express-rate-limit\n• express-session (Mongo)\n• Winston & Morgan Logger", 
-        ha='center', va='center', fontsize=7, color='black')
+ax.text(17.5, 54, "Security & Gateway", ha='center', fontsize=7.8, fontweight='bold', color='black')
+ax.text(17.5, 45, "• Helmet CSP Directives\n• csrf-csrf Token Shield\n• express-rate-limit\n• express-session (Mongo)\n• Winston / Morgan Logger", 
+        ha='center', va='center', fontsize=6.8, color='black')
 
 # Auth & Validation
-rect_auth = patches.Rectangle((37, 37), 25, 20, ec="black", fc="#f2f2f2", lw=1)
+rect_auth = patches.Rectangle((30, 37), 21, 20, ec="black", fc="#f2f2f2", lw=1)
 ax.add_patch(rect_auth)
-ax.text(49.5, 54, "Auth & Validation Gates", ha='center', fontsize=8, fontweight='bold', color='black')
-ax.text(49.5, 45, "• Passport.js Local Strategy\n• Google OAuth 2.0 Auth\n• Bcrypt OTP Verification\n• Joi Schema Validators\n• Role Authorization (isOwner)", 
-        ha='center', va='center', fontsize=7, color='black')
+ax.text(40.5, 54, "Auth & Access Control", ha='center', fontsize=7.8, fontweight='bold', color='black')
+ax.text(40.5, 45, "• Passport Local (Salt/Hash)\n• Google OAuth 2.0 Linking\n• Bcrypt OTP Verification\n• Joi Object Schema Gates\n• RBAC (User/Host/Admin)", 
+        ha='center', va='center', fontsize=6.8, color='black')
 
-# Controllers & Models
-rect_ctrl = patches.Rectangle((66, 37), 26, 20, ec="black", fc="#f2f2f2", lw=1)
-ax.add_patch(rect_ctrl)
-ax.text(79, 54, "Business Logic & ODM", ha='center', fontsize=8, fontweight='bold', color='black')
-ax.text(79, 45, "• Listing & Review Ctrl\n• Booking Engine (Overlap)\n• Razorpay Crypto Verify\n• Mongoose ODM Models\n• Cascading Post Hooks", 
-        ha='center', va='center', fontsize=7, color='black')
+# Core Stay & Booking Logic
+rect_stay = patches.Rectangle((53, 37), 20, 20, ec="black", fc="#f2f2f2", lw=1)
+ax.add_patch(rect_stay)
+ax.text(63, 54, "Stays & Financials", ha='center', fontsize=7.8, fontweight='bold', color='black')
+ax.text(63, 45, "• Listings & Reviews Ctrl\n• Concurrency Lock Engine\n• Razorpay HMAC Verify\n• Host Revenue Analytics\n• Cancellation & Refunds", 
+        ha='center', va='center', fontsize=6.8, color='black')
+
+# AI & Smart Services
+rect_ai = patches.Rectangle((75, 37), 18, 20, ec="black", fc="#f2f2f2", lw=1)
+ax.add_patch(rect_ai)
+ax.text(84, 54, "AI & Smart Match", ha='center', fontsize=7.8, fontweight='bold', color='black')
+ax.text(84, 45, "• Gemini AI Travel Bot\n• Itinerary Generator\n• Curated Catalog Fallback\n• RoomShare Pool Matching\n• Compatibility Scorer", 
+        ha='center', va='center', fontsize=6.8, color='black')
 
 # Arrow Server -> Persistence & External
-ax.annotate("", xy=(30, 22), xytext=(30, 34),
+ax.annotate("", xy=(28, 22), xytext=(28, 34),
             arrowprops=dict(arrowstyle="<->", color="black", lw=1.2))
-ax.text(32, 27, "Mongoose TCP Pool", fontsize=7.5, color='black')
+ax.text(30, 27, "Mongoose ODM TCP Pool", fontsize=7.2, color='black')
 
 ax.annotate("", xy=(75, 22), xytext=(75, 34),
             arrowprops=dict(arrowstyle="<->", color="black", lw=1.2))
-ax.text(77, 27, "REST / Webhooks", fontsize=7.5, color='black')
+ax.text(77, 27, "REST APIs & Webhooks", fontsize=7.2, color='black')
 
 # Tier 3: Persistence Tier (MongoDB Atlas)
-rect_db = patches.FancyBboxPatch((5, 3), 50, 19, boxstyle="square,pad=0.3",
+rect_db = patches.FancyBboxPatch((5, 3), 48, 19, boxstyle="square,pad=0.3",
                                  ec="black", fc="#f8f8f8", lw=1.5)
 ax.add_patch(rect_db)
-ax.text(7, 18, "PERSISTENCE TIER (MongoDB Atlas NoSQL)", fontsize=8.5, fontweight='bold', color='black')
-ax.text(30, 10, "3-Node Distributed Replica Set (Primary + 2 Secondaries)\nCollections: Users  |  Listings  |  Bookings  |  Reviews  |  Sessions\nText Search Index  |  2dsphere Geo Index  |  Compound Indexes", 
-        ha='center', va='center', fontsize=7.5, color='black')
+ax.text(7, 18, "PERSISTENCE TIER (MongoDB Atlas Cloud Cluster)", fontsize=8, fontweight='bold', color='black')
+ax.text(29, 10, "3-Node Replica Set: Users | Listings | Bookings | Reviews | RoomShares | Itineraries\nCompound Indexes  |  Text Search Index  |  2dsphere Geo Index  |  Session Store", 
+        ha='center', va='center', fontsize=7, color='black')
 
 # External Services
-rect_ext = patches.FancyBboxPatch((59, 3), 36, 19, boxstyle="square,pad=0.3",
+rect_ext = patches.FancyBboxPatch((55, 3), 40, 19, boxstyle="square,pad=0.3",
                                   ec="black", fc="#f8f8f8", lw=1.5)
 ax.add_patch(rect_ext)
-ax.text(61, 18, "EXTERNAL CLOUD SERVICES", fontsize=8.5, fontweight='bold', color='black')
-ax.text(77, 10, "• Cloudinary: Media CDN Storage\n• Mapbox API: Forward Geocoding\n• Razorpay: Payment Gateway\n• Nodemailer: Transactional SMTP", 
-        ha='center', va='center', fontsize=7.5, color='black')
+ax.text(57, 18, "EXTERNAL CLOUD SERVICES & APIS", fontsize=8, fontweight='bold', color='black')
+ax.text(75, 10, "• Cloudinary: Media CDN Storage  |  Mapbox: Forward Geocoding & Tiles\n• Razorpay: Payment Orders & Webhooks  |  Nodemailer: SMTP OTP Mails\n• Google Gemini AI: Generative Assistant & Structured JSON Itineraries", 
+        ha='center', va='center', fontsize=6.8, color='black')
 
 plt.tight_layout()
 plt.savefig('report_assets/arch_system_3tier.png', dpi=300, facecolor='white')
 plt.close()
 
 # -------------------------------------------------------------
-# 2. Database Schema ER & Document Architecture
+# 2. Database Schema ER & Document Architecture (6 Collections)
 # -------------------------------------------------------------
-fig, ax = plt.subplots(figsize=(10, 6.4), dpi=300)
+fig, ax = plt.subplots(figsize=(10, 6.8), dpi=300)
 ax.set_xlim(0, 100)
 ax.set_ylim(0, 100)
 ax.axis('off')
 
-ax.text(50, 96, "FIGURE 2: MONGODB ENTITY-RELATIONSHIP & DOCUMENT SCHEMA ARCHITECTURE", 
+ax.text(50, 97, "FIGURE 2: MONGODB ENTITY-RELATIONSHIP & DOCUMENT SCHEMA ARCHITECTURE", 
         ha='center', va='center', fontsize=11, fontweight='bold', color='black')
 
+# Row 1: Users, Listings, Reviews
 # Users Collection Box
-rect_user = patches.Rectangle((5, 56), 26, 36, ec="black", fc="#fafafa", lw=1.2)
+rect_user = patches.Rectangle((3, 53), 29, 39, ec="black", fc="#fafafa", lw=1.2)
 ax.add_patch(rect_user)
-ax.text(18, 88.5, "Users Collection", ha='center', fontsize=9, fontweight='bold', color='black')
-ax.plot([5, 31], [86, 86], color='black', lw=1)
+ax.text(17.5, 89, "Users Collection", ha='center', fontsize=8.5, fontweight='bold', color='black')
+ax.plot([3, 32], [86.5, 86.5], color='black', lw=1)
 user_fields = [
     "_id: ObjectId (PK)",
     "username: String",
     "email: String (Unique)",
-    "hash: String (Salted)",
-    "salt: String",
+    "role: user | host | admin",
+    "hash, salt: (PBKDF2/Bcrypt)",
     "googleId: String (Sparse)",
-    "authProvider: String",
+    "authProvider: local | google",
     "emailVerified: Boolean",
-    "otpHash: String",
-    "otpExpiresAt: Date",
-    "resetPasswordToken: Str"
+    "otpHash, otpExpiresAt: Date",
+    "wishlist: [ObjectId] (Ref)",
+    "travelProfile: {gender, style...}"
 ]
 for i, f in enumerate(user_fields):
-    ax.text(6.5, 83 - i*2.4, f, fontsize=7.2, color='black')
+    ax.text(4.5, 83.5 - i*2.6, f, fontsize=6.8, color='black')
 
 # Listings Collection Box
-rect_list = patches.Rectangle((37, 44), 28, 48, ec="black", fc="#fafafa", lw=1.2)
+rect_list = patches.Rectangle((35.5, 53), 30, 39, ec="black", fc="#fafafa", lw=1.2)
 ax.add_patch(rect_list)
-ax.text(51, 88.5, "Listings Collection", ha='center', fontsize=9, fontweight='bold', color='black')
-ax.plot([37, 65], [86, 86], color='black', lw=1)
+ax.text(50.5, 89, "Listings Collection", ha='center', fontsize=8.5, fontweight='bold', color='black')
+ax.plot([35.5, 65.5], [86.5, 86.5], color='black', lw=1)
 list_fields = [
     "_id: ObjectId (PK)",
-    "title: String (Text Idx)",
-    "description: String",
-    "image: {url, filename}",
-    "price: Number",
-    "location: String (Text)",
-    "country: String (Text)",
-    "geometry: Point [lng,lat]",
+    "title: String (Text Index)",
+    "price: Number (Price Index)",
+    "location, country: (Text Index)",
+    "geometry: Point [lng, lat] (2dsphere)",
     "category: Enum (17 Types)",
     "owner: ObjectId (Ref User)",
     "reviews: [ObjectId] (Ref)",
-    "createdAt: Date"
+    "allowRoomSharing: Boolean",
+    "amenities: [String]",
+    "maxGuests, bedrooms, bathrooms"
 ]
 for i, f in enumerate(list_fields):
-    ax.text(38.5, 83 - i*2.4, f, fontsize=7.2, color='black')
+    ax.text(37, 83.5 - i*2.6, f, fontsize=6.8, color='black')
 
 # Reviews Collection Box
-rect_rev = patches.Rectangle((71, 56), 24, 36, ec="black", fc="#fafafa", lw=1.2)
+rect_rev = patches.Rectangle((69, 61), 28, 31, ec="black", fc="#fafafa", lw=1.2)
 ax.add_patch(rect_rev)
-ax.text(83, 88.5, "Reviews Collection", ha='center', fontsize=9, fontweight='bold', color='black')
-ax.plot([71, 95], [86, 86], color='black', lw=1)
+ax.text(83, 89, "Reviews Collection", ha='center', fontsize=8.5, fontweight='bold', color='black')
+ax.plot([69, 97], [86.5, 86.5], color='black', lw=1)
 rev_fields = [
     "_id: ObjectId (PK)",
     "comment: String",
@@ -157,73 +164,107 @@ rev_fields = [
     "createdAt: Date"
 ]
 for i, f in enumerate(rev_fields):
-    ax.text(72.5, 83 - i*2.4, f, fontsize=7.2, color='black')
+    ax.text(70.5, 83.5 - i*3.2, f, fontsize=6.8, color='black')
 
+# Row 2: Bookings, RoomSharePools, TripItineraries
 # Bookings Collection Box
-rect_book = patches.Rectangle((18, 5), 32, 35, ec="black", fc="#fafafa", lw=1.2)
+rect_book = patches.Rectangle((3, 5), 29, 43, ec="black", fc="#fafafa", lw=1.2)
 ax.add_patch(rect_book)
-ax.text(34, 36.5, "Bookings Collection", ha='center', fontsize=9, fontweight='bold', color='black')
-ax.plot([18, 50], [34, 34], color='black', lw=1)
+ax.text(17.5, 45, "Bookings Collection", ha='center', fontsize=8.5, fontweight='bold', color='black')
+ax.plot([3, 32], [42.5, 42.5], color='black', lw=1)
 book_fields = [
     "_id: ObjectId (PK)",
     "listing: ObjectId (Ref Listing)",
     "guest: ObjectId (Ref User)",
-    "checkIn: Date",
-    "checkOut: Date",
+    "checkIn, checkOut: Date",
     "guests: Number (min: 1)",
-    "basePrice: Number",
-    "taxAmount: Number (18% GST)",
-    "totalPrice: Number",
+    "basePrice, taxAmount, totalPrice",
     "status: pending|confirmed|cancelled",
-    "paymentId: String (Razorpay)"
+    "paymentId, razorpayOrderId",
+    "isSharedBooking: Boolean",
+    "roomSharePool: ObjectId (Ref)",
+    "refundStatus, refundAmount, refundId"
 ]
 for i, f in enumerate(book_fields):
-    ax.text(19.5, 31 - i*2.4, f, fontsize=7.2, color='black')
+    ax.text(4.5, 39.5 - i*2.6, f, fontsize=6.8, color='black')
 
-# Sessions Collection Box
-rect_sess = patches.Rectangle((56, 5), 28, 35, ec="black", fc="#fafafa", lw=1.2)
-ax.add_patch(rect_sess)
-ax.text(70, 36.5, "Sessions (connect-mongo)", ha='center', fontsize=9, fontweight='bold', color='black')
-ax.plot([56, 84], [34, 34], color='black', lw=1)
-sess_fields = [
-    "_id: String (Session ID)",
-    "expires: Date (TTL Index)",
-    "session: {",
-    "  cookie: {...},",
-    "  passport: { user: ID },",
-    "  redirectUrl: String",
-    "}",
-    "lastModified: Date",
-    "-- Auto Expired by Mongo --"
+# RoomSharePools Collection Box
+rect_pool = patches.Rectangle((35.5, 5), 30, 43, ec="black", fc="#fafafa", lw=1.2)
+ax.add_patch(rect_pool)
+ax.text(50.5, 45, "RoomSharePools Collection", ha='center', fontsize=8.5, fontweight='bold', color='black')
+ax.plot([35.5, 65.5], [42.5, 42.5], color='black', lw=1)
+pool_fields = [
+    "_id: ObjectId (PK)",
+    "listing: ObjectId (Ref Listing)",
+    "initiator: ObjectId (Ref User)",
+    "checkIn, checkOut: Date",
+    "targetMembers, currentMembers",
+    "totalPrice, pricePerPerson",
+    "status: open|locked|confirmed...",
+    "participants: [{user, status...}]",
+    "preferences: {gender, budget...}",
+    "messages: [{sender, text, time}]",
+    "booking: ObjectId (Ref Booking)"
 ]
-for i, f in enumerate(sess_fields):
-    ax.text(57.5, 31 - i*2.4, f, fontsize=7.2, color='black')
+for i, f in enumerate(pool_fields):
+    ax.text(37, 39.5 - i*2.6, f, fontsize=6.8, color='black')
 
-# Relationship Arrows
-# User -> Listing (1:N owns)
-ax.annotate("1:N owns", xy=(37, 72), xytext=(31, 72),
-            arrowprops=dict(arrowstyle="->", color="black", lw=1.2),
-            fontsize=7, ha='center', va='bottom')
+# TripItineraries Collection Box
+rect_itin = patches.Rectangle((69, 5), 28, 43, ec="black", fc="#fafafa", lw=1.2)
+ax.add_patch(rect_itin)
+ax.text(83, 45, "TripItineraries Collection", ha='center', fontsize=8.5, fontweight='bold', color='black')
+ax.plot([69, 97], [42.5, 42.5], color='black', lw=1)
+itin_fields = [
+    "_id: ObjectId (PK)",
+    "user: ObjectId (Ref User)",
+    "listing: ObjectId (Ref Listing)",
+    "destination: String",
+    "days: Number (1-14)",
+    "pace: relaxed | balanced | packed",
+    "travelMode: driving|walking|transit",
+    "sourceProvider: gemini | fallback",
+    "totalDistanceKm, totalTravelMins",
+    "dayPlans: [{dayNum, stops...}]",
+    "createdAt: Date"
+]
+for i, f in enumerate(itin_fields):
+    ax.text(70.5, 39.5 - i*2.6, f, fontsize=6.8, color='black')
 
-# Listing -> Review (1:N embedded refs)
-ax.annotate("1:N refs", xy=(71, 72), xytext=(65, 72),
-            arrowprops=dict(arrowstyle="->", color="black", lw=1.2),
-            fontsize=7, ha='center', va='bottom')
+# Relationships
+# Users -> Listings (1:N owns)
+ax.annotate("1:N owns", xy=(35.5, 74), xytext=(32, 74),
+            arrowprops=dict(arrowstyle="->", color="black", lw=1.1),
+            fontsize=6.8, ha='center', va='bottom')
 
-# User -> Review (1:N authors)
-ax.annotate("", xy=(77, 56), xytext=(25, 56),
-            arrowprops=dict(arrowstyle="->", color="black", lw=1, linestyle="dotted"))
-ax.text(51, 57, "1:N authors (User -> Review)", fontsize=7, ha='center', color='black')
+# Listings -> Reviews (1:N ref)
+ax.annotate("1:N refs", xy=(69, 74), xytext=(65.5, 74),
+            arrowprops=dict(arrowstyle="->", color="black", lw=1.1),
+            fontsize=6.8, ha='center', va='bottom')
 
-# User -> Booking (1:N books)
-ax.annotate("1:N guest", xy=(24, 40), xytext=(18, 56),
-            arrowprops=dict(arrowstyle="->", color="black", lw=1.2),
-            fontsize=7, ha='center', va='bottom')
+# Users -> Bookings (1:N guest)
+ax.annotate("1:N guest", xy=(17.5, 48), xytext=(17.5, 53),
+            arrowprops=dict(arrowstyle="->", color="black", lw=1.1),
+            fontsize=6.8, ha='center', va='bottom')
 
-# Listing -> Booking (1:N bookings)
-ax.annotate("1:N reservations", xy=(42, 40), xytext=(45, 44),
-            arrowprops=dict(arrowstyle="->", color="black", lw=1.2),
-            fontsize=7, ha='center', va='bottom')
+# Listings -> Bookings (1:N stays)
+ax.annotate("1:N stays", xy=(32, 30), xytext=(35.5, 55),
+            arrowprops=dict(arrowstyle="->", color="black", lw=1.1),
+            fontsize=6.8, ha='center', va='bottom')
+
+# Listings -> RoomShares (1:N pools)
+ax.annotate("1:N pools", xy=(50.5, 48), xytext=(50.5, 53),
+            arrowprops=dict(arrowstyle="->", color="black", lw=1.1),
+            fontsize=6.8, ha='center', va='bottom')
+
+# RoomShares -> Bookings (1:1 confirmed)
+ax.annotate("1:1 converts", xy=(32, 22), xytext=(35.5, 22),
+            arrowprops=dict(arrowstyle="->", color="black", lw=1.1),
+            fontsize=6.8, ha='center', va='bottom')
+
+# Users -> TripItineraries (1:N plans)
+ax.annotate("1:N plans", xy=(83, 48), xytext=(78, 55),
+            arrowprops=dict(arrowstyle="->", color="black", lw=1.1, linestyle="--"),
+            fontsize=6.8, ha='center', va='bottom')
 
 plt.tight_layout()
 plt.savefig('report_assets/arch_schema_er.png', dpi=300, facecolor='white')
@@ -363,4 +404,4 @@ plt.tight_layout()
 plt.savefig('report_assets/arch_booking_sequence.png', dpi=300, facecolor='white')
 plt.close()
 
-print("All 4 architectural diagrams successfully generated!")
+print("All 4 architectural diagrams successfully regenerated with 6 collections and expanded architecture!")

@@ -3,7 +3,7 @@
 <script>
   const mapToken = "<%= process.env.MAP_TOKEN %>";
   const coordinates = JSON.parse('<%- JSON.stringify(listings.geometry && listings.geometry.coordinates && listings.geometry.coordinates.length === 2 ? listings.geometry.coordinates : [78.4867, 17.3850]) %>');
-  const listingTitle = "<%= listings.title %>";
+  const listingTitle = <%- JSON.stringify(listings.title || "").replace(/</g, '\\u003c') %>;
 </script>
 
 <%
@@ -12,9 +12,17 @@
     const sum = listings.reviews.reduce((acc, r) => acc + Number(r.rating || 5), 0);
     avgRatingVal = (sum / listings.reviews.length).toFixed(1);
   }
-  const isOwnerOrAdmin = currUser && (currUser._id.equals(listings.owner._id) || currUser.username === "guest_user" || currUser.username === "wanderlust_admin" || currUser.username === "Wonderlust_host");
+  const isOwnerOrAdmin = Boolean(currUser && (currUser._id.equals(listings.owner._id) || (typeof isPrivilegedUser !== 'undefined' && isPrivilegedUser)));
 %>
 
+<div id="wl-chat-context"
+  data-listing-id="<%= listings._id %>"
+  data-location="<%= listings.location || '' %>"
+  data-country="<%= listings.country || '' %>"
+  data-title="<%= listings.title || '' %>"
+  data-category="<%= listings.category || '' %>"
+  data-price="<%= listings.price || '' %>"
+  hidden></div>
 <div class="row mt-4">
   <div class="col-lg-10 offset-lg-1 col-md-10 offset-md-1 col-12">
     <!-- Breadcrumb Navigation -->
@@ -31,7 +39,19 @@
       <span class="luxe-breadcrumb-current"><%= listings.title %></span>
     </nav>
 
-    <h2 class="show-title fw-bold mb-3"><%= listings.title %></h2>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+      <h2 class="show-title fw-bold m-0"><%= listings.title %></h2>
+      <% if (currUser) { %>
+        <button type="button" class="btn <%= (typeof isWishlisted !== 'undefined' && isWishlisted) ? 'btn-danger' : 'btn-outline-danger' %> rounded-pill px-3 py-1 fw-semibold wishlist-toggle-btn" data-listing-id="<%= listings._id %>" aria-label="Save to wishlist">
+          <i class="<%= (typeof isWishlisted !== 'undefined' && isWishlisted) ? 'fa-solid' : 'fa-regular' %> fa-heart me-1"></i>
+          <span><%= (typeof isWishlisted !== 'undefined' && isWishlisted) ? 'Saved' : 'Save' %></span>
+        </button>
+      <% } else { %>
+        <a href="/login" class="btn btn-outline-danger rounded-pill px-3 py-1 fw-semibold">
+          <i class="fa-regular fa-heart me-1"></i>Save
+        </a>
+      <% } %>
+    </div>
   </div>
 
   <div class="col-lg-10 offset-lg-1 col-md-10 offset-md-1 col-12">
@@ -91,6 +111,67 @@
         <p class="card-text description-text fs-5 text-secondary mb-4">
           <%= listings.description %>
         </p>
+
+        <div class="d-flex flex-wrap gap-3 text-muted small mb-3">
+          <span><i class="fa-solid fa-users text-danger me-1"></i>Up to <b><%= listings.maxGuests || 4 %></b> guests</span>
+          <span>&middot;</span>
+          <span><i class="fa-solid fa-bed text-danger me-1"></i><b><%= typeof listings.bedrooms === 'number' ? listings.bedrooms : 1 %></b> bedroom<%= (listings.bedrooms === 1) ? '' : 's' %></span>
+          <span>&middot;</span>
+          <span><i class="fa-solid fa-bath text-danger me-1"></i><b><%= typeof listings.bathrooms === 'number' ? listings.bathrooms : 1 %></b> bath<%= (listings.bathrooms === 1) ? '' : 's' %></span>
+        </div>
+
+        <% if (Array.isArray(listings.amenities) && listings.amenities.length > 0) { %>
+          <div class="mb-4">
+            <h6 class="fw-bold text-dark mb-2">What this place offers</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <% listings.amenities.forEach(function(am) { %>
+                <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-medium">
+                  <i class="fa-solid fa-circle-check text-success me-1"></i><%= am %>
+                </span>
+              <% }); %>
+            </div>
+          </div>
+        <% } %>
+
+        <% if (listings.houseRules) { %>
+          <div class="alert alert-light border rounded-4 p-3 mb-4 small">
+            <div class="fw-bold text-dark mb-1"><i class="fa-solid fa-clipboard-list text-danger me-2"></i>House Rules</div>
+            <div class="text-secondary"><%= listings.houseRules %></div>
+          </div>
+        <% } %>
+
+        <!-- Solo Room Share & AI Planner Actions -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border border-light-subtle">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+            <h5 class="fw-bold mb-0"><i class="fa-solid fa-route text-danger me-2"></i>Solo Travel &amp; Smart Planning</h5>
+            <a href="/itineraries/new?listingId=<%= listings._id %>" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-semibold">
+              <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Preview AI Trip Plan
+            </a>
+          </div>
+          <% if (listings.allowRoomSharing && Number(listings.maxGuests || 1) >= 2) { %>
+            <p class="text-muted small mb-3">Travelling solo? Split this stay (up to <%= listings.maxGuests %> guests) with verified companions matching your schedule.</p>
+            <% if (typeof openSharePools !== 'undefined' && openSharePools.length > 0) { %>
+              <div class="d-flex flex-column gap-2 mb-3">
+                <% openSharePools.forEach(function(pool) { %>
+                  <a href="/room-shares/<%= pool._id %>" class="text-decoration-none border rounded-3 p-2 px-3 bg-light d-flex justify-content-between align-items-center">
+                    <span class="small text-dark fw-semibold">
+                      @<%= pool.initiator ? pool.initiator.username : 'traveller' %> &bull;
+                      <%= new Date(pool.checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) %> – <%= new Date(pool.checkOut).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) %>
+                    </span>
+                    <span class="badge bg-success rounded-pill">&#8377;<%= Number(pool.pricePerPerson).toLocaleString('en-IN') %> / person</span>
+                  </a>
+                <% }); %>
+              </div>
+            <% } %>
+            <% if (!isOwnerOrAdmin) { %>
+              <a href="/listings/<%= listings._id %>/room-shares/new" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold">
+                <i class="fa-solid fa-user-group me-1"></i>Start a Room Share Pool
+              </a>
+            <% } %>
+          <% } else { %>
+            <p class="text-muted small mb-0">Generate a personalized day-by-day sightseeing route starting right from this stay.</p>
+          <% } %>
+        </div>
 
         <% if (isOwnerOrAdmin) { %>
           <div class="d-flex align-items-center gap-3 mb-4">
@@ -235,7 +316,7 @@
         <!-- Review Section -->
         <hr class="my-4" />
 
-        <% if (currUser) { %>
+        <% if (currUser && typeof canReview !== 'undefined' && canReview) { %>
         <div class="card border-0 shadow-sm p-4 mb-4 bg-white rounded-4 border border-light-subtle">
           <h4 class="fw-bold mb-3"><i class="fa-solid fa-star text-warning me-2"></i>Leave a Review</h4>
           <form action="/listings/<%= listings._id %>/reviews" method="post" novalidate class="needs-validation">
@@ -268,6 +349,16 @@
         <hr class="my-4" />
         <% } %>
 
+        <% if (currUser && !canReview) { %>
+          <div class="alert alert-light border rounded-4 p-3 mb-4 small text-muted">
+            <% if (typeof hasReviewed !== 'undefined' && hasReviewed) { %>
+              <i class="fa-solid fa-circle-check text-success me-2"></i>You have already reviewed this stay. Thank you for your feedback!
+            <% } else { %>
+              <i class="fa-solid fa-shield-halved text-danger me-2"></i>Verified stays only &mdash; complete a confirmed booking at this property to leave a review.
+            <% } %>
+          </div>
+        <% } %>
+
         <!-- Displaying the Stars / Guest Feedback -->
         <% if (listings.reviews.length > 0) { %>
         <h4 class="fw-bold mb-4"><i class="fa-solid fa-comments me-2 text-secondary"></i>Guest Reviews</h4>
@@ -286,7 +377,7 @@
                   <%= review.comment %>
                 </p>
               </div>
-              <% if (currUser && review.author && (currUser._id.equals(review.author._id) || currUser.username === "guest_user" || currUser.username === "wanderlust_admin" || currUser.username === "Wonderlust_host")) { %>
+              <% if (currUser && review.author && (currUser._id.equals(review.author._id) || (typeof isPrivilegedUser !== 'undefined' && isPrivilegedUser))) { %>
               <form action="/listings/<%= listings._id %>/reviews/<%= review._id %>?_method=DELETE" class="m-0" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <button class="btn btn-sm btn-outline-danger px-3 rounded-pill">
@@ -460,4 +551,37 @@
         else if (e.key === "ArrowRight") showNext();
       });
     })();
+
+    // ---- Wishlist Heart Toggle ----
+    document.querySelectorAll(".wishlist-toggle-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const listingId = btn.dataset.listingId;
+        try {
+          const res = await fetch(`/listings/${listingId}/wishlist`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": "<%= csrfToken %>"
+            }
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          const icon = btn.querySelector("i");
+          const label = btn.querySelector("span");
+          if (data.saved) {
+            btn.classList.remove("btn-outline-danger");
+            btn.classList.add("btn-danger");
+            if (icon) { icon.classList.remove("fa-regular"); icon.classList.add("fa-solid"); }
+            if (label) label.textContent = "Saved";
+          } else {
+            btn.classList.remove("btn-danger");
+            btn.classList.add("btn-outline-danger");
+            if (icon) { icon.classList.remove("fa-solid"); icon.classList.add("fa-regular"); }
+            if (label) label.textContent = "Save";
+          }
+        } catch (err) {
+          console.error("Wishlist toggle error:", err);
+        }
+      });
+    });
 </script>

@@ -6,15 +6,6 @@ if (process.env.NODE_ENV !== "test") {
     validateEnv();
 }
 
-// DNS set servers for development
-if (process.env.NODE_ENV !== "production") {
-    try {
-        require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
-    } catch (e) {
-        // Ignore if unsupported
-    }
-}
-
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -40,12 +31,18 @@ const configurePassport = require("./config/passport");
 
 // Custom Error Class
 const ExpressError = require("./utility/ExpressError.js");
+const { hasAdminOrDemoPrivilege } = require("./middleware.js");
 
 // Router requires
 const router_listing = require("./routes/listing.js");
 const router_reviews = require("./routes/review.js");
 const router_user = require("./routes/user.js");
 const router_bookings = require("./routes/booking.js");
+const router_host = require("./routes/host.js");
+const router_pages = require("./routes/pages.js");
+const router_roomShares = require("./routes/roomShare.js");
+const router_itineraries = require("./routes/itinerary.js");
+const router_chatbot = require("./routes/chatbot.js");
 
 const secret = process.env.SECRET;
 
@@ -89,6 +86,13 @@ app.use(helmet({
 }));
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json({
+    verify: (req, res, buf) => {
+        if (req.originalUrl && req.originalUrl.startsWith("/webhooks/razorpay")) {
+            req.rawBody = buf;
+        }
+    }
+}));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(methodOverride("_method"));
 app.use(cookieParser(secret));
@@ -96,6 +100,9 @@ app.use(sessionMiddleware);
 app.use(flash());
 app.use((req, res, next) => {
     if (process.env.NODE_ENV === "test") {
+        return next();
+    }
+    if (req.originalUrl === "/webhooks/razorpay") {
         return next();
     }
     // For multipart forms, if query/header doesn't have token, defer check until multer parses body
@@ -116,6 +123,7 @@ app.use((req, res, next) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user || null;
+    res.locals.isPrivilegedUser = hasAdminOrDemoPrivilege(req.user);
     next();
 });
 
@@ -136,6 +144,11 @@ app.get("/", (req, res) => {
 app.use("/listings", router_listing);
 app.use("/listings/:id/reviews", router_reviews);
 app.use("/", router_bookings);
+app.use("/host", router_host);
+app.use("/", router_roomShares);
+app.use("/", router_itineraries);
+app.use("/", router_chatbot);
+app.use("/", router_pages);
 app.use("/", router_user);
 
 // 404 handler
@@ -147,6 +160,9 @@ app.all("*", (req, res, next) => {
 app.use((err, req, res, next) => {
     if (err === invalidCsrfTokenError) {
         logger.warn(`CSRF FAILED! sessionID: ${req.sessionID} cookies: ${JSON.stringify(req.cookies)}`);
+        if (req.originalUrl && req.originalUrl.startsWith("/api/")) {
+            return res.status(403).json({ error: "Session refreshed. Please reload the page and try again." });
+        }
         req.flash("error", "Session expired or invalid CSRF token. Please try again.");
         return res.redirect(req.get("Referrer") || "/listings");
     }
@@ -155,7 +171,7 @@ app.use((err, req, res, next) => {
 
 // General Error Handler
 app.use((err, req, res, next) => {
-    let { statusCode = 500 } = err;
+    const statusCode = err.statusCode || err.statuscode || 500;
     logger.error(`Error ${statusCode}: ${err.message}\n${err.stack}`);
     res.status(statusCode).render("error.ejs", { err });
 });

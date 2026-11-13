@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });               //For to use req.perams true mergeParams 
 const wrapAsync = require("../utility/wrapAsync.js");
 const passport = require("passport");
-const { saveRedirectUrl } = require("../middleware.js");
+const { saveRedirectUrl, isLoggedIn } = require("../middleware.js");
 const rateLimit = require("express-rate-limit");
 
 const userController = require("../controllers/user.js");
@@ -63,12 +63,12 @@ router.get("/logout", userController.logout);
 // Forgot Password
 router.route("/forgot-password")
     .get(userController.renderForgotForm)
-    .post(wrapAsync(userController.forgotPassword));
+    .post(authLimiter, wrapAsync(userController.forgotPassword));
 
 // Reset Password
 router.route("/reset-password/:token")
     .get(wrapAsync(userController.renderResetForm))
-    .post(wrapAsync(userController.resetPassword));
+    .post(authLimiter, wrapAsync(userController.resetPassword));
 
 // Google OAuth
 router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
@@ -86,5 +86,13 @@ router.route("/login/otp/request")
 router.route("/login/otp/verify")
     .get(otpController.renderVerifyForm)
     .post(otpLimiter, wrapAsync(otpController.verifyOtp));
+
+// Wishlist & User Profile
+router.post("/listings/:id/wishlist", isLoggedIn, wrapAsync(userController.toggleWishlist));
+router.get("/wishlist", isLoggedIn, wrapAsync(userController.renderWishlist));
+
+router.route("/profile")
+    .get(isLoggedIn, wrapAsync(userController.renderProfile))
+    .patch(isLoggedIn, wrapAsync(userController.updateProfile));
 
 module.exports = router;

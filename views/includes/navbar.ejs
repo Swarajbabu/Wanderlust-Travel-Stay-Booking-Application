@@ -1,6 +1,6 @@
-<nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container-fluid px-lg-5 px-3">
-        <a class="navbar-brand d-flex align-items-center me-3" href="/listings">
+<nav class="navbar navbar-expand-xl sticky-top">
+    <div class="container-fluid px-xl-4 px-3">
+        <a class="navbar-brand d-flex align-items-center me-2 me-xl-3" href="/listings">
             <i class="fa-solid fa-compass brand-icon me-2"></i>
             <span class="brand-text">wanderlust</span>
         </a>
@@ -8,35 +8,47 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav align-items-center">
+            <div class="navbar-nav align-items-xl-center gap-1">
                 <a class="nav-link nav-pill-btn" href="/listings">Explore</a>
+                <a class="nav-link nav-pill-btn" href="/room-shares" title="Find Solo Roommates & Split Stays">
+                    <i class="fa-solid fa-user-group me-1 text-danger"></i>Room Shares
+                </a>
+                <a class="nav-link nav-pill-btn" id="wl-nav-ai-planner" href="/itineraries/new" title="AI Personalized Trip Planner">
+                    <i class="fa-solid fa-route me-1 text-danger"></i>AI Planner
+                </a>
             </div>
 
-            <div class="navbar-nav mx-auto my-2 my-lg-0">
+            <div class="navbar-nav mx-xl-auto my-2 my-xl-0">
                 <form class="search-form" role="search" action="/listings" method="GET">
                     <div class="search-bar">
-                        <input class="form-control search-input" type="search" placeholder="Search destinations..." name="q" autocomplete="off">
+                        <input class="form-control search-input" type="search" placeholder="Search destinations..." name="q" value="<%= typeof q !== 'undefined' && q ? q : '' %>" autocomplete="off">
                         <button class="btn btn-search" type="submit" aria-label="Search">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
                     </div>
                 </form>
             </div>
-            
-            <div class="navbar-nav ms-auto align-items-center gap-1 gap-xl-2">
+
+            <div class="navbar-nav ms-xl-auto align-items-xl-center gap-1">
                 <% if(typeof currUser === 'undefined' || !currUser){ %>
                     <a class="btn btn-guest-nav" href="/guest-login" title="Instant 1-Click Guest Login for Assessment Review">
                         <i class="fa-solid fa-bolt text-warning me-1"></i>Guest Login
                     </a>
                 <% } %>
                 <% if(typeof currUser !== 'undefined' && currUser){ %>
+                    <a class="nav-link nav-pill-btn d-xl-none d-xxl-inline-flex" href="/wishlist" title="Saved Stays">
+                        <i class="fa-regular fa-heart me-1 text-danger"></i>Saved
+                    </a>
                     <a class="nav-link nav-pill-btn" href="/bookings">
                         <i class="fa-regular fa-calendar-check me-1 text-danger"></i>My Bookings
                     </a>
                 <% } %>
-                <a class="nav-link nav-pill-btn" href="/listings/new">Wanderlust your home</a>
-                
-                <div class="dropdown ms-lg-2">
+                <a class="nav-link nav-pill-btn" href="/listings/new">
+                    <span class="d-none d-xxl-inline">Wanderlust your home</span>
+                    <span class="d-xxl-none">Host Stay</span>
+                </a>
+
+                <div class="dropdown ms-xl-1">
                     <button class="btn btn-profile-menu dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Menu">
                         <i class="fa-solid fa-bars me-2"></i>
                         <i class="fa-solid fa-circle-user profile-icon"></i>
@@ -58,8 +70,14 @@
                                 </span>
                             </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/listings/new"><i class="fa-solid fa-house-chimney me-2 text-secondary"></i>Wanderlust your home</a></li>
+                            <li><a class="dropdown-item" href="/profile"><i class="fa-regular fa-user me-2 text-secondary"></i>My Profile</a></li>
+                            <li><a class="dropdown-item" href="/host/dashboard"><i class="fa-solid fa-chart-line me-2 text-secondary"></i>Host Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/wishlist"><i class="fa-regular fa-heart me-2 text-secondary"></i>Saved Stays</a></li>
                             <li><a class="dropdown-item" href="/bookings"><i class="fa-regular fa-calendar-check me-2 text-secondary"></i>My Bookings</a></li>
+                            <li><a class="dropdown-item" href="/itineraries"><i class="fa-solid fa-route me-2 text-secondary"></i>My AI Trips</a></li>
+                            <li><a class="dropdown-item" href="/room-shares"><i class="fa-solid fa-user-group me-2 text-secondary"></i>Room Shares</a></li>
+                            <li><a class="dropdown-item" href="/listings/new"><i class="fa-solid fa-house-chimney me-2 text-secondary"></i>Wanderlust your home</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item fw-bold text-danger" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Log out</a></li>
                         <% } %>
                     </ul>

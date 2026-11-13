@@ -1,6 +1,12 @@
 <% layout('layouts/boilerplate') -%>
 <link rel="stylesheet" href="/css/booking.css">
 
+<div id="wl-chat-context"
+  data-listing-id="<%= listing._id %>"
+  data-location="<%= listing.location || '' %>"
+  data-country="<%= listing.country || '' %>"
+  data-title="<%= listing.title || '' %>"
+  hidden></div>
 <div class="container my-4">
   <!-- Breadcrumb Navigation -->
   <div class="luxe-breadcrumb-bar">
@@ -164,7 +170,7 @@
               <span class="luxe-card-step">2</span>
               <span>Guests & Traveling Party</span>
             </h3>
-            <div class="luxe-card-subtitle">Choose the number of guests staying with you</div>
+            <div class="luxe-card-subtitle">Choose up to <%= listing.maxGuests || 4 %> guests staying with you (<%= typeof listing.bedrooms === 'number' ? listing.bedrooms : 1 %> bedroom<%= listing.bedrooms === 1 ? '' : 's' %>, <%= typeof listing.bathrooms === 'number' ? listing.bathrooms : 1 %> bath<%= listing.bathrooms === 1 ? '' : 's' %>)</div>
           </div>
         </div>
 
@@ -213,31 +219,26 @@
             <i class="fa-solid fa-house-chimney luxe-perk-icon"></i>
             <div>
               <div class="fw-bold text-dark small"><%= listing.category || 'Boutique Stay' %></div>
-              <div class="text-muted small">Verified property category and private comfort</div>
+              <div class="text-muted small">Verified property category &middot; Up to <%= listing.maxGuests || 4 %> guests</div>
             </div>
           </div>
-          <div class="luxe-perk-item">
-            <i class="fa-solid fa-wifi luxe-perk-icon"></i>
-            <div>
-              <div class="fw-bold text-dark small">High-Speed Wi-Fi</div>
-              <div class="text-muted small">Reliable connectivity for work and leisure</div>
+          <% const amenitiesList = Array.isArray(listing.amenities) && listing.amenities.length > 0 ? listing.amenities.slice(0, 3) : ['High-Speed Wi-Fi', 'Air Conditioning']; %>
+          <% amenitiesList.forEach(function(am) { %>
+            <div class="luxe-perk-item">
+              <i class="fa-solid fa-circle-check luxe-perk-icon text-success"></i>
+              <div>
+                <div class="fw-bold text-dark small"><%= am %></div>
+                <div class="text-muted small">Included with your stay</div>
+              </div>
             </div>
-          </div>
-          <div class="luxe-perk-item">
-            <i class="fa-solid fa-key luxe-perk-icon"></i>
-            <div>
-              <div class="fw-bold text-dark small">Seamless Check-In</div>
-              <div class="text-muted small">Direct host assistance with <%= listing.owner && listing.owner.username ? listing.owner.username : 'Host' %></div>
-            </div>
-          </div>
-          <div class="luxe-perk-item">
-            <i class="fa-solid fa-location-dot luxe-perk-icon"></i>
-            <div>
-              <div class="fw-bold text-dark small">Prime Location</div>
-              <div class="text-muted small">Situated in <%= listing.location %>, <%= listing.country %></div>
-            </div>
-          </div>
+          <% }); %>
         </div>
+        <% if (listing.houseRules) { %>
+          <div class="alert alert-light border rounded-3 py-2 px-3 small mb-3">
+            <strong><i class="fa-solid fa-clipboard-list text-danger me-1"></i>House Rules:</strong>
+            <span class="text-secondary"><%= listing.houseRules %></span>
+          </div>
+        <% } %>
 
         <div>
           <label class="form-label small fw-bold text-dark" for="specialNote">Special Requests for Host (Optional)</label>
@@ -367,6 +368,7 @@
 <!-- Dynamic Dual-Month Calendar & Calculation Engine -->
 <script>
   const STAY_PRICE = Number("<%= listing.price %>");
+  const MAX_GUESTS = Number("<%= listing.maxGuests || 4 %>");
 
   // Safe parsing of booked date ranges from database
   const bookedRangesEl = document.getElementById("bookedRangesData");
@@ -674,11 +676,13 @@
 
   function stepGuest(type, change) {
     if (type === 'adults') {
-      guestAdults = Math.max(1, Math.min(10, guestAdults + change));
+      const nextAdults = Math.max(1, Math.min(MAX_GUESTS - guestChildren, guestAdults + change));
+      guestAdults = nextAdults;
       document.getElementById("countAdults").innerText = guestAdults;
       document.getElementById("btnAdultMinus").disabled = guestAdults <= 1;
     } else if (type === 'children') {
-      guestChildren = Math.max(0, Math.min(6, guestChildren + change));
+      const nextChildren = Math.max(0, Math.min(MAX_GUESTS - guestAdults, guestChildren + change));
+      guestChildren = nextChildren;
       document.getElementById("countChildren").innerText = guestChildren;
       document.getElementById("btnChildMinus").disabled = guestChildren <= 0;
     }

@@ -1,4 +1,18 @@
 <% layout('layouts/boilerplate') -%>
+<%
+  const activeNavBooking = Array.isArray(bookings) && bookings.length > 0
+    ? (bookings.find((b) => b.status !== 'cancelled' && b.listing) || bookings.find((b) => b.listing) || bookings[0])
+    : null;
+%>
+<% if (activeNavBooking) { %>
+<div id="wl-chat-context"
+  data-booking-id="<%= activeNavBooking._id %>"
+  data-listing-id="<%= activeNavBooking.listing ? activeNavBooking.listing._id : '' %>"
+  data-location="<%= activeNavBooking.listing ? (activeNavBooking.listing.location || '') : '' %>"
+  data-country="<%= activeNavBooking.listing ? (activeNavBooking.listing.country || '') : '' %>"
+  data-title="<%= activeNavBooking.listing ? (activeNavBooking.listing.title || '') : '' %>"
+  hidden></div>
+<% } %>
 <div class="container mt-4">
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <h2 class="fw-bold m-0"><i class="fa-solid fa-suitcase-rolling text-danger me-2"></i>My Bookings</h2>
@@ -17,7 +31,130 @@
     </div>
   </div>
 
-  <% if (bookings.length === 0) { %>
+  <% const hasSharedPools = typeof sharedPools !== 'undefined' && Array.isArray(sharedPools) && sharedPools.length > 0; %>
+
+  <% if (hasSharedPools) { %>
+    <div class="mb-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h4 class="fw-bold m-0"><i class="fa-solid fa-user-group text-danger me-2"></i>Solo Group &amp; Split Stay Bookings</h4>
+        <a href="/room-shares" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold">Explore Room Shares</a>
+      </div>
+      <div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4">
+        <% sharedPools.forEach(function(pool) { %>
+          <%
+            const acceptedMembers = (pool.participants || []).filter((p) => p.joinStatus === 'accepted');
+            const myPart = acceptedMembers.find((p) => p.user && currUser && p.user._id.equals(currUser._id));
+            const paidMembersCount = acceptedMembers.filter((p) => p.paymentStatus === 'paid').length;
+            const isPaid = Boolean(myPart && myPart.paymentStatus === 'paid');
+            const isPoolInitiator = Boolean(pool.initiator && currUser && pool.initiator._id.equals(currUser._id));
+            const canCancelShared = (isPoolInitiator && pool.status !== 'cancelled') || (isPaid && ['locked', 'partially_booked'].includes(pool.status));
+            let poolBadgeClass = 'bg-info text-dark';
+            let poolStatusText = pool.status.toUpperCase();
+            if (pool.status === 'partially_booked') {
+              poolBadgeClass = 'bg-warning text-dark';
+              poolStatusText = 'Partially Booked — Room Not Allotted';
+            } else if (pool.status === 'confirmed') {
+              poolBadgeClass = 'bg-success';
+              poolStatusText = 'Confirmed & Room Allotted';
+            } else if (pool.status === 'cancelled') {
+              poolBadgeClass = 'bg-danger';
+              poolStatusText = 'Cancelled';
+            } else if (pool.status === 'locked') {
+              poolBadgeClass = 'bg-info text-dark';
+              poolStatusText = 'Locked — Pay Split Share';
+            }
+          %>
+          <div class="col">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white border <%= pool.status === 'partially_booked' ? 'border-warning' : 'border-light-subtle' %>">
+              <div class="position-relative" style="height: 170px;">
+                <img src="<%= pool.listing && pool.listing.image && pool.listing.image.url ? pool.listing.image.url : '/images/default.jpg' %>" class="w-100 h-100 object-fit-cover" alt="Shared Stay">
+                <span class="badge <%= poolBadgeClass %> position-absolute top-0 end-0 m-3 rounded-pill px-3 py-1 shadow-sm"><%= poolStatusText %></span>
+              </div>
+              <div class="card-body d-flex flex-column p-4">
+                <h5 class="fw-bold text-dark mb-1"><%= pool.listing ? pool.listing.title : (pool.destination || 'Group Stay') %></h5>
+                <p class="text-muted small mb-2">
+                  <i class="fa-solid fa-location-dot text-danger me-1"></i><%= pool.listing ? `${pool.listing.location}, ${pool.listing.country}` : (pool.destination || '') %>
+                </p>
+
+                <div class="bg-light rounded-3 p-3 mb-3 border border-light-subtle small">
+                  <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary">Dates:</span>
+                    <span class="fw-semibold"><%= new Date(pool.checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) %> – <%= new Date(pool.checkOut).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary">Your Split Share:</span>
+                    <span class="fw-bold text-success">&#8377;<%= Number(myPart ? myPart.amountDue : pool.pricePerPerson).toLocaleString('en-IN') %> <span class="text-muted fw-normal">(of &#8377;<%= Number(pool.totalPrice).toLocaleString('en-IN') %>)</span></span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-secondary">Members Paid:</span>
+                    <span class="fw-semibold"><%= paidMembersCount %> / <%= acceptedMembers.length %> paid</span>
+                  </div>
+                </div>
+
+                <% if (pool.status === 'partially_booked') { %>
+                  <div class="alert alert-warning py-2 px-3 small rounded-3 mb-3">
+                    <strong>Room Not Allotted Yet:</strong> Waiting for remaining member payment before the room is confirmed.
+                  </div>
+                <% } else if (pool.status === 'cancelled') { %>
+                  <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3">
+                    <div><strong>Cancelled:</strong> <%= pool.cancellationReason || 'Cancelled' %></div>
+                    <% if (myPart && myPart.paymentStatus === 'refunded') { %>
+                      <div class="text-success fw-semibold mt-1">Split share refunded</div>
+                    <% } %>
+                  </div>
+                <% } %>
+
+                <div class="mt-auto d-grid gap-2">
+                  <% if (['locked', 'partially_booked'].includes(pool.status) && myPart && myPart.paymentStatus === 'unpaid') { %>
+                    <a href="/room-shares/<%= pool._id %>/checkout" class="btn btn-success btn-sm rounded-pill fw-semibold">
+                      Pay Your Split Share (&#8377;<%= Number(myPart.amountDue).toLocaleString('en-IN') %>)
+                    </a>
+                  <% } %>
+                  <% if (pool.status === 'confirmed' && pool.booking) { %>
+                    <a href="/bookings/<%= pool.booking %>/receipt" class="btn btn-outline-success btn-sm rounded-pill fw-semibold">
+                      <i class="fa-solid fa-file-invoice me-1"></i>View Shared Receipt
+                    </a>
+                  <% } %>
+                  <a href="/room-shares/<%= pool._id %>" class="btn btn-outline-dark btn-sm rounded-pill fw-semibold">Open Group Chat &amp; Details</a>
+                  <% if (canCancelShared) { %>
+                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill fw-semibold" data-bs-toggle="modal" data-bs-target="#cancelSharedPoolModal<%= pool._id %>">
+                      Cancel &amp; Refund with Reason
+                    </button>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <% if (canCancelShared) { %>
+            <div class="modal fade" id="cancelSharedPoolModal<%= pool._id %>" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                  <form action="/room-shares/<%= pool._id %>/cancel?_method=PATCH" method="POST" class="needs-validation" novalidate>
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <div class="modal-header border-bottom-0 pb-0">
+                      <h5 class="modal-title fw-bold text-danger">Cancel Group Booking &amp; Refund</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p class="small text-muted mb-2">Enter the reason for cancelling (e.g. companion is not responding). Paid shares will be refunded automatically.</p>
+                      <textarea name="cancellationReason" rows="3" minlength="5" maxlength="500" class="form-control rounded-3" placeholder="e.g. Companion is not responding or hasn't completed payment..." required></textarea>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0">
+                      <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Keep</button>
+                      <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">Confirm Cancel &amp; Refund</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        <% }); %>
+      </div>
+    </div>
+  <% } %>
+
+  <% if (bookings.length === 0 && !hasSharedPools) { %>
     <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-4 border border-light-subtle">
       <div class="card-body">
         <i class="fa-regular fa-calendar-xmark text-muted mb-3" style="font-size: 4rem;"></i>
@@ -28,7 +165,10 @@
         </a>
       </div>
     </div>
-  <% } else { %>
+  <% } else if (bookings.length > 0) { %>
+    <% if (hasSharedPools) { %>
+      <h4 class="fw-bold mb-3"><i class="fa-solid fa-bed text-danger me-2"></i>Individual &amp; Confirmed Stay Bookings</h4>
+    <% } %>
     <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4 mb-5">
       <% for (let booking of bookings) { %>
         <div class="col">
@@ -109,7 +249,7 @@
                       Pay Now
                     </a>
                   <% } %>
-                  <% if (booking.status !== "cancelled") { %>
+                  <% if (booking.status === "pending") { %>
                     <!-- Edit Dates Trigger -->
                     <button type="button" class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-semibold" data-bs-toggle="modal" data-bs-target="#editDatesModal<%= booking._id %>">
                       <i class="fa-regular fa-pen-to-square me-1"></i>Edit Dates
@@ -120,6 +260,12 @@
                       Cancel
                     </button>
                   <% } %>
+                  <a href="/bookings/<%= booking._id %>/receipt" class="btn btn-outline-secondary btn-sm px-3 rounded-pill fw-semibold">
+                    Receipt
+                  </a>
+                  <a href="/itineraries/new?bookingId=<%= booking._id %>" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-semibold">
+                    <i class="fa-solid fa-route me-1"></i>AI Trip Plan
+                  </a>
                   <% if (booking.listing && booking.listing._id) { %>
                     <a href="/listings/<%= booking.listing._id %>" class="btn btn-outline-dark btn-sm px-3 rounded-pill fw-semibold">
                       View Stay

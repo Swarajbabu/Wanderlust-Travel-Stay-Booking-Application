@@ -1,81 +1,92 @@
 <% layout('layouts/boilerplate') -%>
 <link rel="stylesheet" href="/css/index.css">
+
+<%
+  const activeFilters = typeof filters !== 'undefined' && filters ? filters : {};
+  const savedSet = new Set(typeof wishlistIds !== 'undefined' && Array.isArray(wishlistIds) ? wishlistIds : []);
+  const hasAdvancedFilters = Boolean(
+    activeFilters.minPrice || activeFilters.maxPrice || activeFilters.guests ||
+    activeFilters.checkIn || activeFilters.checkOut || activeFilters.sort ||
+    (Array.isArray(activeFilters.amenities) && activeFilters.amenities.length > 0)
+  );
+%>
+
 <div id="filters-container">
     <div class="filters-scroll-wrapper">
         <button class="scroll-btn scroll-left" onclick="scrollFilters(-1)">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
-        
+
         <div class="filters" id="filters-list">
-            <div class="filter" onclick="location.href='/listings'">
+            <div class="filter <%= !category ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings'">
                 <i class="fa-solid fa-fire"></i>
-                <p>Trending</p>
+                <p>All Stays</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Rooms'">
+            <div class="filter <%= category === 'Rooms' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Rooms'">
                 <i class="fa-solid fa-bed"></i>
                 <p>Rooms</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Iconic Cities'">
+            <div class="filter <%= category === 'Iconic Cities' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Iconic%20Cities'">
                 <i class="fa-solid fa-mountain-city"></i>
                 <p>Iconic Cities</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Mountains'">
+            <div class="filter <%= category === 'Mountains' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Mountains'">
                 <i class="fa-solid fa-mountain"></i>
                 <p>Mountains</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Castles'">
+            <div class="filter <%= category === 'Castles' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Castles'">
                 <i class="fa-solid fa-fort-awesome"></i>
                 <p>Castles</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Amazing Pools'">
+            <div class="filter <%= category === 'Amazing Pools' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Amazing%20Pools'">
                 <i class="fa-solid fa-person-swimming"></i>
                 <p>Amazing Pools</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Camping'">
+            <div class="filter <%= category === 'Camping' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Camping'">
                 <i class="fa-solid fa-campground"></i>
                 <p>Camping</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Farms'">
+            <div class="filter <%= category === 'Farms' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Farms'">
                 <i class="fa-solid fa-cow"></i>
                 <p>Farms</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Arctic'">
+            <div class="filter <%= category === 'Arctic' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Arctic'">
                 <i class="fa-solid fa-snowflake"></i>
                 <p>Arctic</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Mansions'">
+            <div class="filter <%= category === 'Mansions' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Mansions'">
                 <i class="fa-solid fa-hotel"></i>
                 <p>Mansions</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Caves'">
+            <div class="filter <%= category === 'Caves' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Caves'">
                 <i class="fa-solid fa-mountain-sun"></i>
                 <p>Caves</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=New'">
+            <div class="filter <%= category === 'New' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=New'">
                 <i class="fa-solid fa-key"></i>
                 <p>New</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Play'">
+            <div class="filter <%= category === 'Play' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Play'">
                 <i class="fa-solid fa-gamepad"></i>
                 <p>Play</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Off-the-grid'">
+            <div class="filter <%= category === 'Off-the-grid' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Off-the-grid'">
                 <i class="fa-solid fa-tree"></i>
                 <p>Off-the-grid</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Creative spaces'">
+            <div class="filter <%= category === 'Creative spaces' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Creative%20spaces'">
                 <i class="fa-solid fa-palette"></i>
                 <p>Creative spaces</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Houseboats'">
+            <div class="filter <%= category === 'Houseboats' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Houseboats'">
                 <i class="fa-solid fa-ship"></i>
                 <p>Houseboats</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Yurts'">
+            <div class="filter <%= category === 'Yurts' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Yurts'">
                 <i class="fa-solid fa-tent"></i>
                 <p>Yurts</p>
             </div>
-            <div class="filter" onclick="location.href='/listings?category=Casas particulares'">
+            <div class="filter <%= category === 'Casas particulares' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Casas%20particulares'">
                 <i class="fa-solid fa-house-chimney"></i>
                 <p>Casas particulares</p>
             </div>
@@ -86,116 +97,436 @@
         </button>
     </div>
 
-    <div class="tax-toggle">
-        <div class="form-check-reverse form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="taxSwitch">
-            <label class="form-check-label" for="taxSwitch">Display total after taxes</label>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <button class="btn btn-outline-dark rounded-4 px-3 py-2 fw-semibold btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFiltersPanel" aria-expanded="<%= hasAdvancedFilters ? 'true' : 'false' %>">
+            <i class="fa-solid fa-sliders me-1"></i>Filters
+        </button>
+        <button class="btn btn-dark rounded-4 px-3 py-2 fw-semibold btn-sm" type="button" id="toggleMapViewBtn">
+            <i class="fa-solid fa-map-location-dot me-1"></i><span>Show Map</span>
+        </button>
+        <div class="tax-toggle">
+            <div class="form-check-reverse form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="taxSwitch">
+                <label class="form-check-label" for="taxSwitch">Display total after taxes</label>
+            </div>
         </div>
     </div>
 </div>
-<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
-  <% for(let listing of allListings){ %>
-  <a href="/listings/<%= listing._id %>" class="listing-link">
-    <div class="card col listing-card">
 
-      <img src="<%= listing.image.url %>" class="card-img-top" alt="listingimage" style="height: 20rem;">
-
-      <div class="card-img-overlay"></div>
-
-      <div class="card-body">
-        <p class="card-text">
-          <b> <%= listing.title %> </b> <br>
-          &#8377; <%= Number(listing.price).toLocaleString("en-IN") %> / Night
-          <i class="tax-info"> &nbsp; &nbsp;+18% GST</i>
-        </p>
+<!-- Collapsible Advanced Filters & Availability Bar -->
+<div class="collapse <%= hasAdvancedFilters ? 'show' : '' %> mt-3" id="advancedFiltersPanel">
+  <form action="/listings" method="GET" class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white border border-light-subtle">
+    <% if (typeof q !== 'undefined' && q) { %>
+      <input type="hidden" name="q" value="<%= q %>">
+    <% } %>
+    <% if (typeof category !== 'undefined' && category) { %>
+      <input type="hidden" name="category" value="<%= category %>">
+    <% } %>
+    <div class="row g-3 align-items-end">
+      <div class="col-6 col-md-2">
+        <label class="form-label small fw-bold text-muted" for="minPrice">Min Price (&#8377;)</label>
+        <input type="number" min="0" class="form-control form-control-sm rounded-3" id="minPrice" name="minPrice" value="<%= activeFilters.minPrice || '' %>" placeholder="e.g. 1000">
       </div>
-
+      <div class="col-6 col-md-2">
+        <label class="form-label small fw-bold text-muted" for="maxPrice">Max Price (&#8377;)</label>
+        <input type="number" min="0" class="form-control form-control-sm rounded-3" id="maxPrice" name="maxPrice" value="<%= activeFilters.maxPrice || '' %>" placeholder="e.g. 15000">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label small fw-bold text-muted" for="guestsFilter">Guests</label>
+        <select class="form-select form-select-sm rounded-3" id="guestsFilter" name="guests">
+          <option value="">Any</option>
+          <% [1, 2, 4, 6, 8].forEach(function(g) { %>
+            <option value="<%= g %>" <%= Number(activeFilters.guests) === g ? 'selected' : '' %>><%= g %>+ guests</option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label small fw-bold text-muted" for="checkInFilter">Check-In</label>
+        <input type="date" class="form-control form-control-sm rounded-3" id="checkInFilter" name="checkIn" value="<%= activeFilters.checkIn || '' %>">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label small fw-bold text-muted" for="checkOutFilter">Check-Out</label>
+        <input type="date" class="form-control form-control-sm rounded-3" id="checkOutFilter" name="checkOut" value="<%= activeFilters.checkOut || '' %>">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label small fw-bold text-muted" for="sortFilter">Sort By</label>
+        <select class="form-select form-select-sm rounded-3" id="sortFilter" name="sort">
+          <option value="newest" <%= !activeFilters.sort || activeFilters.sort === 'newest' ? 'selected' : '' %>>Newest</option>
+          <option value="price_asc" <%= activeFilters.sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+          <option value="price_desc" <%= activeFilters.sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+        </select>
+      </div>
     </div>
-  </a>
+
+    <div class="mt-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <div class="d-flex flex-wrap gap-2">
+        <% const selectedAms = Array.isArray(activeFilters.amenities) ? activeFilters.amenities : []; %>
+        <% (typeof amenitiesList !== 'undefined' ? amenitiesList.slice(0, 6) : []).forEach(function(am, idx) { %>
+          <div class="form-check form-check-inline m-0">
+            <input class="form-check-input" type="checkbox" name="amenity" value="<%= am %>" id="filter_am_<%= idx %>" <%= selectedAms.includes(am) ? 'checked' : '' %>>
+            <label class="form-check-label small" for="filter_am_<%= idx %>"><%= am %></label>
+          </div>
+        <% }); %>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/listings" class="btn btn-light btn-sm rounded-pill px-3 fw-semibold">Reset</a>
+        <button type="submit" class="btn btn-danger btn-sm rounded-pill px-4 fw-semibold">Apply Filters</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Interactive Map Browse Container (toggled via Show Map button) -->
+<div id="browseMapWrapper" class="d-none mt-3 mb-4">
+  <div id="browseMap" style="width: 100%; height: 480px; border-radius: 1.25rem;" class="shadow-sm border"></div>
+</div>
+
+<!-- Listings Grid -->
+<div id="listingsGridWrapper">
+  <% if (!allListings || allListings.length === 0) { %>
+    <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-4 mt-4 border border-light-subtle">
+      <i class="fa-solid fa-magnifying-glass text-muted mb-3" style="font-size: 3rem;"></i>
+      <h4 class="fw-bold text-secondary">No Stays Match Your Filters</h4>
+      <p class="text-muted mb-3">Try clearing some filters or searching a different destination.</p>
+      <div><a href="/listings" class="btn btn-danger rounded-pill px-4 fw-semibold">Show All Stays</a></div>
+    </div>
+  <% } else { %>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xxl-4 mt-3" id="listingsGridRow">
+      <% for(let listing of allListings){ %>
+        <% const isSaved = savedSet.has(listing._id.toString()); %>
+        <div class="col position-relative">
+          <% if (currUser) { %>
+            <button type="button"
+              class="btn btn-sm rounded-circle position-absolute top-0 end-0 m-3 z-3 shadow-sm card-wishlist-btn <%= isSaved ? 'btn-danger' : 'btn-light' %>"
+              data-listing-id="<%= listing._id %>"
+              aria-label="Save listing to wishlist"
+              style="width: 36px; height: 36px;">
+              <i class="<%= isSaved ? 'fa-solid' : 'fa-regular' %> fa-heart"></i>
+            </button>
+          <% } %>
+          <a href="/listings/<%= listing._id %>" class="listing-link">
+            <div class="card listing-card">
+              <img src="<%= (listing.image && listing.image.url) ? listing.image.url : 'https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?auto=format&fit=crop&w=800&q=60' %>" class="card-img-top" alt="<%= listing.title %>" style="height: 20rem;" loading="lazy">
+              <div class="card-img-overlay"></div>
+              <div class="card-body">
+                <p class="card-text">
+                  <b><%= listing.title %></b><br>
+                  <span class="text-muted small"><%= listing.location %>, <%= listing.country %></span><br>
+                  <span class="listing-price" data-base-price="<%= Number(listing.price || 0) %>">&#8377; <%= Number(listing.price || 0).toLocaleString("en-IN") %></span> / Night
+                  <i class="tax-info"> &nbsp; (incl. 18% GST)</i>
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+      <% } %>
+    </div>
   <% } %>
 </div>
 
-<!-- Pagination Section -->
-<% if (totalPages > 1) { %>
-  <nav aria-label="Page navigation" class="mt-4 mb-5">
-    <ul class="pagination justify-content-center">
-      <% 
-        // Build base query string with preserved params
-        let queryParams = [];
-        if (typeof q !== 'undefined' && q) queryParams.push(`q=${encodeURIComponent(q)}`);
-        if (typeof category !== 'undefined' && category) queryParams.push(`category=${encodeURIComponent(category)}`);
-        let baseQuery = queryParams.length > 0 ? queryParams.join('&') + '&' : '';
-      %>
+<!-- Lazy Loading Infinite Scroll Sentinel & Indicators (Replaces numbered navigation) -->
+<div id="lazyLoadContainer" class="text-center my-4"
+  data-current-page="<%= currentPage %>"
+  data-total-pages="<%= totalPages %>"
+  data-total-count="<%= totalCount %>"
+  data-has-user="<%= Boolean(currUser) %>"
+  data-csrf="<%= csrfToken %>">
 
-      <!-- Previous Page -->
-      <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-        <a class="page-link shadow-sm rounded-start-3" href="/listings?<%= baseQuery %>page=<%= currentPage - 1 %>" aria-label="Previous">
-          <span aria-hidden="true">&laquo; Previous</span>
-        </a>
-      </li>
+  <div id="lazyLoadSpinner" class="d-none py-3">
+    <div class="spinner-border text-danger" role="status" style="width: 2.25rem; height: 2.25rem;">
+      <span class="visually-hidden">Loading more stays...</span>
+    </div>
+    <div class="text-muted small mt-2 fw-semibold">Discovering more unique stays...</div>
+  </div>
 
-      <!-- Page Numbers -->
-      <% for (let i = 1; i <= totalPages; i++) { %>
-        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-          <a class="page-link shadow-sm" href="/listings?<%= baseQuery %>page=<%= i %>"><%= i %></a>
-        </li>
-      <% } %>
+  <div id="lazyLoadEndOfList" class="<%= totalPages <= 1 ? '' : 'd-none' %> py-4 text-muted small">
+    <i class="fa-solid fa-compass text-danger me-1"></i>You've explored all <%= totalCount %> available stays.
+  </div>
 
-      <!-- Next Page -->
-      <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-        <a class="page-link shadow-sm rounded-end-3" href="/listings?<%= baseQuery %>page=<%= currentPage + 1 %>" aria-label="Next">
-          <span aria-hidden="true">Next &raquo;</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
-<% } %>
+  <button type="button" id="loadMoreBtn" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-semibold mt-2 shadow-sm d-none">
+    <i class="fa-solid fa-plus me-1"></i>Load More Stays
+  </button>
+
+  <div id="lazyLoadSentinel" style="height: 24px; margin-top: 10px;"></div>
+</div>
+
+<script id="browseMapData" type="application/json">
+  <%- JSON.stringify(typeof mapListings !== 'undefined' ? mapListings : []).replace(/</g, '\\u003c') %>
+</script>
 
 <script>
-    let taxSwitch = document.getElementById("taxSwitch");
-    taxSwitch.addEventListener("click", () => {
-        let taxInfo = document.getElementsByClassName("tax-info");
-        for (let info of taxInfo) {
-            if (info.style.display !== "inline") {
-                info.style.display = "inline";
-            } else {
-                info.style.display = "none";
-            }
-        }
-    });
+    // Tax Toggle (real 18% GST calculation)
+    const taxSwitch = document.getElementById("taxSwitch");
+    if (taxSwitch) {
+        taxSwitch.addEventListener("change", () => {
+            const showWithTax = taxSwitch.checked;
+            document.querySelectorAll(".listing-price").forEach((priceEl) => {
+                const base = Number(priceEl.dataset.basePrice || 0);
+                const displayPrice = showWithTax ? Math.round(base * 1.18) : base;
+                priceEl.textContent = `₹ ${displayPrice.toLocaleString("en-IN")}`;
+            });
+            document.querySelectorAll(".tax-info").forEach((info) => {
+                info.style.display = showWithTax ? "inline" : "none";
+            });
+        });
+    }
 
+    // Horizontal Category Scroll
     const filtersList = document.getElementById("filters-list");
     const btnLeft = document.querySelector(".scroll-left");
     const btnRight = document.querySelector(".scroll-right");
 
     function scrollFilters(direction) {
         const scrollAmount = 300;
-        filtersList.scrollBy({
-            left: direction * scrollAmount,
-            behavior: "smooth"
-        });
+        filtersList.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
     }
 
     function updateScrollButtons() {
+        if (!filtersList || !btnLeft || !btnRight) return;
         const scrollLeft = filtersList.scrollLeft;
         const maxScroll = filtersList.scrollWidth - filtersList.clientWidth;
-        
-        if (scrollLeft <= 5) {
-            btnLeft.style.visibility = "hidden";
-        } else {
-            btnLeft.style.visibility = "visible";
+        btnLeft.style.visibility = scrollLeft <= 5 ? "hidden" : "visible";
+        btnRight.style.visibility = scrollLeft >= maxScroll - 5 ? "hidden" : "visible";
+    }
+
+    if (filtersList) {
+        filtersList.addEventListener("scroll", updateScrollButtons);
+        window.addEventListener("resize", updateScrollButtons);
+        setTimeout(updateScrollButtons, 100);
+    }
+
+    // Card Wishlist Toggle
+    function bindWishlistButton(btn) {
+        if (!btn || btn.dataset.bound === "true") return;
+        btn.dataset.bound = "true";
+        btn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const listingId = btn.dataset.listingId;
+            try {
+                const res = await fetch(`/listings/${listingId}/wishlist`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-csrf-token": "<%= csrfToken %>"
+                    }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                const icon = btn.querySelector("i");
+                if (data.saved) {
+                    btn.classList.remove("btn-light");
+                    btn.classList.add("btn-danger");
+                    if (icon) { icon.classList.remove("fa-regular"); icon.classList.add("fa-solid"); }
+                } else {
+                    btn.classList.remove("btn-danger");
+                    btn.classList.add("btn-light");
+                    if (icon) { icon.classList.remove("fa-solid"); icon.classList.add("fa-regular"); }
+                }
+            } catch (err) {
+                console.error("Wishlist error:", err);
+            }
+        });
+    }
+
+    document.querySelectorAll(".card-wishlist-btn").forEach(bindWishlistButton);
+
+    // Infinite Scroll / Lazy Loading
+    const lazyContainer = document.getElementById("lazyLoadContainer");
+    const lazySpinner = document.getElementById("lazyLoadSpinner");
+    const lazySentinel = document.getElementById("lazyLoadSentinel");
+    const lazyEndOfList = document.getElementById("lazyLoadEndOfList");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+    const gridRow = document.getElementById("listingsGridRow");
+
+    let currentPage = Number(lazyContainer ? lazyContainer.dataset.currentPage : 1) || 1;
+    let totalPages = Number(lazyContainer ? lazyContainer.dataset.totalPages : 1) || 1;
+    const hasUser = lazyContainer && lazyContainer.dataset.hasUser === "true";
+    let isLoadingMore = false;
+
+    function buildListingCardElement(listing) {
+        const showWithTax = taxSwitch ? taxSwitch.checked : false;
+        const basePrice = Number(listing.price || 0);
+        const displayPrice = showWithTax ? Math.round(basePrice * 1.18) : basePrice;
+        const isSaved = Boolean(listing.isSaved);
+
+        const colDiv = document.createElement("div");
+        colDiv.className = "col position-relative";
+
+        let wishlistBtnHtml = "";
+        if (hasUser) {
+            wishlistBtnHtml = `
+              <button type="button"
+                class="btn btn-sm rounded-circle position-absolute top-0 end-0 m-3 z-3 shadow-sm card-wishlist-btn ${isSaved ? 'btn-danger' : 'btn-light'}"
+                data-listing-id="${listing.id}"
+                aria-label="Save listing to wishlist"
+                style="width: 36px; height: 36px;">
+                <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+              </button>
+            `;
         }
-        
-        if (scrollLeft >= maxScroll - 5) {
-            btnRight.style.visibility = "hidden";
-        } else {
-            btnRight.style.visibility = "visible";
+
+        colDiv.innerHTML = `
+          ${wishlistBtnHtml}
+          <a href="/listings/${listing.id}" class="listing-link">
+            <div class="card listing-card">
+              <img src="${listing.image || 'https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?auto=format&fit=crop&w=800&q=60'}" class="card-img-top" alt="${listing.title}" style="height: 20rem;" loading="lazy">
+              <div class="card-img-overlay"></div>
+              <div class="card-body">
+                <p class="card-text">
+                  <b>${listing.title}</b><br>
+                  <span class="text-muted small">${listing.location}, ${listing.country}</span><br>
+                  <span class="listing-price" data-base-price="${basePrice}">₹ ${displayPrice.toLocaleString("en-IN")}</span> / Night
+                  <i class="tax-info" style="display: ${showWithTax ? 'inline' : 'none'};"> &nbsp; (incl. 18% GST)</i>
+                </p>
+              </div>
+            </div>
+          </a>
+        `;
+
+        const wishBtn = colDiv.querySelector(".card-wishlist-btn");
+        if (wishBtn) bindWishlistButton(wishBtn);
+        return colDiv;
+    }
+
+    async function loadNextPageOfListings() {
+        if (isLoadingMore || currentPage >= totalPages) return;
+        isLoadingMore = true;
+        if (lazySpinner) lazySpinner.classList.remove("d-none");
+        if (loadMoreBtn) loadMoreBtn.classList.add("d-none");
+
+        const params = new URLSearchParams(window.location.search);
+        params.set("page", String(currentPage + 1));
+        params.set("format", "json");
+
+        try {
+            const res = await fetch(`/listings?${params.toString()}`, {
+                headers: { Accept: "application/json" }
+            });
+            if (!res.ok) throw new Error("Network response error");
+            const data = await res.json();
+
+            if (Array.isArray(data.listings) && data.listings.length > 0 && gridRow) {
+                data.listings.forEach((listing) => {
+                    const cardEl = buildListingCardElement(listing);
+                    gridRow.appendChild(cardEl);
+                });
+
+                if (browseMapInstance && Array.isArray(data.mapListings)) {
+                    data.mapListings.forEach((item) => {
+                        const popupNode = document.createElement("div");
+                        const titleEl = document.createElement("strong");
+                        titleEl.textContent = item.title;
+                        const priceEl = document.createElement("div");
+                        priceEl.textContent = `₹ ${Number(item.price).toLocaleString("en-IN")} / night`;
+                        const linkEl = document.createElement("a");
+                        linkEl.href = `/listings/${item.id}`;
+                        linkEl.textContent = "View Stay →";
+                        linkEl.className = "text-danger fw-semibold small d-inline-block mt-1";
+                        popupNode.appendChild(titleEl);
+                        popupNode.appendChild(priceEl);
+                        popupNode.appendChild(linkEl);
+
+                        new mapboxgl.Marker({ color: "#fe424d" })
+                            .setLngLat(item.coordinates)
+                            .setPopup(new mapboxgl.Popup({ offset: 20 }).setDOMContent(popupNode))
+                            .addTo(browseMapInstance);
+                    });
+                }
+            }
+
+            currentPage = Number(data.currentPage || (currentPage + 1));
+            totalPages = Number(data.totalPages || totalPages);
+
+            if (currentPage >= totalPages) {
+                if (lazyEndOfList) lazyEndOfList.classList.remove("d-none");
+                if (lazySentinel) lazySentinel.style.display = "none";
+                if (loadMoreBtn) loadMoreBtn.classList.add("d-none");
+            }
+        } catch (err) {
+            console.error("Lazy load failed:", err);
+            if (currentPage < totalPages && loadMoreBtn) {
+                loadMoreBtn.classList.remove("d-none");
+            }
+        } finally {
+            if (lazySpinner) lazySpinner.classList.add("d-none");
+            isLoadingMore = false;
         }
     }
 
-    filtersList.addEventListener("scroll", updateScrollButtons);
-    window.addEventListener("resize", updateScrollButtons);
-    
-    // Initial check
-    setTimeout(updateScrollButtons, 100);
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener("click", loadNextPageOfListings);
+    }
+
+    if (lazySentinel && "IntersectionObserver" in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting && !isLoadingMore && currentPage < totalPages) {
+                    loadNextPageOfListings();
+                }
+            });
+        }, {
+            rootMargin: "300px 0px 300px 0px"
+        });
+        observer.observe(lazySentinel);
+    } else if (currentPage < totalPages && loadMoreBtn) {
+        loadMoreBtn.classList.remove("d-none");
+    }
+
+    // Map View Toggle
+    const toggleMapBtn = document.getElementById("toggleMapViewBtn");
+    const mapWrapper = document.getElementById("browseMapWrapper");
+    const gridWrapper = document.getElementById("listingsGridWrapper");
+    let browseMapInstance = null;
+
+    if (toggleMapBtn && mapWrapper && gridWrapper) {
+        toggleMapBtn.addEventListener("click", () => {
+            const showingMap = !mapWrapper.classList.contains("d-none");
+            const label = toggleMapBtn.querySelector("span");
+            if (showingMap) {
+                mapWrapper.classList.add("d-none");
+                gridWrapper.classList.remove("d-none");
+                if (label) label.textContent = "Show Map";
+            } else {
+                mapWrapper.classList.remove("d-none");
+                gridWrapper.classList.add("d-none");
+                if (label) label.textContent = "Show Grid";
+
+                if (!browseMapInstance && typeof mapboxgl !== "undefined") {
+                    const dataEl = document.getElementById("browseMapData");
+                    const items = dataEl ? JSON.parse(dataEl.textContent || "[]") : [];
+                    const center = items.length > 0 ? items[0].coordinates : [78.4867, 17.3850];
+                    mapboxgl.accessToken = "<%= process.env.MAP_TOKEN || '' %>";
+                    browseMapInstance = new mapboxgl.Map({
+                        container: "browseMap",
+                        style: "mapbox://styles/mapbox/streets-v12",
+                        center,
+                        zoom: items.length > 0 ? 4 : 3
+                    });
+
+                    items.forEach((item) => {
+                        const popupNode = document.createElement("div");
+                        const titleEl = document.createElement("strong");
+                        titleEl.textContent = item.title;
+                        const priceEl = document.createElement("div");
+                        priceEl.textContent = `₹ ${Number(item.price).toLocaleString("en-IN")} / night`;
+                        const linkEl = document.createElement("a");
+                        linkEl.href = `/listings/${item.id}`;
+                        linkEl.textContent = "View Stay →";
+                        linkEl.className = "text-danger fw-semibold small d-inline-block mt-1";
+                        popupNode.appendChild(titleEl);
+                        popupNode.appendChild(priceEl);
+                        popupNode.appendChild(linkEl);
+
+                        new mapboxgl.Marker({ color: "#fe424d" })
+                            .setLngLat(item.coordinates)
+                            .setPopup(new mapboxgl.Popup({ offset: 20 }).setDOMContent(popupNode))
+                            .addTo(browseMapInstance);
+                    });
+                } else if (browseMapInstance) {
+                    browseMapInstance.resize();
+                }
+            }
+        });
+    }
 </script>

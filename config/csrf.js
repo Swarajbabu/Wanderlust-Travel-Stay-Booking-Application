@@ -1,6 +1,6 @@
 const { doubleCsrf } = require("csrf-csrf");
 
-const secret = process.env.SECRET || "supersecretkeyfallback";
+const secret = process.env.SECRET || (process.env.NODE_ENV === "test" ? "test-csrf-secret" : undefined);
 
 const {
     doubleCsrfProtection,
@@ -8,7 +8,7 @@ const {
     invalidCsrfTokenError
 } = doubleCsrf({
     getSecret: () => secret,
-    getSessionIdentifier: (req) => "",
+    getSessionIdentifier: (req) => req.sessionID || "",
     cookieName: "x-csrf-token",
     cookieOptions: {
         sameSite: "lax",

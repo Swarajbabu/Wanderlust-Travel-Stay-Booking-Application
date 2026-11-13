@@ -315,3 +315,183 @@ describe("Booking Business Logic Tests", () => {
         expect(cancelledBooking.refundId).toBeNull();
     });
 });
+
+
+describe("Booking Security, Validation & Receipt Tests", () => {
+    let ownerCookie;
+    let guestCookie;
+    let otherCookie;
+    let listing;
+
+    beforeEach(async () => {
+        await Booking.deleteMany({});
+        await Listing.deleteMany({});
+        await User.deleteMany({});
+
+        const resA = await request(app)
+            .post("/signup")
+            .type("form")
+            .send({ username: "owner2", email: "owner2@example.com", password: "password" });
+        ownerCookie = resA.headers["set-cookie"];
+
+        const resB = await request(app)
+            .post("/signup")
+            .type("form")
+            .send({ username: "guest2", email: "guest2@example.com", password: "password" });
+        guestCookie = resB.headers["set-cookie"];
+
+        const resC = await request(app)
+            .post("/signup")
+            .type("form")
+            .send({ username: "other2", email: "other2@example.com", password: "password" });
+        otherCookie = resC.headers["set-cookie"];
+
+        await User.updateMany({}, { emailVerified: true });
+        const ownerUser = await User.findOne({ username: "owner2" });
+
+        listing = new Listing({
+            title: "Policy Stay",
+            description: "Description",
+            price: 150,
+            maxGuests: 2,
+            location: "Goa",
+            country: "India",
+            geometry: { type: "Point", coordinates: [73.8567, 15.2993] },
+            owner: ownerUser._id
+        });
+        await listing.save();
+    });
+
+    test("Payment verification rejects mismatched razorpay_order_id", async () => {
+        const guestUser = await User.findOne({ username: "guest2" });
+
+        const booking = new Booking({
+            listing: listing._id,
+            guest: guestUser._id,
+            checkIn: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+            checkOut: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+            totalPrice: 300,
+            status: "pending",
+            razorpayOrderId: "order_expected_111"
+        });
+        await booking.save();
+
+        const tamperedOrderId = "order_tampered_222";
+        const razorpay_payment_id = "pay_test_tampered";
+        const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "dummykeysecret12345678");
+        hmac.update(tamperedOrderId + "|" + razorpay_payment_id);
+        const razorpay_signature = hmac.digest("hex");
+
+        const resVerify = await request(app)
+            .post(`/bookings/${booking._id}/verify-payment`)
+            .set("Cookie", guestCookie)
+            .type("form")
+            .send({
+                razorpay_payment_id,
+                razorpay_order_id: tamperedOrderId,
+                razorpay_signature
+            });
+
+        expect(resVerify.status).toBe(400);
+        const stillPending = await Booking.findById(booking._id);
+        expect(stillPending.status).toBe("pending");
+        expect(stillPending.paymentId).toBeNull();
+    });
+
+    test("Confirmed booking dates cannot be modified directly", async () => {
+        const guestUser = await User.findOne({ username: "guest2" });
+        const origIn = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+        const origOut = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+
+        const booking = new Booking({
+            listing: listing._id,
+            guest: guestUser._id,
+            checkIn: origIn,
+            checkOut: origOut,
+            totalPrice: 300,
+            status: "confirmed",
+            paymentId: "pay_confirmed_immutable"
+        });
+        await booking.save();
+
+        const newIn = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+        const newOut = new Date(Date.now() + 12 * 24 * 60 * 60 * 1000);
+
+        const resEdit = await request(app)
+            .patch(`/bookings/${booking._id}/edit-dates`)
+            .set("Cookie", guestCookie)
+            .type("form")
+            .send({
+                "booking[checkIn]": newIn.toISOString(),
+                "booking[checkOut]": newOut.toISOString()
+            });
+
+        expect(resEdit.status).toBe(302);
+        const checkBooking = await Booking.findById(booking._id);
+        expect(checkBooking.checkIn.getTime()).toBe(origIn.getTime());
+        expect(checkBooking.checkOut.getTime()).toBe(origOut.getTime());
+    });
+
+    test("Booking creation rejects owner self-booking and guests exceeding maxGuests", async () => {
+        const checkIn = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000);
+        const checkOut = new Date(Date.now() + 6 * 24 * 60 * 60 * 1000);
+
+        // Owner tries to book own listing
+        const selfRes = await request(app)
+            .post(`/listings/${listing._id}/bookings`)
+            .set("Cookie", ownerCookie)
+            .type("form")
+            .send({
+                "booking[checkIn]": checkIn.toISOString(),
+                "booking[checkOut]": checkOut.toISOString(),
+                "booking[guests]": 1
+            });
+        expect(selfRes.status).toBe(302);
+
+        // Guest tries to book for 5 guests when maxGuests is 2
+        const capRes = await request(app)
+            .post(`/listings/${listing._id}/bookings`)
+            .set("Cookie", guestCookie)
+            .type("form")
+            .send({
+                "booking[checkIn]": checkIn.toISOString(),
+                "booking[checkOut]": checkOut.toISOString(),
+                "booking[guests]": 5
+            });
+        expect(capRes.status).toBe(302);
+
+        const count = await Booking.countDocuments({ listing: listing._id });
+        expect(count).toBe(0);
+    });
+
+    test("Booking receipt is accessible to guest and host, denied to unrelated user", async () => {
+        const guestUser = await User.findOne({ username: "guest2" });
+
+        const booking = new Booking({
+            listing: listing._id,
+            guest: guestUser._id,
+            checkIn: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+            checkOut: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+            totalPrice: 300,
+            status: "confirmed",
+            paymentId: "pay_receipt_123"
+        });
+        await booking.save();
+
+        const guestRes = await request(app)
+            .get(`/bookings/${booking._id}/receipt`)
+            .set("Cookie", guestCookie);
+        expect(guestRes.status).toBe(200);
+        expect(guestRes.text).toContain("Policy Stay");
+
+        const hostRes = await request(app)
+            .get(`/bookings/${booking._id}/receipt`)
+            .set("Cookie", ownerCookie);
+        expect(hostRes.status).toBe(200);
+
+        const otherRes = await request(app)
+            .get(`/bookings/${booking._id}/receipt`)
+            .set("Cookie", otherCookie);
+        expect(otherRes.status).toBe(302);
+    });
+});

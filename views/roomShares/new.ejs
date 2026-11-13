@@ -1,0 +1,81 @@
+<% layout('layouts/boilerplate') -%>
+<div class="container mt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-12">
+      <nav class="mb-3 small">
+        <a href="/listings/<%= listing._id %>" class="text-decoration-none text-secondary"><i class="fa-solid fa-arrow-left me-1"></i>Back to <%= listing.title %></a>
+      </nav>
+
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white border border-light-subtle">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+          <h3 class="fw-bold mb-0"><i class="fa-solid fa-user-group text-danger me-2"></i>Start a Solo Room-Share Pool</h3>
+          <% if (listing.category) { %>
+            <span class="badge bg-light text-dark border rounded-pill px-3 py-1"><%= listing.category %></span>
+          <% } %>
+        </div>
+        <p class="text-muted mb-4">Open a shared booking pool for <strong><%= listing.title %></strong> (&#8377;<%= Number(listing.price).toLocaleString('en-IN') %>/night + 18% GST) so compatible travellers can split the cost.</p>
+
+        <form action="/listings/<%= listing._id %>/room-shares" method="POST" class="needs-validation" novalidate>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label for="shareCheckIn" class="form-label fw-semibold small">Check-In Date</label>
+              <input type="date" id="shareCheckIn" name="share[checkIn]" class="form-control rounded-3" required>
+            </div>
+            <div class="col-md-4">
+              <label for="shareCheckOut" class="form-label fw-semibold small">Check-Out Date</label>
+              <input type="date" id="shareCheckOut" name="share[checkOut]" class="form-control rounded-3" required>
+            </div>
+            <div class="col-md-4">
+              <label for="maxParticipants" class="form-label fw-semibold small">Group Size</label>
+              <select id="maxParticipants" name="share[maxParticipants]" class="form-select rounded-3" required>
+                <% for (let count = 2; count <= Math.min(10, Number(listing.maxGuests || 4)); count++) { %>
+                  <option value="<%= count %>"><%= count %> Travellers (&#8377;<%= Math.ceil((Number(listing.price) * 1.18) / count).toLocaleString('en-IN') %>/night each)</option>
+                <% } %>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label for="companionGender" class="form-label fw-semibold small">Companion Preference</label>
+              <select id="companionGender" name="share[companionGender]" class="form-select rounded-3">
+                <option value="any">Open to Any Gender</option>
+                <option value="same_gender">Same Gender Only</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="smokingPreference" class="form-label fw-semibold small">Smoking Rule</label>
+              <select id="smokingPreference" name="share[smokingPreference]" class="form-select rounded-3">
+                <option value="no_preference">No Preference</option>
+                <option value="non_smoker">Non-Smoker Only</option>
+                <option value="smoker">Smoker Friendly</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="sleepSchedule" class="form-label fw-semibold small">Sleep Schedule</label>
+              <select id="sleepSchedule" name="share[sleepSchedule]" class="form-select rounded-3">
+                <option value="flexible">Flexible</option>
+                <option value="early_bird">Early Riser</option>
+                <option value="night_owl">Night Owl</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="shareNote" class="form-label fw-semibold small">Short Trip Note for Potential Companions</label>
+            <textarea id="shareNote" name="share[note]" rows="3" maxlength="400" class="form-control rounded-3" placeholder="Share your trip vibe, workation hours, or sightseeing plans..."></textarea>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="/listings/<%= listing._id %>" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold">Cancel</a>
+            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold shadow-sm">
+              <i class="fa-solid fa-paper-plane me-1"></i>Publish Room Share
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

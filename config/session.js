@@ -1,12 +1,12 @@
 const session = require("express-session");
 const { MongoStore } = require("connect-mongo");
+const mongoose = require("mongoose");
 const logger = require("./logger");
 
 const secret = process.env.SECRET;
-const mongodb_url = process.env.MONGODB_ATLAS;
 
 const store = MongoStore.create({
-    mongoUrl: mongodb_url,
+    clientPromise: mongoose.connection.asPromise().then(() => mongoose.connection.getClient()),
     crypto: {
         secret: secret,
     },

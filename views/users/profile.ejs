@@ -1,0 +1,153 @@
+<% layout('layouts/boilerplate') -%>
+<div class="container mt-4 mb-5">
+  <div class="row g-4 justify-content-center">
+    <div class="col-lg-4 col-12">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border border-light-subtle text-center">
+        <div class="mb-3">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger-subtle text-danger fw-bold" style="width: 84px; height: 84px; font-size: 2rem;">
+            <%= (profileUser.username || "U").charAt(0).toUpperCase() %>
+          </div>
+        </div>
+        <h4 class="fw-bold mb-1"><%= profileUser.username %></h4>
+        <p class="text-muted small mb-3"><%= profileUser.email %></p>
+
+        <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+          <% if (profileUser.emailVerified) { %>
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">
+              <i class="fa-solid fa-circle-check me-1"></i>Email Verified
+            </span>
+          <% } else { %>
+            <a href="/login/otp/request" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1 text-decoration-none">
+              <i class="fa-solid fa-triangle-exclamation me-1"></i>Verify Email
+            </a>
+          <% } %>
+          <% if (profileUser.googleId) { %>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1">
+              <i class="fa-brands fa-google me-1"></i>Google Linked
+            </span>
+          <% } %>
+        </div>
+
+        <hr class="my-3">
+        <div class="row text-center">
+          <div class="col-6 border-end">
+            <div class="fs-4 fw-bold text-dark"><%= listingCount %></div>
+            <div class="text-muted small">Hosted Stays</div>
+          </div>
+          <div class="col-6">
+            <div class="fs-4 fw-bold text-dark"><%= bookingCount %></div>
+            <div class="text-muted small">Bookings</div>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 mt-4">
+          <a href="/bookings" class="btn btn-outline-dark rounded-pill btn-sm fw-semibold">My Bookings</a>
+          <a href="/wishlist" class="btn btn-outline-danger rounded-pill btn-sm fw-semibold">Saved Stays</a>
+          <a href="/host/dashboard" class="btn btn-dark rounded-pill btn-sm fw-semibold">Host Dashboard</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7 col-12">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border border-light-subtle">
+        <h4 class="fw-bold mb-3"><i class="fa-solid fa-user-pen text-danger me-2"></i>Account Settings</h4>
+        <form action="/profile?_method=PATCH" method="POST" class="needs-validation" novalidate>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+          <div class="mb-3">
+            <label for="phone" class="form-label fw-semibold small">Phone Number (Optional)</label>
+            <input type="text" class="form-control rounded-3" id="phone" name="phone" value="<%= profileUser.phone || '' %>" maxlength="30" placeholder="+91 98765 43210">
+          </div>
+
+          <div class="mb-4">
+            <label for="bio" class="form-label fw-semibold small">About You / Host Bio</label>
+            <textarea class="form-control rounded-3" id="bio" name="bio" rows="3" maxlength="300" placeholder="Tell hosts or travelers a bit about yourself..."><%= profileUser.bio || '' %></textarea>
+          </div>
+
+          <hr class="my-4" id="travel-preferences">
+          <h5 class="fw-bold mb-1"><i class="fa-solid fa-user-group text-danger me-2"></i>Solo Room-Share Match Preferences</h5>
+          <p class="text-muted small mb-3">Used to match you with compatible travel companions while keeping your contact info private.</p>
+          <input type="hidden" name="_travelProfileSubmitted" value="1">
+          <% const tp = profileUser.travelProfile || {}; %>
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label for="tp_gender" class="form-label fw-semibold small">Gender</label>
+              <select id="tp_gender" name="gender" class="form-select rounded-3">
+                <option value="prefer_not_to_say" <%= !tp.gender || tp.gender === 'prefer_not_to_say' ? 'selected' : '' %>>Prefer not to say</option>
+                <option value="female" <%= tp.gender === 'female' ? 'selected' : '' %>>Female</option>
+                <option value="male" <%= tp.gender === 'male' ? 'selected' : '' %>>Male</option>
+                <option value="non_binary" <%= tp.gender === 'non_binary' ? 'selected' : '' %>>Non-binary</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="tp_prefGender" class="form-label fw-semibold small">Companion Rule</label>
+              <select id="tp_prefGender" name="preferredCompanionGender" class="form-select rounded-3">
+                <option value="any" <%= !tp.preferredCompanionGender || tp.preferredCompanionGender === 'any' ? 'selected' : '' %>>Open to Any</option>
+                <option value="same_gender" <%= tp.preferredCompanionGender === 'same_gender' ? 'selected' : '' %>>Same Gender Only</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="tp_style" class="form-label fw-semibold small">Travel Style</label>
+              <select id="tp_style" name="travelStyle" class="form-select rounded-3">
+                <option value="budget" <%= tp.travelStyle === 'budget' ? 'selected' : '' %>>Budget</option>
+                <option value="balanced" <%= !tp.travelStyle || tp.travelStyle === 'balanced' ? 'selected' : '' %>>Balanced</option>
+                <option value="comfort" <%= tp.travelStyle === 'comfort' ? 'selected' : '' %>>Comfort</option>
+                <option value="adventure" <%= tp.travelStyle === 'adventure' ? 'selected' : '' %>>Adventure</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="tp_sleep" class="form-label fw-semibold small">Sleep Schedule</label>
+              <select id="tp_sleep" name="sleepSchedule" class="form-select rounded-3">
+                <option value="flexible" <%= !tp.sleepSchedule || tp.sleepSchedule === 'flexible' ? 'selected' : '' %>>Flexible</option>
+                <option value="early_bird" <%= tp.sleepSchedule === 'early_bird' ? 'selected' : '' %>>Early Riser</option>
+                <option value="night_owl" <%= tp.sleepSchedule === 'night_owl' ? 'selected' : '' %>>Night Owl</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="tp_smoking" class="form-label fw-semibold small">Smoking</label>
+              <select id="tp_smoking" name="smokingPreference" class="form-select rounded-3">
+                <option value="no_preference" <%= !tp.smokingPreference || tp.smokingPreference === 'no_preference' ? 'selected' : '' %>>No Preference</option>
+                <option value="non_smoker" <%= tp.smokingPreference === 'non_smoker' ? 'selected' : '' %>>Non-Smoker</option>
+                <option value="smoker" <%= tp.smokingPreference === 'smoker' ? 'selected' : '' %>>Smoker</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="tp_languages" class="form-label fw-semibold small">Languages</label>
+              <input type="text" id="tp_languages" name="languages" class="form-control rounded-3" value="<%= (tp.languages || ['English']).join(', ') %>" placeholder="English, Hindi">
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold small d-block mb-2">Travel Interests</label>
+            <div class="d-flex flex-wrap gap-3">
+              <% ['Mountains', 'Beaches', 'Culture', 'Food', 'Adventure', 'Photography', 'Workation'].forEach(function(tag, idx) { %>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="interests[]" value="<%= tag %>" id="tp_int_<%= idx %>" <%= Array.isArray(tp.interests) && tp.interests.includes(tag) ? 'checked' : '' %>>
+                  <label class="form-check-label small" for="tp_int_<%= idx %>"><%= tag %></label>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+
+          <% if (profileUser.authProvider !== 'google' || profileUser.hash) { %>
+            <hr class="my-4">
+            <h5 class="fw-bold mb-3">Change Password <span class="text-muted fw-normal small">(Optional)</span></h5>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="currentPassword" class="form-label fw-semibold small">Current Password</label>
+                <input type="password" class="form-control rounded-3" id="currentPassword" name="currentPassword" autocomplete="current-password">
+              </div>
+              <div class="col-md-6">
+                <label for="newPassword" class="form-label fw-semibold small">New Password</label>
+                <input type="password" class="form-control rounded-3" id="newPassword" name="newPassword" minlength="6" autocomplete="new-password">
+              </div>
+            </div>
+          <% } %>
+
+          <button type="submit" class="btn btn-danger rounded-pill px-4 py-2 fw-semibold shadow-sm mt-2">
+            <i class="fa-solid fa-floppy-disk me-2"></i>Save Profile Changes
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

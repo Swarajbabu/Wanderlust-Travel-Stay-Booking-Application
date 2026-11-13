@@ -35,7 +35,7 @@
     <div class="col-lg-7 col-12">
       <div class="checkout-card">
         <div class="checkout-hero">
-          <img src="<%= booking.listing.image.url %>" alt="<%= booking.listing.title %>" class="checkout-hero-img">
+          <img src="<%= (booking.listing.image && booking.listing.image.url) ? booking.listing.image.url : 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80' %>" alt="<%= booking.listing.title %>" class="checkout-hero-img">
           <div class="checkout-hero-overlay">
             <span class="checkout-status-badge"><i class="fa-solid fa-clock me-1"></i>Payment Pending</span>
             <h3 class="checkout-hero-title"><%= booking.listing.title %></h3>
@@ -65,6 +65,14 @@
             const base = booking.basePrice || (booking.listing && booking.listing.price ? nights * booking.listing.price : Math.round(booking.totalPrice / 1.18));
             const tax = booking.taxAmount || (booking.totalPrice - base);
           %>
+          <div id="wl-chat-context"
+            data-booking-id="<%= booking._id %>"
+            data-listing-id="<%= booking.listing ? booking.listing._id : '' %>"
+            data-days="<%= nights %>"
+            data-location="<%= booking.listing ? (booking.listing.location || '') : '' %>"
+            data-country="<%= booking.listing ? (booking.listing.country || '') : '' %>"
+            data-title="<%= booking.listing ? (booking.listing.title || '') : '' %>"
+            hidden></div>
 
           <div class="checkout-info-strip">
             <div>
@@ -165,7 +173,7 @@
       amount: Number("<%= order.amount %>"),
       currency: "<%= order.currency %>",
       name: "Wanderlust Stays",
-      description: "Reservation Payment for <%= booking.listing.title %>",
+      description: <%- JSON.stringify("Reservation Payment for " + (booking.listing ? booking.listing.title : "Stay")).replace(/</g, '\\u003c') %>,
       order_id: "<%= order.id %>",
       handler: function (response) {
           // Submit verified payment credentials to verify endpoint
@@ -202,8 +210,8 @@
           form.submit();
       },
       prefill: {
-          name: "<%= booking.guest.username %>",
-          email: "<%= booking.guest.email %>"
+          name: <%- JSON.stringify(booking.guest ? booking.guest.username : "").replace(/</g, '\\u003c') %>,
+          email: <%- JSON.stringify(booking.guest ? booking.guest.email : "").replace(/</g, '\\u003c') %>
       },
       theme: {
           color: "#fe424d"

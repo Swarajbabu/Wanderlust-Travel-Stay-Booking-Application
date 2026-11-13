@@ -1,0 +1,24 @@
+<% layout('layouts/boilerplate') -%>
+<div class="container my-5" style="max-width: 820px;">
+  <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white border border-light-subtle">
+    <div class="mb-4 pb-3 border-bottom">
+      <div class="d-flex align-items-center gap-2 text-danger mb-2">
+        <i class="fa-solid <%= page.icon %> fs-3"></i>
+        <h2 class="fw-bold m-0 text-dark"><%= page.title %></h2>
+      </div>
+      <p class="text-muted mb-0"><%= page.subtitle %></p>
+    </div>
+
+    <% (page.sections || []).forEach(function(sec) { %>
+      <div class="mb-4">
+        <h5 class="fw-bold text-dark mb-2"><%= sec.heading %></h5>
+        <p class="text-secondary mb-0" style="line-height: 1.7;"><%= sec.body %></p>
+      </div>
+    <% }); %>
+
+    <div class="pt-3 border-top d-flex gap-2 flex-wrap">
+      <a href="/listings" class="btn btn-danger rounded-pill px-4 fw-semibold">Explore Stays</a>
+      <a href="/bookings" class="btn btn-outline-dark rounded-pill px-4 fw-semibold">My Bookings</a>
+    </div>
+  </div>
+</div>

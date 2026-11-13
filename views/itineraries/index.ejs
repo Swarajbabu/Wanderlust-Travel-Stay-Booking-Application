@@ -1,0 +1,53 @@
+<% layout('layouts/boilerplate') -%>
+<div class="container mt-4 mb-5">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>My Saved AI Trip Itineraries</h2>
+      <p class="text-muted mb-0">Revisit your personalized day-by-day routes, leg distances, and attraction plans.</p>
+    </div>
+    <a href="/itineraries/new" class="btn btn-danger rounded-pill px-4 py-2 fw-semibold shadow-sm">
+      <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Plan New Trip
+    </a>
+  </div>
+
+  <% if (!itineraries || itineraries.length === 0) { %>
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white border border-light-subtle">
+      <i class="fa-solid fa-compass text-muted mb-3" style="font-size: 3.5rem;"></i>
+      <h4 class="fw-bold text-secondary">No Saved Itineraries Yet</h4>
+      <p class="text-muted mb-4">Generate an AI-powered day-wise travel plan from any destination or booked stay.</p>
+      <div>
+        <a href="/itineraries/new" class="btn btn-danger rounded-pill px-4 py-2 fw-semibold">Create First Itinerary</a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4">
+      <% itineraries.forEach(function(item) { %>
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white border border-light-subtle d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <h5 class="fw-bold text-dark mb-0"><%= item.destination %></h5>
+              <span class="badge bg-dark-subtle text-dark rounded-pill"><%= item.days %> Days</span>
+            </div>
+            <p class="text-muted small mb-3">
+              <%= item.pace.charAt(0).toUpperCase() + item.pace.slice(1) %> pace &bull; <%= item.travelMode %> &bull; <%= item.totalDistanceKm %> km total
+            </p>
+            <% if (item.interests && item.interests.length > 0) { %>
+              <div class="d-flex flex-wrap gap-1 mb-3">
+                <% item.interests.slice(0, 4).forEach(function(tag) { %>
+                  <span class="badge bg-light text-secondary border rounded-pill fw-normal"><%= tag %></span>
+                <% }); %>
+              </div>
+            <% } %>
+            <div class="mt-auto d-flex gap-2">
+              <a href="/itineraries/<%= item._id %>" class="btn btn-dark btn-sm rounded-pill flex-grow-1 fw-semibold">Open Route</a>
+              <form action="/itineraries/<%= item._id %>?_method=DELETE" method="POST" class="m-0">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" aria-label="Delete itinerary"><i class="fa-solid fa-trash"></i></button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>

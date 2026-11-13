@@ -3,16 +3,19 @@
     display: flex;
     align-items: center;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 0.75rem;
+    gap: 1rem;
 }
+
 .filters-scroll-wrapper {
     display: flex;
     align-items: center;
     position: relative;
     flex-grow: 1;
     overflow: hidden;
-    margin-right: 1.5rem;
+    min-width: 0;
 }
+
 .scroll-btn {
     background-color: white;
     border: 1px solid rgba(0, 0, 0, 0.15);
@@ -27,18 +30,22 @@
     z-index: 10;
     flex-shrink: 0;
 }
+
 .scroll-btn:hover {
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     transform: scale(1.05);
     background-color: white;
 }
+
 .scroll-left {
     margin-right: 0.5rem;
     visibility: hidden;
 }
+
 .scroll-right {
     margin-left: 0.5rem;
 }
+
 .filters {
     display: flex;
     overflow-x: auto;
@@ -46,35 +53,112 @@
     align-items: center;
     flex-grow: 1;
     scrollbar-width: none; /* Hide scrollbar in Firefox */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
 }
+
 .filters::-webkit-scrollbar {
     display: none; /* Hide scrollbar in Chrome/Safari/Edge */
 }
+
 .filter {
     text-align: center;
-    margin-right: 2rem;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    margin-right: 1.75rem;
+    margin-top: 0.75rem;
+    margin-bottom: 0.35rem;
     opacity: 0.7;
     flex-shrink: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
+
 .filter:hover {
     opacity: 1;
     cursor: pointer;
+    transform: translateY(-1px);
 }
+
 .filter p {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     margin-bottom: 0;
+    margin-top: 0.35rem;
+    white-space: nowrap;
 }
+
 .tax-info {
     display: none;
 }
+
 .tax-toggle {
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.18);
     border-radius: 1rem;
-    height: 3.25rem;
-    padding: 1rem;
+    height: 2.75rem;
+    padding: 0.5rem 0.95rem;
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    background: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.tax-toggle .form-check-label {
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Lazy loading indicator styling */
+#lazyLoadContainer {
+    min-height: 48px;
+}
+
+#lazyLoadSpinner {
+    transition: opacity 0.2s ease;
+}
+
+/* Tablet & Mobile Breakpoints */
+@media (max-width: 991.98px) {
+    #filters-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+    }
+
+    .filters-scroll-wrapper {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    #filters-container > .d-flex {
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .scroll-btn {
+        width: 1.9rem;
+        height: 1.9rem;
+        font-size: 0.8rem;
+    }
+
+    .filter {
+        margin-right: 1.25rem;
+    }
+
+    .filter p {
+        font-size: 0.72rem;
+    }
+
+    .tax-toggle {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.78rem;
+        height: 2.5rem;
+    }
+
+    .tax-toggle .form-check-label {
+        font-size: 0.78rem;
+    }
 }

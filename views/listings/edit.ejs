@@ -11,6 +11,7 @@
 
     <form action="/listings/<%= listings._id %>?_method=PUT&_csrf=<%= csrfToken %>" method="post" novalidate class="needs-validation" enctype="multipart/form-data">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="_amenitiesSubmitted" value="1">
 
       <!-- Basic Details -->
       <div class="form-section-title">Basic Details</div>
@@ -35,12 +36,18 @@
 
       <div class="mb-3">
         <label class="form-label form-icon-label">
-          <i class="fa-solid fa-photo-film"></i> Current Gallery (<%= galleryThumbs.length %> photo<%= galleryThumbs.length === 1 ? '' : 's' %>)
+          <i class="fa-solid fa-photo-film"></i> Current Gallery (<%= galleryItems.length %> photo<%= galleryItems.length === 1 ? '' : 's' %>)
         </label>
         <div class="image-preview-grid">
-          <% galleryThumbs.forEach(function(thumbUrl) { %>
-            <div class="image-preview-thumb">
-              <img src="<%= thumbUrl %>" alt="Current listing photo">
+          <% galleryItems.forEach(function(item, idx) { %>
+            <div class="d-flex flex-column align-items-center gap-1">
+              <div class="image-preview-thumb w-100">
+                <img src="<%= item.thumbUrl %>" alt="Current listing photo <%= idx + 1 %>">
+              </div>
+              <div class="form-check small">
+                <input class="form-check-input" type="checkbox" name="deleteImages[]" value="<%= item.key %>" id="delImg_<%= idx %>">
+                <label class="form-check-label text-danger" for="delImg_<%= idx %>">Remove</label>
+              </div>
             </div>
           <% }); %>
         </div>
@@ -48,10 +55,10 @@
 
       <div class="mb-3 file-upload-area">
         <label class="form-label form-icon-label" for="images">
-          <i class="fa-solid fa-images"></i> Replace Photos (optional)
+          <i class="fa-solid fa-images"></i> Add New Photos (optional)
         </label>
         <input type="file" name="listing[images]" id="images" class="form-control" accept="image/png,image/jpeg,image/jpg" multiple>
-        <div class="form-text">Leave empty to keep the current gallery, or select 1 to 10 new photos to replace it entirely. Fewer than 3? We'll fill the rest with default stay photos.</div>
+        <div class="form-text">Upload up to 10 photos to add to your gallery (check "Remove" above on any photos you want deleted).</div>
         <div id="imagePreviewGrid" class="image-preview-grid"></div>
       </div>
 
@@ -63,7 +70,7 @@
           <label class="form-label form-icon-label" for="price">
             <i class="fa-solid fa-indian-rupee-sign"></i> Price / Night
           </label>
-          <input type="number" name="listing[price]" id="price" value="<%= listings.price %>" placeholder="e.g. 1200" class="form-control" required>
+          <input type="number" name="listing[price]" id="price" value="<%= listings.price %>" min="0" placeholder="e.g. 1200" class="form-control" required>
           <div class="invalid-feedback">Price should be valid.</div>
         </div>
 
@@ -82,6 +89,77 @@
         </label>
         <input type="text" name="listing[location]" id="location" value="<%= listings.location %>" placeholder="e.g. Hyderabad, Telangana" class="form-control" required>
         <div class="invalid-feedback">Location should be valid.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label form-icon-label" for="category">
+          <i class="fa-solid fa-tag"></i> Category
+        </label>
+        <select name="listing[category]" id="category" class="form-select" required>
+          <option value="" disabled <%= !listings.category ? 'selected' : '' %>>Select a property category</option>
+          <% (categories || []).forEach(function(cat) { %>
+            <option value="<%= cat %>" <%= listings.category === cat ? 'selected' : '' %>><%= cat %></option>
+          <% }); %>
+        </select>
+        <div class="invalid-feedback">Please select a category.</div>
+      </div>
+
+      <!-- Capacity & Amenities -->
+      <div class="form-section-title mt-4">Capacity & Amenities</div>
+
+      <div class="row">
+        <div class="mb-3 col-md-4">
+          <label class="form-label form-icon-label" for="maxGuests">
+            <i class="fa-solid fa-users"></i> Max Guests
+          </label>
+          <input type="number" name="listing[maxGuests]" id="maxGuests" value="<%= listings.maxGuests || 4 %>" min="1" max="20" class="form-control" required>
+        </div>
+        <div class="mb-3 col-md-4">
+          <label class="form-label form-icon-label" for="bedrooms">
+            <i class="fa-solid fa-bed"></i> Bedrooms
+          </label>
+          <input type="number" name="listing[bedrooms]" id="bedrooms" value="<%= typeof listings.bedrooms === 'number' ? listings.bedrooms : 1 %>" min="0" max="20" class="form-control" required>
+        </div>
+        <div class="mb-3 col-md-4">
+          <label class="form-label form-icon-label" for="bathrooms">
+            <i class="fa-solid fa-bath"></i> Bathrooms
+          </label>
+          <input type="number" name="listing[bathrooms]" id="bathrooms" value="<%= typeof listings.bathrooms === 'number' ? listings.bathrooms : 1 %>" min="0" max="20" class="form-control" required>
+        </div>
+      </div>
+
+      <% const currentAmenities = Array.isArray(listings.amenities) ? listings.amenities : []; %>
+      <div class="mb-3">
+        <label class="form-label form-icon-label">
+          <i class="fa-solid fa-list-check"></i> Amenities
+        </label>
+        <div class="row g-2">
+          <% (amenitiesList || []).forEach(function(amenity, idx) { %>
+            <div class="col-6 col-sm-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="listing[amenities][]" value="<%= amenity %>" id="edit_amenity_<%= idx %>" <%= currentAmenities.includes(amenity) ? 'checked' : '' %>>
+                <label class="form-check-label small" for="edit_amenity_<%= idx %>"><%= amenity %></label>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label form-icon-label" for="houseRules">
+          <i class="fa-solid fa-clipboard-list"></i> House Rules (Optional)
+        </label>
+        <textarea name="listing[houseRules]" id="houseRules" rows="2" maxlength="500" placeholder="e.g. Check-in after 2 PM, no smoking indoors, quiet hours after 10 PM." class="form-control"><%= listings.houseRules || '' %></textarea>
+      </div>
+
+      <div class="mb-3">
+        <input type="hidden" name="_roomShareSubmitted" value="1">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="allowRoomSharing" name="listing[allowRoomSharing]" value="true" <%= listings.allowRoomSharing ? 'checked' : '' %>>
+          <label class="form-check-label fw-semibold small" for="allowRoomSharing">
+            Allow Solo Room Sharing (Let verified solo travellers split costs on this stay)
+          </label>
+        </div>
       </div>
 
       <button class="btn btn-listing-submit mt-3">
@@ -105,7 +183,10 @@
         const url = URL.createObjectURL(file);
         const thumb = document.createElement("div");
         thumb.className = "image-preview-thumb";
-        thumb.innerHTML = `<img src="${url}" alt="${file.name}">`;
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = file.name;
+        thumb.appendChild(img);
         grid.appendChild(thumb);
       });
     });

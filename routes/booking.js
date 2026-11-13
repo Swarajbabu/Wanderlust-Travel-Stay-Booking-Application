@@ -2,14 +2,14 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 
 const wrapAsync = require("../utility/wrapAsync");
-const { isLoggedIn, validateBooking, validateCancellation, isBookingOwner, isBookingGuest, isBookingGuestOrOwner, isGuestDemoUser } = require("../middleware.js");
+const { isLoggedIn, isEmailVerified, validateBooking, validateEditBookingDates, validateCancellation, isBookingOwner, isBookingGuest, isBookingGuestOrOwner, isGuestDemoUser } = require("../middleware.js");
 const bookingController = require("../controllers/booking.js");
 
 // GET route to render separate dedicated booking page with date-wise flight style availability
 router.get("/listings/:id/book", wrapAsync(bookingController.renderBookingPage));
 
 // POST route to create a booking
-router.post("/listings/:id/bookings", isLoggedIn, validateBooking, wrapAsync(bookingController.createBooking));
+router.post("/listings/:id/bookings", isLoggedIn, isEmailVerified, validateBooking, wrapAsync(bookingController.createBooking));
 
 // GET route to get booked dates
 router.get("/listings/:id/bookings/booked-dates", wrapAsync(bookingController.getBookedDates));
@@ -18,7 +18,7 @@ router.get("/listings/:id/bookings/booked-dates", wrapAsync(bookingController.ge
 router.get("/bookings", isLoggedIn, wrapAsync(bookingController.myBookings));
 
 // PATCH route to edit booking dates
-router.patch("/bookings/:bookingId/edit-dates", isLoggedIn, isBookingGuestOrOwner, wrapAsync(bookingController.editBookingDates));
+router.patch("/bookings/:bookingId/edit-dates", isLoggedIn, isBookingGuestOrOwner, validateEditBookingDates, wrapAsync(bookingController.editBookingDates));
 
 // PATCH route to cancel a booking (can be cancelled by either guest or listing owner)
 router.patch("/bookings/:bookingId/cancel", isLoggedIn, isBookingGuestOrOwner, validateCancellation, wrapAsync(bookingController.cancelBooking));
@@ -34,6 +34,12 @@ router.patch("/bookings/:bookingId/guest-confirm", isLoggedIn, isBookingGuest, i
 
 // POST route to verify payment signature
 router.post("/bookings/:bookingId/verify-payment", isLoggedIn, isBookingGuest, wrapAsync(bookingController.verifyPayment));
+
+// GET route to render printable booking receipt
+router.get("/bookings/:bookingId/receipt", isLoggedIn, isBookingGuestOrOwner, wrapAsync(bookingController.renderReceipt));
+
+// Razorpay asynchronous webhook endpoint (authenticated via x-razorpay-signature HMAC)
+router.post("/webhooks/razorpay", wrapAsync(bookingController.razorpayWebhook));
 
 // DELETE route to clear all demo bookings for the guest evaluation account
 router.delete("/bookings/guest-clear", isLoggedIn, isGuestDemoUser, wrapAsync(bookingController.clearGuestBookings));

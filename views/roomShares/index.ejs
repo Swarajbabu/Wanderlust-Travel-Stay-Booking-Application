@@ -1,0 +1,413 @@
+<% layout('layouts/boilerplate') -%>
+<% const todayIso = new Date().toISOString().split('T')[0]; %>
+<% const showFormInitially = Boolean(openCreateForm); %>
+<div class="container mt-4 mb-5">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="fa-solid fa-user-group text-danger me-2"></i>Solo Room Shares &amp; Companion Match</h2>
+      <p class="text-muted mb-0">Post your destination, category &amp; dates to match with solo travellers, chat live, and split stay payments safely across accounts.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a href="/profile#travel-preferences" class="btn btn-outline-dark rounded-pill px-3 fw-semibold">
+        <i class="fa-solid fa-sliders me-1"></i>My Match Preferences
+      </a>
+      <button
+        type="button"
+        id="toggleCreateRoomShareBtn"
+        class="btn <%= showFormInitially ? 'btn-danger' : 'btn-outline-danger' %> rounded-pill px-3 fw-semibold shadow-sm d-inline-flex align-items-center gap-2"
+        data-bs-toggle="collapse"
+        data-bs-target="#createRoomShareCollapse"
+        aria-expanded="<%= showFormInitially ? 'true' : 'false' %>"
+        aria-controls="createRoomShareCollapse"
+      >
+        <i class="fa-solid <%= showFormInitially ? 'fa-toggle-on' : 'fa-toggle-off' %>" id="toggleCreateRoomShareIcon"></i>
+        <span>Post Solo Room Share</span>
+        <span class="badge rounded-pill <%= showFormInitially ? 'bg-light text-danger' : 'bg-danger-subtle text-danger' %>" id="toggleCreateRoomShareState" style="font-size: 0.7rem;">
+          <%= showFormInitially ? 'ON' : 'OFF' %>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Solo Room Share Submission Form -->
+  <div class="collapse <%= showFormInitially ? 'show' : '' %> mb-4" id="createRoomShareCollapse">
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border border-danger-subtle">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+          <h5 class="fw-bold mb-1"><i class="fa-solid fa-calendar-check text-danger me-2"></i>Post Your Stay Request for Solo Room Sharing &amp; Matching</h5>
+          <p class="text-muted small mb-0">Select your State &amp; City, category, and stay dates. Pick a stay now or choose one together with matched companions in chat.</p>
+        </div>
+      </div>
+
+      <% if (!currUser) { %>
+        <div class="alert alert-light border rounded-3 d-flex flex-wrap justify-content-between align-items-center gap-2 mb-0">
+          <span class="small text-secondary mb-0">Sign in to select your State &amp; City, stay dates, and match preferences.</span>
+          <a href="/login" class="btn btn-danger btn-sm rounded-pill px-3 fw-semibold">Log in to Post &amp; Match</a>
+        </div>
+      <% } else { %>
+        <form action="/room-shares" method="POST" class="needs-validation" novalidate id="hubRoomShareForm">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" id="hubShareDestination" name="share[destination]" value="<%= [filters.city, filters.state].filter(Boolean).join(', ') || filters.destination || '' %>">
+
+          <div class="row g-3 mb-3">
+            <div class="col-lg-3 col-md-6">
+              <label for="hubShareState" class="form-label fw-semibold small">1. State</label>
+              <select id="hubShareState" name="share[state]" class="form-select rounded-3" required>
+                <option value="">Choose state...</option>
+                <% ((typeof allLocationTree !== 'undefined' && allLocationTree.states) || []).forEach(function(stName) { %>
+                  <option value="<%= stName %>" <%= filters.state === stName ? 'selected' : '' %>><%= stName %></option>
+                <% }); %>
+              </select>
+              <div class="invalid-feedback">Please select a state.</div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <label for="hubShareCity" class="form-label fw-semibold small">2. City</label>
+              <select id="hubShareCity" name="share[city]" class="form-select rounded-3" required disabled>
+                <option value="">Select state first...</option>
+              </select>
+              <div class="invalid-feedback">Please select a city.</div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <label for="hubShareCategory" class="form-label fw-semibold small">Category</label>
+              <select id="hubShareCategory" name="share[category]" class="form-select rounded-3">
+                <option value="">All Categories</option>
+                <% (categories || []).forEach(function(cat) { %>
+                  <option value="<%= cat %>" <%= filters.category === cat ? 'selected' : '' %>><%= cat %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <label for="hubShareListing" class="form-label fw-semibold small">3. Specific Stay (Optional)</label>
+              <select id="hubShareListing" name="share[listingId]" class="form-select rounded-3" disabled>
+                <option value="">Decide stay in chat (pick State &amp; City)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-lg-3 col-md-6">
+              <label for="hubShareCheckIn" class="form-label fw-semibold small">Staying From</label>
+              <input type="date" id="hubShareCheckIn" name="share[checkIn]" min="<%= todayIso %>" class="form-control rounded-3" required>
+              <div class="invalid-feedback">Pick check-in date.</div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <label for="hubShareCheckOut" class="form-label fw-semibold small">Staying To</label>
+              <input type="date" id="hubShareCheckOut" name="share[checkOut]" min="<%= todayIso %>" class="form-control rounded-3" required>
+              <div class="invalid-feedback">Pick check-out date.</div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <label for="hubShareMaxParticipants" class="form-label fw-semibold small">Group Size</label>
+              <select id="hubShareMaxParticipants" name="share[maxParticipants]" class="form-select rounded-3" required>
+                <% for (let count = 2; count <= 6; count++) { %>
+                  <option value="<%= count %>"><%= count %> Travellers</option>
+                <% } %>
+              </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <label for="hubShareMaxBudget" class="form-label fw-semibold small">Target Split (&#8377;)</label>
+              <input type="number" id="hubShareMaxBudget" name="share[maxBudget]" min="0" class="form-control rounded-3" placeholder="e.g. 1500">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-lg-3 col-md-4">
+              <label for="hubShareGender" class="form-label fw-semibold small">Companion Rule</label>
+              <select id="hubShareGender" name="share[companionGender]" class="form-select rounded-3">
+                <option value="any">Open to Any Gender</option>
+                <option value="same_gender">Same Gender Only</option>
+              </select>
+            </div>
+            <div class="col-lg-2 col-md-4">
+              <label for="hubShareSmoking" class="form-label fw-semibold small">Smoking Rule</label>
+              <select id="hubShareSmoking" name="share[smokingPreference]" class="form-select rounded-3">
+                <option value="no_preference">No Preference</option>
+                <option value="non_smoker">Non-Smoker Only</option>
+                <option value="smoker">Smoker Friendly</option>
+              </select>
+            </div>
+            <div class="col-lg-3 col-md-4">
+              <label for="hubShareSleep" class="form-label fw-semibold small">Sleep Schedule</label>
+              <select id="hubShareSleep" name="share[sleepSchedule]" class="form-select rounded-3">
+                <option value="flexible">Flexible</option>
+                <option value="early_bird">Early Riser</option>
+                <option value="night_owl">Night Owl</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 align-items-end">
+            <div class="col-lg-9">
+              <label for="hubShareNote" class="form-label fw-semibold small">Trip Note for Potential Companions</label>
+              <input type="text" id="hubShareNote" name="share[note]" maxlength="400" class="form-control rounded-3" placeholder="e.g. Visiting Shimla solo on these dates, open to splitting a ₹3,000 stay 50/50...">
+            </div>
+            <div class="col-lg-3 d-grid">
+              <button type="submit" class="btn btn-danger rounded-pill fw-semibold py-2 shadow-sm">
+                <i class="fa-solid fa-paper-plane me-1"></i>Submit &amp; Match
+              </button>
+            </div>
+          </div>
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (currUser && typeof myActivePools !== 'undefined' && myActivePools.length > 0) { %>
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white border border-light-subtle">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="fw-bold mb-0"><i class="fa-solid fa-users-between-lines text-danger me-2"></i>Your Active Group Requests &amp; Split Bookings</h6>
+        <a href="/bookings" class="small text-decoration-none fw-semibold text-danger">View in My Bookings &rarr;</a>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <% myActivePools.forEach(function(mp) { %>
+          <a href="/room-shares/<%= mp._id %>" class="btn btn-sm rounded-pill border px-3 py-2 d-flex align-items-center gap-2 <%= mp.status === 'partially_booked' ? 'btn-warning-subtle border-warning text-dark' : (mp.status === 'confirmed' ? 'btn-success-subtle border-success text-success' : 'btn-light text-dark') %>">
+            <span class="fw-semibold"><%= mp.listing ? mp.listing.title : (mp.destination || 'Solo Request') %></span>
+            <span class="badge rounded-pill <%= mp.status === 'partially_booked' ? 'bg-warning text-dark' : (mp.status === 'confirmed' ? 'bg-success' : (mp.status === 'locked' ? 'bg-info text-dark' : 'bg-secondary')) %>">
+              <%= mp.status === 'partially_booked' ? 'PARTIALLY BOOKED (Not Allotted)' : mp.status.toUpperCase() %>
+            </span>
+          </a>
+        <% }); %>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Search & Compatibility Filter Bar -->
+  <form action="/room-shares" method="GET" class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white border border-light-subtle">
+    <div class="row g-2 align-items-end">
+      <div class="col-lg-2 col-md-4">
+        <label for="filterShareState" class="form-label small fw-semibold text-secondary mb-1 text-nowrap">State</label>
+        <select id="filterShareState" name="state" class="form-select rounded-3">
+          <option value="" <%= !filters.state ? 'selected' : '' %>>All States</option>
+          <% ((typeof allLocationTree !== 'undefined' && allLocationTree.states) || []).forEach(function(stName) { %>
+            <option value="<%= stName %>" <%= filters.state === stName ? 'selected' : '' %>><%= stName %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-lg-2 col-md-4">
+        <label for="filterShareCity" class="form-label small fw-semibold text-secondary mb-1 text-nowrap">City</label>
+        <select id="filterShareCity" name="city" class="form-select rounded-3">
+          <option value="">All Cities</option>
+        </select>
+      </div>
+      <div class="col-lg-2 col-md-4">
+        <label class="form-label small fw-semibold text-secondary mb-1 text-nowrap">Category</label>
+        <select name="category" class="form-select rounded-3">
+          <option value="" <%= !filters.category ? 'selected' : '' %>>All Categories</option>
+          <% (categories || []).forEach(function(cat) { %>
+            <option value="<%= cat %>" <%= filters.category === cat ? 'selected' : '' %>><%= cat %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-lg-2 col-md-3">
+        <label class="form-label small fw-semibold text-secondary mb-1 text-nowrap">Check-In</label>
+        <input type="date" name="checkIn" class="form-control rounded-3" value="<%= filters.checkIn || '' %>">
+      </div>
+      <div class="col-lg-2 col-md-3">
+        <label class="form-label small fw-semibold text-secondary mb-1 text-nowrap">Check-Out</label>
+        <input type="date" name="checkOut" class="form-control rounded-3" value="<%= filters.checkOut || '' %>">
+      </div>
+      <div class="col-lg-1 col-md-3">
+        <label class="form-label small fw-semibold text-secondary mb-1 text-nowrap">Rule</label>
+        <select name="companionGender" class="form-select rounded-3">
+          <option value="" <%= !filters.companionGender ? 'selected' : '' %>>Any</option>
+          <option value="any" <%= filters.companionGender === 'any' ? 'selected' : '' %>>All</option>
+          <option value="same_gender" <%= filters.companionGender === 'same_gender' ? 'selected' : '' %>>Same</option>
+        </select>
+      </div>
+      <div class="col-lg-1 col-md-3 d-grid">
+        <button type="submit" class="btn btn-dark rounded-3 fw-semibold" aria-label="Search Room Shares"><i class="fa-solid fa-magnifying-glass"></i></button>
+      </div>
+    </div>
+  </form>
+
+  <% if (matchedPools.length === 0) { %>
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white border border-light-subtle">
+      <i class="fa-solid fa-people-arrows text-muted mb-3" style="font-size: 3.5rem;"></i>
+      <h4 class="fw-bold text-secondary">No Matching Room Shares Open Yet</h4>
+      <p class="text-muted mb-3">Click <strong>Post Solo Room Share</strong> above to toggle the request form ON and publish your destination, category, and dates.</p>
+      <div class="d-flex justify-content-center flex-wrap gap-2">
+        <button
+          type="button"
+          class="btn btn-danger rounded-pill px-4 py-2 fw-semibold"
+          data-bs-toggle="collapse"
+          data-bs-target="#createRoomShareCollapse"
+        >
+          <i class="fa-solid fa-plus me-1"></i>Post Solo Room Share
+        </button>
+        <a href="/listings" class="btn btn-outline-danger rounded-pill px-4 py-2 fw-semibold">Explore All Stays</a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4">
+      <% matchedPools.forEach(function({ pool, match, acceptedCount, spotsRemaining, isOwnPool }) { %>
+        <% const cardTitle = pool.listing ? pool.listing.title : `Solo Trip to ${pool.destination || 'Destination'}`; %>
+        <% const cardLocation = pool.listing ? `${pool.listing.location}, ${pool.listing.country}` : (pool.destination || 'Flexible Stay'); %>
+        <% const displayCategory = (pool.listing && pool.listing.category) || (pool.preferences && pool.preferences.category); %>
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white border <%= isOwnPool ? 'border-danger-subtle' : 'border-light-subtle' %>">
+            <div class="position-relative" style="height: 190px;">
+              <img src="<%= pool.listing && pool.listing.image && pool.listing.image.url ? pool.listing.image.url : 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80' %>" class="w-100 h-100 object-fit-cover" alt="<%= cardTitle %>">
+              <span class="badge <%= isOwnPool ? 'bg-danger' : 'bg-success' %> position-absolute top-0 start-0 m-3 rounded-pill px-3 py-1 shadow-sm">
+                <% if (isOwnPool) { %>
+                  <i class="fa-solid fa-check-circle me-1"></i>Your Posted Request (<%= match.score %>%)
+                <% } else { %>
+                  <i class="fa-solid fa-sparkles me-1"></i><%= match.score %>% Match
+                <% } %>
+              </span>
+              <span class="badge bg-dark bg-opacity-75 position-absolute top-0 end-0 m-3 rounded-pill px-3 py-1">
+                <%= spotsRemaining %> spot<%= spotsRemaining === 1 ? '' : 's' %> left
+              </span>
+            </div>
+            <div class="card-body d-flex flex-column p-4">
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                <h5 class="fw-bold text-dark mb-0"><%= cardTitle %></h5>
+                <% if (displayCategory) { %>
+                  <span class="badge bg-light text-dark border rounded-pill flex-shrink-0"><%= displayCategory %></span>
+                <% } %>
+              </div>
+              <p class="text-muted small mb-2">
+                <i class="fa-solid fa-location-dot text-danger me-1"></i><%= cardLocation %>
+              </p>
+              <div class="bg-light rounded-3 p-3 mb-3 border border-light-subtle small">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="text-secondary">Dates:</span>
+                  <span class="fw-semibold"><%= new Date(pool.checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) %> – <%= new Date(pool.checkOut).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="text-secondary"><%= pool.listing ? 'Your Split Share:' : 'Target Budget:' %></span>
+                  <% if (pool.listing) { %>
+                    <span class="fw-bold text-success">&#8377;<%= Number(pool.pricePerPerson).toLocaleString('en-IN') %> <span class="text-muted fw-normal text-decoration-line-through">&#8377;<%= Number(pool.totalPrice).toLocaleString('en-IN') %></span></span>
+                  <% } else if (pool.pricePerPerson > 0) { %>
+                    <span class="fw-bold text-primary">~&#8377;<%= Number(pool.pricePerPerson).toLocaleString('en-IN') %> / person</span>
+                  <% } else { %>
+                    <span class="fw-semibold text-muted">Pick stay in chat</span>
+                  <% } %>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span class="text-secondary">Organizer:</span>
+                  <span class="fw-semibold">@<%= pool.initiator ? pool.initiator.username : 'traveller' %> (<%= acceptedCount %>/<%= pool.maxParticipants %>)</span>
+                </div>
+              </div>
+              <% if (match.reasons && match.reasons.length > 0) { %>
+                <div class="d-flex flex-wrap gap-1 mb-3">
+                  <% match.reasons.slice(0, 3).forEach(function(reason) { %>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill fw-normal"><%= reason %></span>
+                  <% }); %>
+                </div>
+              <% } %>
+              <div class="mt-auto d-grid">
+                <a href="/room-shares/<%= pool._id %>" class="btn <%= isOwnPool ? 'btn-danger' : 'btn-dark' %> rounded-pill fw-semibold">
+                  <%= isOwnPool ? 'Manage Request & Chat' : 'Open Chat & Join' %>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<script id="hubStaysData" type="application/json"><%- JSON.stringify({ staysTree: hubLocationTree || { states: [], citiesByState: {}, stays: [] }, locationTree: (typeof allLocationTree !== 'undefined' && allLocationTree) || hubLocationTree || { states: [], citiesByState: {}, stays: [] }, filters: filters || {} }) %></script>
+<script src="/js/cascadingLocationSelect.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const destInput = document.getElementById("hubShareDestination");
+    const catSelect = document.getElementById("hubShareCategory");
+    const stateSelect = document.getElementById("hubShareState");
+    const citySelect = document.getElementById("hubShareCity");
+    const listingSelect = document.getElementById("hubShareListing");
+    const filterStateSelect = document.getElementById("filterShareState");
+    const filterCitySelect = document.getElementById("filterShareCity");
+    const sizeSelect = document.getElementById("hubShareMaxParticipants");
+    const checkInInput = document.getElementById("hubShareCheckIn");
+    const checkOutInput = document.getElementById("hubShareCheckOut");
+    const staysDataEl = document.getElementById("hubStaysData");
+
+    function refreshGroupSizes(selectedStay) {
+      if (!sizeSelect) return;
+      const maxG = Math.min(10, Math.max(2, Number(selectedStay && selectedStay.maxGuests) || 6));
+      const price = Number(selectedStay && selectedStay.price) || 0;
+      const prevVal = Number(sizeSelect.value) || 2;
+
+      sizeSelect.innerHTML = "";
+      for (let count = 2; count <= maxG; count++) {
+        const option = document.createElement("option");
+        option.value = String(count);
+        option.textContent = price > 0
+          ? `${count} Travellers (~Rs. ${Math.ceil((price * 1.18) / count).toLocaleString("en-IN")}/night each)`
+          : `${count} Travellers`;
+        if (count === Math.min(prevVal, maxG)) option.selected = true;
+        sizeSelect.appendChild(option);
+      }
+    }
+
+    if (staysDataEl) {
+      try {
+        const data = JSON.parse(staysDataEl.textContent || "{}");
+        if (stateSelect && citySelect && listingSelect && typeof window.initCascadingStayPicker === "function") {
+          window.initCascadingStayPicker({
+            stateSelect,
+            citySelect,
+            staySelect: listingSelect,
+            categorySelect: catSelect,
+            destinationInput: destInput,
+            tree: data.staysTree,
+            locationTree: data.locationTree,
+            initial: {
+              state: (data.filters && data.filters.state) || "",
+              city: (data.filters && data.filters.city) || ""
+            },
+            defaultStayPlaceholder: "Decide stay in chat (or pick one here)...",
+            onStayChange: refreshGroupSizes
+          });
+        }
+        if (filterStateSelect && filterCitySelect && typeof window.initStateCityFilter === "function") {
+          window.initStateCityFilter({
+            stateSelect: filterStateSelect,
+            citySelect: filterCitySelect,
+            tree: data.locationTree,
+            initialState: (data.filters && data.filters.state) || "",
+            initialCity: (data.filters && data.filters.city) || ""
+          });
+        }
+      } catch (e) {}
+    }
+
+    if (checkInInput && checkOutInput) {
+      checkInInput.addEventListener("change", function () {
+        if (checkInInput.value) {
+          checkOutInput.min = checkInInput.value;
+          if (checkOutInput.value && checkOutInput.value <= checkInInput.value) {
+            checkOutInput.value = "";
+          }
+        }
+      });
+    }
+
+    const collapseEl = document.getElementById("createRoomShareCollapse");
+    const toggleBtn = document.getElementById("toggleCreateRoomShareBtn");
+    const toggleIcon = document.getElementById("toggleCreateRoomShareIcon");
+    const toggleBadge = document.getElementById("toggleCreateRoomShareState");
+
+    function syncToggleUi(isOpen) {
+      if (!toggleBtn || !toggleIcon || !toggleBadge) return;
+      toggleBtn.classList.toggle("btn-danger", isOpen);
+      toggleBtn.classList.toggle("btn-outline-danger", !isOpen);
+      toggleIcon.classList.toggle("fa-toggle-on", isOpen);
+      toggleIcon.classList.toggle("fa-toggle-off", !isOpen);
+      toggleBadge.textContent = isOpen ? "ON" : "OFF";
+      toggleBadge.className = isOpen
+        ? "badge rounded-pill bg-light text-danger"
+        : "badge rounded-pill bg-danger-subtle text-danger";
+    }
+
+    if (collapseEl) {
+      collapseEl.addEventListener("show.bs.collapse", function () {
+        syncToggleUi(true);
+      });
+      collapseEl.addEventListener("hide.bs.collapse", function () {
+        syncToggleUi(false);
+      });
+    }
+  });
+</script>

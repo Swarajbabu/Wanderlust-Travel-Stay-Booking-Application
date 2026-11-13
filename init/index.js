@@ -1,9 +1,4 @@
 require("dotenv").config({ path: require("path").resolve(__dirname, "../.env") });
-try {
-    require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
-} catch (e) {
-    // Ignore if not supported
-}
 const mongoose = require("mongoose");
 const initData = require("./data");
 const Listing = require("../modals/listing");
@@ -31,18 +26,20 @@ const initDB = async () => {
         const hostUser = new User({
             username: "Wonderlust_host",
             email: "host@wanderlust.com",
-            emailVerified: true
+            emailVerified: true,
+            role: "host"
         });
-        const registeredHost = await User.register(hostUser, "HostPass@2026");
+        const registeredHost = await User.register(hostUser, process.env.DEMO_HOST_PASSWORD || "HostPass@2026");
         logger.info(`Created Wonderlust Host user: ${registeredHost.username} (ID: ${registeredHost._id})`);
 
         // 3. Create the Guest user (guest_user)
         const guestUser = new User({
             username: "guest_user",
             email: "guest@wanderlust.com",
-            emailVerified: true
+            emailVerified: true,
+            role: "user"
         });
-        const registeredGuest = await User.register(guestUser, "GuestPass@2026");
+        const registeredGuest = await User.register(guestUser, process.env.DEMO_GUEST_PASSWORD || "GuestPass@2026");
         logger.info(`Created Guest user: ${registeredGuest.username} (ID: ${registeredGuest._id})`);
 
         // 4. Map the host user's ID to all listings and ensure schema compliance
@@ -63,7 +60,8 @@ const initDB = async () => {
                 type: "Point",
                 coordinates: [78.4867, 17.3850]
             },
-            category: obj.category || "Rooms"
+            category: obj.category || "Rooms",
+            allowRoomSharing: (obj.maxGuests || 4) >= 2
         }));
 
         // 5. Insert seeded Indian listings

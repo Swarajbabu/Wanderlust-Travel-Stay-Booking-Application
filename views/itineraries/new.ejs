@@ -1,0 +1,101 @@
+<% layout('layouts/boilerplate') -%>
+<div class="container mt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-12">
+      <div class="d-flex justify-content-between align-items-md-center flex-column flex-md-row gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold mb-1"><i class="fa-solid fa-route text-danger me-2"></i>AI Personalized Trip Planner</h2>
+          <p class="text-muted mb-0">Generate day-wise routes with attraction recommendations, estimated distances, and travel times.</p>
+        </div>
+        <div class="flex-shrink-0">
+          <a href="/itineraries" class="btn btn-outline-dark rounded-pill px-3 py-2 fw-semibold text-nowrap">
+            <i class="fa-solid fa-bookmark me-1"></i>Saved Trips
+          </a>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white border border-light-subtle">
+        <form action="/itineraries/generate" method="POST" class="needs-validation" novalidate id="itineraryGeneratorForm">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <% if (prefill.bookingId) { %>
+            <input type="hidden" name="itinerary[bookingId]" value="<%= prefill.bookingId %>">
+          <% } %>
+          <% if (prefill.listingId) { %>
+            <input type="hidden" name="itinerary[listingId]" value="<%= prefill.listingId %>">
+          <% } %>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-8">
+              <label for="destination" class="form-label fw-semibold small">Destination City / Region</label>
+              <input type="text" id="destination" name="itinerary[destination]" class="form-control rounded-3" placeholder="e.g. Manali, Himachal Pradesh" value="<%= prefill.destination %>" required>
+            </div>
+            <div class="col-sm-4">
+              <label for="days" class="form-label fw-semibold small">Trip Duration (Days)</label>
+              <input type="number" id="days" name="itinerary[days]" min="1" max="14" class="form-control rounded-3" value="<%= prefill.days || 3 %>" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+              <label for="dailyStartTime" class="form-label fw-semibold small">Day Start Time</label>
+              <input type="time" id="dailyStartTime" name="itinerary[dailyStartTime]" class="form-control rounded-3" value="<%= prefill.dailyStartTime || '09:00' %>" required>
+            </div>
+            <div class="col-sm-6">
+              <label for="dailyHours" class="form-label fw-semibold small">Exploration Hours / Day</label>
+              <input type="number" id="dailyHours" name="itinerary[dailyHours]" min="2" max="14" class="form-control rounded-3" value="<%= prefill.dailyHours || 8 %>" required>
+            </div>
+            <div class="col-sm-6">
+              <label for="pace" class="form-label fw-semibold small">Exploration Pace</label>
+              <select id="pace" name="itinerary[pace]" class="form-select rounded-3">
+                <option value="relaxed" <%= prefill.pace === 'relaxed' ? 'selected' : '' %>>Relaxed (3 stops / day)</option>
+                <option value="balanced" <%= !prefill.pace || prefill.pace === 'balanced' ? 'selected' : '' %>>Balanced (4 stops / day)</option>
+                <option value="packed" <%= prefill.pace === 'packed' ? 'selected' : '' %>>Packed (5 stops / day)</option>
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label for="travelMode" class="form-label fw-semibold small">Local Transport</label>
+              <select id="travelMode" name="itinerary[travelMode]" class="form-select rounded-3">
+                <option value="driving" <%= !prefill.travelMode || prefill.travelMode === 'driving' ? 'selected' : '' %>>Cab / Car</option>
+                <option value="transit" <%= prefill.travelMode === 'transit' ? 'selected' : '' %>>Local Transit</option>
+                <option value="walking" <%= prefill.travelMode === 'walking' ? 'selected' : '' %>>Walking</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold small d-block mb-2">Interests (Pick what excites you)</label>
+            <div class="bg-light rounded-3 p-3 border border-light-subtle">
+              <div class="row g-2">
+                <% const selectedInterests = Array.isArray(prefill.interests) && prefill.interests.length > 0 ? prefill.interests : ['Nature', 'Adventure', 'Heritage']; %>
+                <% (interestsList || []).forEach(function(interest, idx) { %>
+                  <div class="col-6 col-sm-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="itinerary[interests][]" value="<%= interest %>" id="interest_<%= idx %>" <%= selectedInterests.includes(interest) ? 'checked' : '' %>>
+                      <label class="form-check-label small" for="interest_<%= idx %>"><%= interest %></label>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-danger rounded-pill py-2 fw-semibold shadow-sm" id="generateItineraryBtn">
+              <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Generate Personalized Itinerary
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById("itineraryGeneratorForm").addEventListener("submit", function () {
+    const btn = document.getElementById("generateItineraryBtn");
+    if (btn && this.checkValidity()) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Building Day-Wise Route...';
+    }
+  });
+</script>

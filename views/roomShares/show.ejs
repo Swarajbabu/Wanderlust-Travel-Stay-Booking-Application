@@ -1,0 +1,457 @@
+<% layout('layouts/boilerplate') -%>
+<% const poolNights = Math.max(1, Math.min(14, Math.ceil((new Date(pool.checkOut) - new Date(pool.checkIn)) / 86400000))); %>
+<% const poolLocationLabel = pool.listing ? `${pool.listing.location}, ${pool.listing.country}` : (pool.destination || 'Flexible Destination'); %>
+<% const canCancelPool = (isInitiator && pool.status !== 'cancelled') || (isPaidMember && ['locked', 'partially_booked'].includes(pool.status)); %>
+<div id="wl-chat-context"
+  data-listing-id="<%= pool.listing ? pool.listing._id : '' %>"
+  data-days="<%= poolNights %>"
+  data-location="<%= pool.listing ? (pool.listing.location || '') : (pool.destination || '') %>"
+  data-country="<%= pool.listing ? (pool.listing.country || '') : '' %>"
+  data-title="<%= pool.listing ? (pool.listing.title || '') : (pool.destination || '') %>"
+  hidden></div>
+<div class="container mt-4 mb-5">
+  <div class="mb-3">
+    <a href="/room-shares" class="text-decoration-none text-secondary small"><i class="fa-solid fa-arrow-left me-1"></i>Back to Room Shares</a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Stay & Cost Breakdown + Participants -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border border-light-subtle mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+          <div>
+            <%
+              let statusBadgeClass = 'bg-primary';
+              let statusLabel = pool.status.toUpperCase();
+              if (pool.status === 'confirmed') {
+                statusBadgeClass = 'bg-success';
+                statusLabel = 'CONFIRMED & ROOM ALLOTTED';
+              } else if (pool.status === 'partially_booked') {
+                statusBadgeClass = 'bg-warning text-dark';
+                statusLabel = 'PARTIALLY BOOKED — ROOM NOT ALLOTTED';
+              } else if (pool.status === 'locked') {
+                statusBadgeClass = 'bg-info text-dark';
+                statusLabel = 'LOCKED — AWAITING SPLIT PAYMENTS';
+              } else if (pool.status === 'cancelled') {
+                statusBadgeClass = 'bg-danger';
+                statusLabel = 'CANCELLED';
+              }
+            %>
+            <span class="badge rounded-pill px-3 py-1 mb-2 <%= statusBadgeClass %>">
+              Status: <%= statusLabel %>
+            </span>
+            <% if (pool.preferences && pool.preferences.category) { %>
+              <span class="badge bg-light text-dark border rounded-pill px-3 py-1 mb-2 ms-1"><%= pool.preferences.category %></span>
+            <% } %>
+            <h3 class="fw-bold mb-1"><%= pool.listing ? pool.listing.title : `Solo Trip Request: ${pool.destination || 'Shared Stay'}` %></h3>
+            <p class="text-muted small mb-0">
+              <i class="fa-solid fa-location-dot text-danger me-1"></i>
+              <%= poolLocationLabel %>
+            </p>
+          </div>
+          <% if (compatibility) { %>
+            <div class="text-end">
+              <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2 fs-6">
+                <%= compatibility.score %>% Compatibility
+              </span>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="row g-3 bg-light rounded-3 p-3 border border-light-subtle mb-3">
+          <div class="col-sm-4">
+            <div class="text-muted small">Check-In</div>
+            <div class="fw-bold"><%= new Date(pool.checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></div>
+          </div>
+          <div class="col-sm-4">
+            <div class="text-muted small">Check-Out</div>
+            <div class="fw-bold"><%= new Date(pool.checkOut).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></div>
+          </div>
+          <div class="col-sm-4">
+            <% if (pool.listing && pool.totalPrice > 0) { %>
+              <div class="text-muted small">Split Share / Person</div>
+              <div class="fw-bold text-success fs-5">&#8377;<%= Number(pool.pricePerPerson).toLocaleString('en-IN') %></div>
+              <div class="text-muted small">Total stay: &#8377;<%= Number(pool.totalPrice).toLocaleString('en-IN') %> (incl. GST)</div>
+            <% } else { %>
+              <div class="text-muted small">Target Budget / Person</div>
+              <div class="fw-bold text-primary fs-6"><%= pool.pricePerPerson > 0 ? `~₹${Number(pool.pricePerPerson).toLocaleString('en-IN')}` : 'Flexible / Decide in chat' %></div>
+              <div class="text-muted small">Select a stay below once matched</div>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 small mb-2">
+          <span class="badge bg-light text-dark border rounded-pill px-3 py-2">Companion Rule: <%= pool.preferences.companionGender === 'same_gender' ? 'Same Gender' : 'Any Gender' %></span>
+          <span class="badge bg-light text-dark border rounded-pill px-3 py-2">Smoking: <%= pool.preferences.smokingPreference.replace('_', ' ') %></span>
+          <span class="badge bg-light text-dark border rounded-pill px-3 py-2">Schedule: <%= pool.preferences.sleepSchedule.replace('_', ' ') %></span>
+        </div>
+        <% if (pool.preferences.note) { %>
+          <p class="text-secondary small mt-2 mb-0"><i class="fa-solid fa-quote-left me-1 text-muted"></i><%= pool.preferences.note %></p>
+        <% } %>
+
+        <% if (pool.status === 'partially_booked') { %>
+          <div class="alert alert-warning rounded-3 mt-3 mb-0 border-warning-subtle">
+            <div class="fw-bold mb-1">
+              <i class="fa-solid fa-hourglass-half me-1"></i>Partially Booked &mdash; Room Not Allotted Yet
+            </div>
+            <p class="small mb-0">
+              <strong><%= paymentSummary.paidCount %> of <%= paymentSummary.acceptedCount %></strong> companions paid
+              (<strong>&#8377;<%= Number(paymentSummary.paidAmount).toLocaleString('en-IN') %></strong> of &#8377;<%= Number(pool.totalPrice).toLocaleString('en-IN') %>).
+              The room will be officially allotted and confirmed only after all members complete payment.
+              If a companion is not responding, any paid member can cancel with a reason for a full refund.
+            </p>
+          </div>
+        <% } else if (pool.status === 'cancelled') { %>
+          <div class="alert alert-danger rounded-3 mt-3 mb-0">
+            <div class="fw-bold mb-1"><i class="fa-solid fa-circle-xmark me-1"></i>Request Cancelled &amp; Paid Shares Refunded</div>
+            <% if (pool.cancellationReason) { %>
+              <div class="small"><strong>Reason:</strong> <%= pool.cancellationReason %></div>
+            <% } %>
+            <% if (pool.cancelledBy && pool.cancelledBy.username) { %>
+              <div class="small text-muted">Cancelled by @<%= pool.cancelledBy.username %></div>
+            <% } %>
+          </div>
+        <% } else if (pool.booking) { %>
+          <div class="alert alert-success rounded-3 mt-3 mb-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span><i class="fa-solid fa-circle-check me-2"></i>All companions paid! Shared room is allotted and confirmed.</span>
+            <a href="/bookings/<%= pool.booking %>/receipt" class="btn btn-success btn-sm rounded-pill px-3 fw-semibold">View Receipt</a>
+          </div>
+        <% } %>
+      </div>
+
+      <% if (isInitiator && pool.status === 'open' && typeof destinationStays !== 'undefined' && destinationStays.length > 0) { %>
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border border-danger-subtle mb-4">
+          <h5 class="fw-bold mb-1">
+            <i class="fa-solid fa-hotel text-danger me-2"></i><%= pool.listing ? 'Change Selected Stay' : `Pick a Stay in ${pool.destination || 'Your Destination'}` %>
+          </h5>
+          <p class="text-muted small mb-3">Once you and your matched companion agree in chat, choose the <strong>State &rarr; City &rarr; Stay</strong> to calculate exact split payments per account.</p>
+          <form action="/room-shares/<%= pool._id %>/select-stay" method="POST" class="row g-2 align-items-end" id="selectStayCascadingForm">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="col-md-3">
+              <label for="stayFilterState" class="form-label small fw-semibold mb-1">1. State</label>
+              <select id="stayFilterState" class="form-select rounded-3">
+                <option value="">Choose state...</option>
+                <% (locationTree && locationTree.states || []).forEach(function(stName) { %>
+                  <option value="<%= stName %>" <%= initialStaySelection && initialStaySelection.state === stName ? 'selected' : '' %>><%= stName %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="stayFilterCity" class="form-label small fw-semibold mb-1">2. City</label>
+              <select id="stayFilterCity" class="form-select rounded-3" <%= initialStaySelection && initialStaySelection.state ? '' : 'disabled' %>>
+                <option value="">Select a state first...</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="selectDestinationStay" class="form-label small fw-semibold mb-1">3. Available Stays</label>
+              <select id="selectDestinationStay" name="listingId" class="form-select rounded-3" required disabled>
+                <option value="">Select state &amp; city first...</option>
+              </select>
+            </div>
+            <div class="col-md-2 d-grid">
+              <button type="submit" class="btn btn-danger rounded-pill fw-semibold">
+                <i class="fa-solid fa-check me-1"></i>Attach Stay
+              </button>
+            </div>
+          </form>
+        </div>
+      <% } %>
+
+      <!-- Accepted Participants Roster -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border border-light-subtle mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <h5 class="fw-bold mb-0">Group Companions (<%= accepted.length %>/<%= pool.maxParticipants %>)</h5>
+          <% if (pool.totalPrice > 0) { %>
+            <span class="small fw-semibold text-secondary">Paid: &#8377;<%= Number(paymentSummary.paidAmount).toLocaleString('en-IN') %> / &#8377;<%= Number(pool.totalPrice).toLocaleString('en-IN') %></span>
+          <% } %>
+        </div>
+        <% accepted.forEach(function(p) { %>
+          <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div>
+              <div class="fw-semibold">
+                @<%= p.user ? p.user.username : 'traveller' %>
+                <% if (p.role === 'initiator') { %><span class="badge bg-dark-subtle text-dark ms-1">Organizer</span><% } %>
+                <% if (p.user && p.user.emailVerified) { %><i class="fa-solid fa-circle-check text-success ms-1" title="Verified Email"></i><% } %>
+              </div>
+              <div class="text-muted small">
+                <%= pool.totalPrice > 0 ? `Share Due: ₹${Number(p.amountDue || pool.pricePerPerson).toLocaleString('en-IN')}` : 'Stay & split pending' %>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge rounded-pill <%= p.paymentStatus === 'paid' ? 'bg-success' : (p.paymentStatus === 'refunded' ? 'bg-secondary' : 'bg-warning text-dark') %>">
+                <%= p.paymentStatus.toUpperCase() %>
+              </span>
+              <% if (currUser && p.user && p.user._id.equals(currUser._id) && p.role !== 'initiator' && pool.status === 'open') { %>
+                <form action="/room-shares/<%= pool._id %>/participants/<%= p._id %>?_method=PATCH" method="POST" class="m-0">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="action" value="leave">
+                  <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">Leave</button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+
+        <% if (isInitiator && pendingRequests.length > 0 && pool.status === 'open') { %>
+          <h6 class="fw-bold mt-4 mb-2 text-secondary">Pending Join Requests (<%= pendingRequests.length %>)</h6>
+          <% pendingRequests.forEach(function(reqPart) { %>
+            <div class="border rounded-3 p-3 mb-2 bg-light">
+              <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div>
+                  <div class="fw-semibold">@<%= reqPart.user ? reqPart.user.username : 'traveller' %></div>
+                  <p class="small text-muted mb-1"><%= reqPart.introMessage || 'Interested in splitting this room share.' %></p>
+                </div>
+                <div class="d-flex gap-2">
+                  <form action="/room-shares/<%= pool._id %>/participants/<%= reqPart._id %>?_method=PATCH" method="POST" class="m-0">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="action" value="accept">
+                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-3">Accept</button>
+                  </form>
+                  <form action="/room-shares/<%= pool._id %>/participants/<%= reqPart._id %>?_method=PATCH" method="POST" class="m-0">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="action" value="reject">
+                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">Decline</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Right Column: Actions & Live Companion Chat -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border border-light-subtle mb-4">
+        <h5 class="fw-bold mb-3">Actions &amp; Split Booking</h5>
+
+        <% if (!currUser) { %>
+          <a href="/login" class="btn btn-danger rounded-pill w-100 fw-semibold">Log in to Chat &amp; Join</a>
+        <% } else if (isInitiator) { %>
+          <% if (pool.status === 'open') { %>
+            <form action="/room-shares/<%= pool._id %>/lock" method="POST" class="mb-2">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit" class="btn btn-dark rounded-pill w-100 fw-semibold" <%= (accepted.length < 2 || !pool.listing) ? 'disabled' : '' %>>
+                <i class="fa-solid fa-lock me-1"></i>Lock Group &amp; Start Split Payment
+              </button>
+            </form>
+            <% if (!pool.listing) { %>
+              <p class="small text-danger mb-2">Attach a stay on the left before locking for split payment.</p>
+            <% } else if (accepted.length < 2) { %>
+              <p class="small text-muted mb-2">Accept at least 1 companion to enable split payment across both accounts.</p>
+            <% } %>
+          <% } %>
+        <% } else if (!currentParticipant && pool.status === 'open') { %>
+          <form action="/room-shares/<%= pool._id %>/join" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="mb-3">
+              <label for="introMessage" class="form-label small fw-semibold">Short Intro to Organizer (Unlocks Chat)</label>
+              <textarea id="introMessage" name="introMessage" rows="2" maxlength="300" class="form-control rounded-3" placeholder="Hi! I'm also visiting on these dates and would like to chat about splitting the stay..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger rounded-pill w-100 fw-semibold">
+              <i class="fa-solid fa-handshake me-1"></i>Request to Join &amp; Chat <%= pool.pricePerPerson > 0 ? `(Est. ₹${Number(pool.pricePerPerson).toLocaleString('en-IN')})` : '' %>
+            </button>
+          </form>
+        <% } else if (currentParticipant && currentParticipant.joinStatus === 'pending') { %>
+          <div class="alert alert-info small mb-2">Your join request was sent! Use the chat below to discuss the stay while awaiting organizer acceptance.</div>
+        <% } %>
+
+        <% if (['locked', 'partially_booked'].includes(pool.status) && currentParticipant && currentParticipant.joinStatus === 'accepted' && currentParticipant.paymentStatus === 'unpaid') { %>
+          <a href="/room-shares/<%= pool._id %>/checkout" class="btn btn-success rounded-pill w-100 fw-semibold mt-2">
+            <i class="fa-solid fa-credit-card me-1"></i>Pay Your Split Share (&#8377;<%= Number(currentParticipant.amountDue).toLocaleString('en-IN') %>)
+          </a>
+        <% } else if (['locked', 'partially_booked'].includes(pool.status) && isPaidMember) { %>
+          <div class="alert alert-warning small mt-2 mb-0">
+            <i class="fa-solid fa-check-circle text-success me-1"></i>You have paid your share (&#8377;<%= Number(currentParticipant.amountDue).toLocaleString('en-IN') %>). Waiting for the remaining companion to pay before the room is allotted.
+          </div>
+        <% } %>
+
+        <% if (canCancelPool) { %>
+          <button
+            type="button"
+            class="btn btn-outline-danger rounded-pill w-100 btn-sm fw-semibold mt-3"
+            data-bs-toggle="modal"
+            data-bs-target="#cancelRoomShareModal"
+          >
+            <i class="fa-solid fa-ban me-1"></i>Cancel Request &amp; Refund with Reason
+          </button>
+        <% } %>
+      </div>
+
+      <!-- Companion Live Chat -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border border-light-subtle">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="fw-bold mb-0"><i class="fa-regular fa-comments text-danger me-2"></i>Companion Live Chat</h5>
+          <% if (canChat) { %><span class="badge bg-success-subtle text-success rounded-pill">Live</span><% } %>
+        </div>
+        <% if (!canChat) { %>
+          <p class="text-muted small mb-0">Click <strong>Request to Join &amp; Chat</strong> above to unlock direct chat with the organizer before deciding on the stay and booking.</p>
+        <% } else { %>
+          <div id="poolChatMessages" class="bg-light rounded-3 p-3 mb-3 border border-light-subtle" style="max-height: 280px; overflow-y: auto;">
+            <% if (!pool.messages || pool.messages.length === 0) { %>
+              <p class="text-muted small mb-0" id="poolChatEmptyHint">No messages yet. Discuss dates, stay preference, and arrival plans here!</p>
+            <% } else { %>
+              <% pool.messages.forEach(function(msg) { %>
+                <div class="mb-2" data-msg-id="<%= msg._id %>">
+                  <span class="fw-bold small">@<%= msg.sender ? msg.sender.username : 'member' %></span>
+                  <span class="text-muted" style="font-size: 0.72rem;"><%= new Date(msg.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) %></span>
+                  <div class="bg-white rounded-3 px-3 py-2 border small mt-1"><%= msg.text %></div>
+                </div>
+              <% }); %>
+            <% } %>
+          </div>
+          <form id="poolChatForm" action="/room-shares/<%= pool._id %>/messages" method="POST" class="d-flex gap-2">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="text" id="poolChatInput" name="text" class="form-control rounded-pill" placeholder="Chat about stay choice, check-in, or plans..." maxlength="500" required>
+            <button type="submit" class="btn btn-dark rounded-pill px-3"><i class="fa-solid fa-paper-plane"></i></button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if (canCancelPool) { %>
+  <div class="modal fade" id="cancelRoomShareModal" tabindex="-1" aria-labelledby="cancelRoomShareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow">
+        <form action="/room-shares/<%= pool._id %>/cancel?_method=PATCH" method="POST" class="needs-validation" novalidate>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="modal-header border-bottom-0 pb-0">
+            <h5 class="modal-title fw-bold text-danger" id="cancelRoomShareModalLabel">
+              <i class="fa-solid fa-triangle-exclamation me-2"></i>Cancel Room Share &amp; Refund
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="small text-muted mb-3">
+              Please select or write the reason for cancelling. Any paid split shares will be automatically refunded to the respective accounts.
+            </p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill wl-cancel-preset">Companion not responding to chat</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill wl-cancel-preset">Companion did not pay split share in time</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill wl-cancel-preset">Change in travel dates or plans</button>
+            </div>
+            <label for="poolCancelReasonInput" class="form-label fw-semibold small">Cancellation Reason (Required)</label>
+            <textarea id="poolCancelReasonInput" name="cancellationReason" rows="3" minlength="5" maxlength="500" class="form-control rounded-3" placeholder="Explain why you are cancelling this room-share request..." required></textarea>
+            <div class="invalid-feedback">Please provide a reason (at least 5 characters).</div>
+          </div>
+          <div class="modal-footer border-top-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Keep Request</button>
+            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">Confirm Cancel &amp; Refund</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<script id="showStaysData" type="application/json"><%- JSON.stringify({ tree: locationTree || { states: [], citiesByState: {}, stays: [] }, initial: initialStaySelection || {} }) %></script>
+<script src="/js/cascadingLocationSelect.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const staysDataEl = document.getElementById("showStaysData");
+    const stateSelect = document.getElementById("stayFilterState");
+    const citySelect = document.getElementById("stayFilterCity");
+    const staySelect = document.getElementById("selectDestinationStay");
+    if (staysDataEl && stateSelect && citySelect && staySelect && typeof window.initCascadingStayPicker === "function") {
+      try {
+        const parsed = JSON.parse(staysDataEl.textContent || "{}");
+        window.initCascadingStayPicker({
+          stateSelect,
+          citySelect,
+          staySelect,
+          tree: parsed.tree,
+          initial: parsed.initial,
+          defaultStayPlaceholder: "Choose a stay in this city..."
+        });
+      } catch (e) {}
+    }
+
+    const reasonInput = document.getElementById("poolCancelReasonInput");
+    document.querySelectorAll(".wl-cancel-preset").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (reasonInput) reasonInput.value = btn.textContent.trim();
+      });
+    });
+
+    const chatBox = document.getElementById("poolChatMessages");
+    const chatForm = document.getElementById("poolChatForm");
+    const chatInput = document.getElementById("poolChatInput");
+    if (!chatBox || !chatForm || !chatInput) return;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    function renderMessages(messages) {
+      if (!Array.isArray(messages) || messages.length === 0) return;
+      const existingCount = chatBox.querySelectorAll("[data-msg-id]").length;
+      if (messages.length === existingCount) return;
+
+      const atBottom = (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight) < 40;
+      chatBox.innerHTML = "";
+      messages.forEach((msg) => {
+        const row = document.createElement("div");
+        row.className = "mb-2";
+        row.dataset.msgId = msg._id || "";
+
+        const userSpan = document.createElement("span");
+        userSpan.className = "fw-bold small";
+        userSpan.textContent = `@${msg.sender || "member"} `;
+
+        const timeSpan = document.createElement("span");
+        timeSpan.className = "text-muted";
+        timeSpan.style.fontSize = "0.72rem";
+        timeSpan.textContent = new Date(msg.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+
+        const bubble = document.createElement("div");
+        bubble.className = "bg-white rounded-3 px-3 py-2 border small mt-1";
+        bubble.textContent = msg.text;
+
+        row.appendChild(userSpan);
+        row.appendChild(timeSpan);
+        row.appendChild(bubble);
+        chatBox.appendChild(row);
+      });
+      if (atBottom) chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function fetchLatestMessages() {
+      try {
+        const res = await fetch("/room-shares/<%= pool._id %>/messages", { headers: { Accept: "application/json" } });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && Array.isArray(data.messages)) {
+          renderMessages(data.messages);
+        }
+      } catch (e) {}
+    }
+
+    chatForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      const csrfField = chatForm.querySelector('input[name="_csrf"]');
+      try {
+        const res = await fetch(chatForm.action, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-CSRF-Token": csrfField ? csrfField.value : ""
+          },
+          body: JSON.stringify({ text, _csrf: csrfField ? csrfField.value : "" })
+        });
+        if (res.ok) {
+          chatInput.value = "";
+          await fetchLatestMessages();
+        } else {
+          chatForm.submit();
+        }
+      } catch (err) {
+        chatForm.submit();
+      }
+    });
+
+    setInterval(fetchLatestMessages, 3500);
+  });
+</script>

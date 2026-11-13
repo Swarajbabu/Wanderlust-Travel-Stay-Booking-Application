@@ -1,0 +1,289 @@
+<% layout('layouts/boilerplate') -%>
+<div id="wl-chat-context"
+  data-location="<%= itinerary.destination || '' %>"
+  data-title="<%= itinerary.destination ? itinerary.destination + ' Itinerary' : '' %>"
+  hidden></div>
+<div class="container mt-4 mb-5">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <nav class="small mb-2">
+        <a href="/itineraries" class="text-decoration-none text-secondary"><i class="fa-solid fa-arrow-left me-1"></i>All Saved Trips</a>
+      </nav>
+      <h2 class="fw-bold mb-1"><%= itinerary.destination %> &middot; <%= itinerary.days %>-Day Itinerary</h2>
+      <div class="d-flex flex-wrap gap-2 small text-muted align-items-center">
+        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">
+          <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
+          <%= itinerary.sourceProvider === 'gemini' ? 'Gemini AI Curated' : 'Smart Curated Planner' %>
+        </span>
+        <span><strong>Total Route:</strong> <%= itinerary.totalDistanceKm %> km</span>
+        <span>&bull;</span>
+        <span><strong>Est. Travel Time:</strong> <%= itinerary.totalTravelMins %> mins</span>
+        <span>&bull;</span>
+        <span><strong>Pace:</strong> <%= itinerary.pace %> (<%= itinerary.dailyHours %>h/day via <%= itinerary.travelMode %>)</span>
+      </div>
+    </div>
+    <a href="/itineraries/new" class="btn btn-outline-dark rounded-pill px-3 fw-semibold">
+      <i class="fa-solid fa-rotate-right me-1"></i>Plan Another Trip
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Day-wise Timeline -->
+    <div class="col-lg-7">
+      <ul class="nav nav-pills gap-2 mb-3" id="dayTabs" role="tablist">
+        <% itinerary.dayPlans.forEach(function(day, idx) { %>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill fw-semibold itinerary-day-tab <%= idx === 0 ? 'active' : '' %>" id="day-tab-<%= day.dayNumber %>" data-bs-toggle="pill" data-bs-target="#day-pane-<%= day.dayNumber %>" type="button" role="tab" data-day-number="<%= day.dayNumber %>">
+              Day <%= day.dayNumber %>
+            </button>
+          </li>
+        <% }); %>
+      </ul>
+
+      <div class="tab-content" id="dayTabsContent">
+        <% itinerary.dayPlans.forEach(function(day, idx) { %>
+          <div class="tab-pane fade <%= idx === 0 ? 'show active' : '' %>" id="day-pane-<%= day.dayNumber %>" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border border-light-subtle mb-3">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
+                <h5 class="fw-bold mb-0">Day <%= day.dayNumber %>: <%= day.theme %></h5>
+                <span class="text-muted small">
+                  <i class="fa-solid fa-road me-1 text-danger"></i><%= day.estimatedDistanceKm %> km &bull;
+                  <i class="fa-regular fa-clock ms-1 me-1 text-danger"></i><%= day.estimatedTravelMins %> mins transit
+                </span>
+              </div>
+
+              <% if (!day.stops || day.stops.length === 0) { %>
+                <p class="text-muted mb-0">Open leisure day to relax at your stay and explore local cafes.</p>
+              <% } else { %>
+                <div class="d-flex flex-column gap-3">
+                  <% day.stops.forEach(function(stop) { %>
+                    <div class="border rounded-3 p-3 bg-light">
+                      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-1">
+                        <div>
+                          <span class="badge bg-danger rounded-pill me-2">#<%= stop.order %></span>
+                          <span class="fw-bold text-dark"><%= stop.name %></span>
+                          <span class="badge bg-white text-secondary border ms-1"><%= stop.category %></span>
+                        </div>
+                        <span class="small fw-semibold text-secondary">
+                          <i class="fa-regular fa-clock me-1"></i><%= stop.arrivalTime %> (<%= stop.durationMins %> mins)
+                        </span>
+                      </div>
+                      <p class="small text-secondary mb-2"><%= stop.description %></p>
+                      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 small text-muted">
+                        <div class="d-flex flex-wrap gap-3">
+                          <span><i class="fa-solid fa-route me-1 text-danger"></i><%= stop.distanceFromPrevKm %> km / <%= stop.travelMinsFromPrev %> mins from previous</span>
+                          <% if (stop.tips) { %>
+                            <span><i class="fa-regular fa-lightbulb me-1 text-warning"></i><%= stop.tips %></span>
+                          <% } %>
+                        </div>
+                        <% if (Array.isArray(stop.coordinates) && stop.coordinates.length >= 2) { %>
+                          <button
+                            type="button"
+                            class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold wl-stop-directions-btn"
+                            data-lng="<%= stop.coordinates[0] %>"
+                            data-lat="<%= stop.coordinates[1] %>"
+                          >
+                            <i class="fa-solid fa-location-arrow me-1"></i>Directions
+                          </button>
+                        <% } %>
+                      </div>
+                    </div>
+                  <% }); %>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+
+    <!-- Interactive Mapbox Route Map -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border border-light-subtle sticky-top sticky-top-lg-only" style="top: 85px;">
+        <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+          <h6 class="fw-bold mb-0"><i class="fa-solid fa-map-pin text-danger me-1"></i>Route Map (<span id="activeDayLabel">Day 1</span>)</h6>
+          <button type="button" id="openDayRouteMapsBtn" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold">
+            <i class="fa-solid fa-diamond-turn-right me-1"></i>Open in Maps
+          </button>
+        </div>
+        <div id="itineraryMap" style="height: 430px; width: 100%; border-radius: 12px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const itineraryMapToken = "<%= process.env.MAP_TOKEN %>";
+  const itineraryData = <%- JSON.stringify({
+    destination: itinerary.destination,
+    travelMode: itinerary.travelMode || 'driving',
+    startCoordinates: itinerary.startCoordinates,
+    dayPlans: itinerary.dayPlans
+  }).replace(/</g, '\\u003c') %>;
+
+  document.addEventListener("DOMContentLoaded", function () {
+    let activeDayNumber = 1;
+
+    function createDirectionsBtn(coords, labelText) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn btn-danger btn-sm rounded-pill mt-2 w-100 fw-semibold";
+      btn.textContent = labelText || "Directions from My Location";
+      btn.addEventListener("click", function () {
+        if (typeof window.wlOpenMapsDirections === "function") {
+          window.wlOpenMapsDirections({
+            lng: coords[0],
+            lat: coords[1],
+            travelMode: itineraryData.travelMode
+          });
+        }
+      });
+      return btn;
+    }
+
+    document.querySelectorAll(".wl-stop-directions-btn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        if (typeof window.wlOpenMapsDirections === "function") {
+          window.wlOpenMapsDirections({
+            lng: this.dataset.lng,
+            lat: this.dataset.lat,
+            travelMode: itineraryData.travelMode
+          });
+        }
+      });
+    });
+
+    const openDayBtn = document.getElementById("openDayRouteMapsBtn");
+    if (openDayBtn) {
+      openDayBtn.addEventListener("click", function () {
+        if (typeof window.wlOpenMapsDirections !== "function") return;
+        const day = (itineraryData.dayPlans || []).find((d) => d.dayNumber === Number(activeDayNumber));
+        const validStops = (day && Array.isArray(day.stops) ? day.stops : [])
+          .filter((s) => Array.isArray(s.coordinates) && s.coordinates.length >= 2);
+        if (validStops.length === 0) {
+          const anchorCoords = Array.isArray(itineraryData.startCoordinates) && itineraryData.startCoordinates.length === 2
+            ? itineraryData.startCoordinates
+            : [78.4867, 17.3850];
+          window.wlOpenMapsDirections({
+            lng: anchorCoords[0],
+            lat: anchorCoords[1],
+            travelMode: itineraryData.travelMode
+          });
+          return;
+        }
+        const finalStop = validStops[validStops.length - 1];
+        const middleWaypoints = validStops.slice(0, -1).map((s) => s.coordinates);
+        window.wlOpenMapsDirections({
+          lng: finalStop.coordinates[0],
+          lat: finalStop.coordinates[1],
+          waypoints: middleWaypoints,
+          travelMode: itineraryData.travelMode
+        });
+      });
+    }
+
+    const mapContainer = document.getElementById("itineraryMap");
+    if (!mapContainer || typeof mapboxgl === "undefined" || !itineraryMapToken) {
+      if (mapContainer) {
+        mapContainer.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted rounded-3 p-3 text-center">Map preview requires a Mapbox token. Stop coordinates are saved cleanly.</div>';
+      }
+      return;
+    }
+
+    mapboxgl.accessToken = itineraryMapToken;
+    const anchor = Array.isArray(itineraryData.startCoordinates) && itineraryData.startCoordinates.length === 2
+      ? itineraryData.startCoordinates
+      : [78.4867, 17.3850];
+
+    const map = new mapboxgl.Map({
+      container: "itineraryMap",
+      style: "mapbox://styles/mapbox/streets-v12",
+      center: anchor,
+      zoom: 11
+    });
+
+    let activeMarkers = [];
+
+    function renderDayOnMap(dayNumber) {
+      activeDayNumber = Number(dayNumber);
+      activeMarkers.forEach((m) => m.remove());
+      activeMarkers = [];
+
+      const day = (itineraryData.dayPlans || []).find((d) => d.dayNumber === Number(dayNumber));
+      const label = document.getElementById("activeDayLabel");
+      if (label) label.textContent = "Day " + dayNumber;
+
+      const coords = [anchor];
+      const anchorPopup = document.createElement("div");
+      const anchorTitle = document.createElement("strong");
+      anchorTitle.textContent = "Stay / Trip Start";
+      anchorPopup.appendChild(anchorTitle);
+      anchorPopup.appendChild(createDirectionsBtn(anchor, "Navigate Here from My Location"));
+      activeMarkers.push(
+        new mapboxgl.Marker({ color: "#111827" })
+          .setLngLat(anchor)
+          .setPopup(new mapboxgl.Popup({ offset: 20 }).setDOMContent(anchorPopup))
+          .addTo(map)
+      );
+
+      if (day && Array.isArray(day.stops)) {
+        day.stops.forEach((stop) => {
+          if (!Array.isArray(stop.coordinates) || stop.coordinates.length < 2) return;
+          coords.push(stop.coordinates);
+
+          const pop = document.createElement("div");
+          const h = document.createElement("strong");
+          h.textContent = "#" + stop.order + " " + stop.name;
+          const p = document.createElement("div");
+          p.textContent = stop.arrivalTime + " • " + stop.durationMins + " mins (" + stop.distanceFromPrevKm + " km)";
+          pop.appendChild(h);
+          pop.appendChild(p);
+          pop.appendChild(createDirectionsBtn(stop.coordinates, "Navigate from My Location"));
+
+          activeMarkers.push(
+            new mapboxgl.Marker({ color: "#fe424d" })
+              .setLngLat(stop.coordinates)
+              .setPopup(new mapboxgl.Popup({ offset: 20 }).setDOMContent(pop))
+              .addTo(map)
+          );
+        });
+      }
+
+      if (map.getSource("dayRoute")) {
+        map.getSource("dayRoute").setData({
+          type: "Feature",
+          geometry: { type: "LineString", coordinates: coords }
+        });
+      }
+
+      if (coords.length > 1) {
+        const bounds = new mapboxgl.LngLatBounds(coords[0], coords[0]);
+        coords.forEach((c) => bounds.extend(c));
+        map.fitBounds(bounds, { padding: 45, maxZoom: 13 });
+      } else {
+        map.flyTo({ center: anchor, zoom: 11 });
+      }
+    }
+
+    map.on("load", function () {
+      map.addSource("dayRoute", {
+        type: "geojson",
+        data: { type: "Feature", geometry: { type: "LineString", coordinates: [] } }
+      });
+      map.addLayer({
+        id: "dayRouteLine",
+        type: "line",
+        source: "dayRoute",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: { "line-color": "#fe424d", "line-width": 3, "line-dasharray": [2, 1.5] }
+      });
+      renderDayOnMap(1);
+    });
+
+    document.querySelectorAll('#dayTabs button[data-day-number]').forEach((btn) => {
+      btn.addEventListener("shown.bs.tab", function () {
+        renderDayOnMap(this.getAttribute("data-day-number"));
+      });
+    });
+  });
+</script>

@@ -1,0 +1,72 @@
+<!-- Wanderlust Travel Assistant Floating Chatbot -->
+<div id="wl-chatbot-root" data-csrf="<%= csrfToken %>" aria-live="polite">
+  <button
+    type="button"
+    id="wl-chatbot-toggle"
+    class="wl-chat-fab"
+    aria-label="Open Wanderlust Travel Assistant"
+    aria-expanded="false"
+    aria-controls="wl-chatbot-panel"
+  >
+    <i class="fa-solid fa-comments wl-chat-fab-icon"></i>
+    <span class="wl-chat-fab-label">Travel Chat</span>
+  </button>
+
+  <section
+    id="wl-chatbot-panel"
+    class="wl-chat-panel d-none"
+    role="dialog"
+    aria-label="Wanderlust Travel Assistant"
+  >
+    <header class="wl-chat-header">
+      <div class="wl-chat-title-wrap">
+        <div class="wl-chat-avatar">
+          <i class="fa-solid fa-compass"></i>
+        </div>
+        <div>
+          <h6 class="wl-chat-title mb-0">Wanderlust Travel Chat</h6>
+          <div class="wl-chat-subtitle-row">
+            <span class="wl-chat-subtitle">AI guide for places, distances &amp; local highlights</span>
+            <span id="wl-chatbot-location-pill" class="wl-chat-loc-pill d-none"></span>
+          </div>
+        </div>
+      </div>
+      <div class="wl-chat-header-actions">
+        <button
+          type="button"
+          id="wl-chatbot-reset-btn"
+          class="wl-chat-icon-btn"
+          title="Start a fresh chat"
+          aria-label="Reset chat conversation"
+        >
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+        <button
+          type="button"
+          id="wl-chatbot-close"
+          class="wl-chat-icon-btn"
+          title="Close chat"
+          aria-label="Close chat"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </header>
+
+    <div id="wl-chatbot-messages" class="wl-chat-messages"></div>
+
+    <form id="wl-chatbot-form" class="wl-chat-input-bar" autocomplete="off">
+      <input
+        type="text"
+        id="wl-chatbot-input"
+        class="form-control wl-chat-input"
+        placeholder="Ask AI about any place, distance, specialty..."
+        maxlength="1000"
+        required
+      />
+      <button type="submit" id="wl-chatbot-send" class="btn wl-chat-send-btn" aria-label="Send message">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </form>
+  </section>
+</div>

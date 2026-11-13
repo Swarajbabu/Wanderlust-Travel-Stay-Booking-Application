@@ -11,6 +11,7 @@
 
     <form action="/listings?_csrf=<%= csrfToken %>" method="post" novalidate class="needs-validation" enctype="multipart/form-data">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="_amenitiesSubmitted" value="1">
 
       <!-- Basic Details -->
       <div class="form-section-title">Basic Details</div>
@@ -50,7 +51,7 @@
           <label class="form-label form-icon-label" for="price">
             <i class="fa-solid fa-indian-rupee-sign"></i> Price / Night
           </label>
-          <input type="number" name="listing[price]" id="price" placeholder="e.g. 1200" class="form-control" required>
+          <input type="number" name="listing[price]" id="price" placeholder="e.g. 1200" min="0" class="form-control" required>
           <div class="invalid-feedback">Price should be valid.</div>
         </div>
 
@@ -69,6 +70,76 @@
         </label>
         <input type="text" name="listing[location]" id="location" placeholder="e.g. Hyderabad, Telangana" class="form-control" required>
         <div class="invalid-feedback">Location should be valid.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label form-icon-label" for="category">
+          <i class="fa-solid fa-tag"></i> Category
+        </label>
+        <select name="listing[category]" id="category" class="form-select" required>
+          <option value="" disabled selected>Select a property category</option>
+          <% (categories || []).forEach(function(cat) { %>
+            <option value="<%= cat %>"><%= cat %></option>
+          <% }); %>
+        </select>
+        <div class="invalid-feedback">Please select a category.</div>
+      </div>
+
+      <!-- Capacity & Amenities -->
+      <div class="form-section-title mt-4">Capacity & Amenities</div>
+
+      <div class="row">
+        <div class="mb-3 col-md-4">
+          <label class="form-label form-icon-label" for="maxGuests">
+            <i class="fa-solid fa-users"></i> Max Guests
+          </label>
+          <input type="number" name="listing[maxGuests]" id="maxGuests" value="4" min="1" max="20" class="form-control" required>
+        </div>
+        <div class="mb-3 col-md-4">
+          <label class="form-label form-icon-label" for="bedrooms">
+            <i class="fa-solid fa-bed"></i> Bedrooms
+          </label>
+          <input type="number" name="listing[bedrooms]" id="bedrooms" value="1" min="0" max="20" class="form-control" required>
+        </div>
+        <div class="mb-3 col-md-4">
+          <label class="form-label form-icon-label" for="bathrooms">
+            <i class="fa-solid fa-bath"></i> Bathrooms
+          </label>
+          <input type="number" name="listing[bathrooms]" id="bathrooms" value="1" min="0" max="20" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label form-icon-label">
+          <i class="fa-solid fa-list-check"></i> Amenities
+        </label>
+        <div class="row g-2">
+          <% (amenitiesList || []).forEach(function(amenity, idx) { %>
+            <div class="col-6 col-sm-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="listing[amenities][]" value="<%= amenity %>" id="amenity_<%= idx %>" <%= idx < 2 ? 'checked' : '' %>>
+                <label class="form-check-label small" for="amenity_<%= idx %>"><%= amenity %></label>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label form-icon-label" for="houseRules">
+          <i class="fa-solid fa-clipboard-list"></i> House Rules (Optional)
+        </label>
+        <textarea name="listing[houseRules]" id="houseRules" rows="2" maxlength="500" placeholder="e.g. Check-in after 2 PM, no smoking indoors, quiet hours after 10 PM." class="form-control"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <input type="hidden" name="_roomShareSubmitted" value="1">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="allowRoomSharing" name="listing[allowRoomSharing]" value="true" checked>
+          <label class="form-check-label fw-semibold small" for="allowRoomSharing">
+            Allow Solo Room Sharing (Let verified solo travellers open cost-splitting pools up to Max Guests)
+          </label>
+        </div>
       </div>
 
       <button class="btn btn-listing-submit mt-3">
@@ -92,7 +163,10 @@
         const url = URL.createObjectURL(file);
         const thumb = document.createElement("div");
         thumb.className = "image-preview-thumb";
-        thumb.innerHTML = `<img src="${url}" alt="${file.name}">`;
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = file.name;
+        thumb.appendChild(img);
         grid.appendChild(thumb);
       });
     });

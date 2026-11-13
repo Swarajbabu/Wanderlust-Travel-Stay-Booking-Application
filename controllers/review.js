@@ -1,5 +1,5 @@
 const Listing = require("../modals/listing");
-const Review = require("../modals/review"); 
+const Review = require("../modals/review");
 const Booking = require("../modals/booking");
 const ExpressError = require("../utility/ExpressError");
 
@@ -23,25 +23,30 @@ module.exports.createReview = async (req, res) => {
         return res.redirect(`/listings/${id}`);
     }
 
+    // Prevent duplicate reviews by the same guest on the same listing
+    const existingReview = await Review.findOne({
+        _id: { $in: listing.reviews },
+        author: req.user._id
+    });
+    if (existingReview) {
+        req.flash("error", "You have already submitted a review for this listing.");
+        return res.redirect(`/listings/${id}`);
+    }
+
     const newReview = new Review(req.body.review);
     newReview.author = req.user._id;
     listing.reviews.push(newReview);
-    await listing.save();
     await newReview.save();
+    await listing.save();
 
-    req.flash("success","New Review Created!");
+    req.flash("success", "New Review Created!");
     res.redirect(`/listings/${id}`);
-    // console.log(listing);
-    // res.send("Working");
 };
 
 module.exports.destroyReview = async (req, res) => {
-    let { id, reviewId } = req.params;
-    // pull it help to delete that id from the array. and search the listing id and go to the reviews array
-    // and delete that review id
-    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } })
+    const { id, reviewId } = req.params;
+    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
     await Review.findByIdAndDelete(reviewId);
-    req.flash("success","Review Deleted!");
+    req.flash("success", "Review Deleted!");
     res.redirect(`/listings/${id}`);
 };
-

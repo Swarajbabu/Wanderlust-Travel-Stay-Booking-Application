@@ -2,9 +2,9 @@
 
 # 🏡 Wanderlust
 
-### Discover a stay. Book it with confidence. Travel without the guesswork.
+### Discover a stay. Match with travel companions. Plan with AI. Travel with confidence.
 
-A full-stack vacation rental platform — built end-to-end with session-based auth (local + Google OAuth), OTP email verification, Mapbox geocoding, Cloudinary image storage, Razorpay payments, and a Jest test suite backed by an in-memory MongoDB.
+A production-grade, full-stack vacation rental & solo travel companion matching platform — built end-to-end with Node.js, Express, MongoDB Atlas, EJS Mate, Google Gemini AI, Mapbox GL geocoding, Cloudinary image storage, multi-account Razorpay split payments, and a 41-test Jest suite.
 
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
@@ -12,7 +12,9 @@ A full-stack vacation rental platform — built end-to-end with session-based au
 [![EJS](https://img.shields.io/badge/EJS-B4CA65?style=for-the-badge&logo=ejs&logoColor=black)](https://ejs.co/)
 [![Passport.js](https://img.shields.io/badge/Passport.js-34E27A?style=for-the-badge&logo=passport&logoColor=white)](https://www.passportjs.org/)
 [![Razorpay](https://img.shields.io/badge/Razorpay-0C2451?style=for-the-badge&logo=razorpay&logoColor=white)](https://razorpay.com/)
-[![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
+[![Google Gemini AI](https://img.shields.io/badge/Google_Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Mapbox](https://img.shields.io/badge/Mapbox_GL-000000?style=for-the-badge&logo=mapbox&logoColor=white)](https://www.mapbox.com/)
+[![Jest](https://img.shields.io/badge/Jest_41_Tests-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
 [![Live Demo](https://img.shields.io/badge/Live_Demo-wanderlust.swarajvecha.in-fe424d?style=for-the-badge&logo=google-chrome&logoColor=white)](https://wanderlust.swarajvecha.in/)
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application?style=flat-square)](https://github.com/Swarajbabu/Wanderlust-Travel-Stay-Booking-Application/stargazers)
@@ -27,21 +29,16 @@ A full-stack vacation rental platform — built end-to-end with session-based au
 
 ## 📸 Project Preview
 
-> Screenshots aren't bundled with this README yet. Drop images into `assets/screenshots/` using the filenames below, and they'll render automatically once pushed.
-
-| Page | Path |
+| Feature / Page | Description |
 |---|---|
-| Homepage / Listings feed | `assets/screenshots/home.png` |
-| Listing details page | `assets/screenshots/listing-details.png` |
-| Create listing form | `assets/screenshots/create-listing.png` |
-| Login / Signup | `assets/screenshots/auth.png` |
-| Booking checkout (Razorpay) | `assets/screenshots/checkout.png` |
-| My Bookings dashboard | `assets/screenshots/my-bookings.png` |
-
-```markdown
-<!-- Example embed once the file exists -->
-![Homepage](assets/screenshots/home.png)
-```
+| **Homepage & Infinite Scroll** | Lazy loading with `IntersectionObserver`, dynamic GST tax calculator toggle, Mapbox cluster map view |
+| **Solo Room Shares & Match** | State & City cascading stay discovery, compatibility scoring, live pool chat, multi-account split payments |
+| **AI Travel Planner** | Personalized multi-day custom itineraries powered by Google Gemini AI with interactive Mapbox route maps |
+| **AI Travel Chatbot** | 24/7 floating assistant with contextual recommendations and itinerary suggestions |
+| **Listing Details & Reviews** | Real-time calendar availability, verified guest reviews gated by completed stays, host profile |
+| **Booking & Split Checkout** | Individual Razorpay checkouts per co-traveler, partial booking reservation locks, automated cancellation refunds |
+| **Wishlist & User Profile** | Instant AJAX save/heart stays, travel preferences (gender, sleep schedule, smoking rule) |
+| **Host Dashboard** | Occupancy metrics, revenue analytics, listing lifecycle management, booking approvals |
 
 ---
 
@@ -49,460 +46,393 @@ A full-stack vacation rental platform — built end-to-end with session-based au
 
 - [About The Project](#-about-the-project)
 - [Key Features](#-key-features)
+  - [👥 Solo Room Sharing & Companion Matching](#-solo-room-sharing--companion-matching)
+  - [🤖 AI Travel Planner & Chatbot](#-ai-travel-planner--chatbot)
+  - [🏡 Property Listings & Infinite Scroll](#-property-listings--infinite-scroll)
+  - [💳 Bookings, Multi-Account Split Payments & Refunds](#-bookings-multi-account-split-payments--refunds)
+  - [⭐ Verified Reviews & Wishlist](#-verified-reviews--wishlist)
+  - [🔐 Authentication & Authorization](#-authentication--authorization)
+  - [📱 Fully Responsive Cross-Device UI](#-fully-responsive-cross-device-ui)
 - [Tech Stack](#-tech-stack)
 - [Architecture](#-architecture)
-- [Application Flow](#-application-flow)
-- [Authentication & Authorization](#-authentication--authorization)
+- [Application Flow & Sequence Diagrams](#-application-flow--sequence-diagrams)
 - [Database Design](#-database-design)
 - [API / Routes](#-api--routes)
 - [Project Structure](#-project-structure)
-- [Installation](#-installation)
+- [Installation & Setup](#-installation--setup)
 - [Environment Variables](#-environment-variables)
 - [Running Locally](#-running-locally)
-- [Seed Data](#-seed-data)
 - [Testing](#-testing)
-- [Deployment](#-deployment)
-- [Security](#-security)
-- [Performance & Scalability](#-performance--scalability)
-- [Future Improvements](#-future-improvements)
-- [Learning Outcomes](#-learning-outcomes)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Author](#-author)
+- [Security & Performance](#-security--performance)
+- [Author & License](#-author--license)
 
 ---
 
 ## 🧭 About The Project
 
-**Wanderlust** is a full-stack vacation-rental booking platform in the spirit of Airbnb: hosts list properties, guests search and book them, and both sides manage the stay through to payment and review — all server-rendered with Node.js, Express, MongoDB, and EJS.
+**Wanderlust** is a vacation rental and social travel platform that goes beyond standard booking portals. It solves real-world challenges faced by both property hosts and solo travelers:
 
-Booking platforms are a deceptively good engineering exercise. They aren't just CRUD — they force you to solve for **double-booking prevention**, **server-trusted pricing**, **payment integrity**, and **role-based access** where the same resource (a listing, a booking) behaves differently depending on who's looking at it. Wanderlust was built to solve each of those problems for real, not to fake them for a portfolio.
-
-What a visitor can actually do:
-
-- Browse, search, and filter property listings by category, keyword, or location
-- Register with email/password, Google, or a one-time email code — with mandatory email verification before listing anything
-- Publish listings with photo uploads (Cloudinary) and automatic map geocoding (Mapbox)
-- Book a stay with real-time availability checking, pay through Razorpay, and receive an email confirmation
-- Leave a rating and review — but only after a **confirmed, completed** stay, not just an account
-- Manage bookings as a guest (cancel) or as a host (confirm/cancel bookings on their own listings)
-
-This project exists to demonstrate practical full-stack ability: designing a relational-ish document schema, writing server-side business rules that don't trust the client, integrating three real third-party APIs (payments, maps, image storage) end-to-end, and backing the whole thing with an automated test suite.
+1. **The Solo Travel Cost Barrier:** Solo travelers often pay the full price of a double room or hesitate to travel alone. Wanderlust introduces a dedicated **Solo Room Sharing & Companion Match** engine where travelers post stay requests, filter by **State → City → Stay**, match via an intelligent compatibility algorithm, collaborate in real-time pool chats, and split booking payments directly across their individual Razorpay accounts.
+2. **Double-Booking & Split Payment Integrity:** Accommodations are reserved under a **Payment Lock** window (30-minute TTL). If Member A pays ₹1,500 and Member B hasn't paid yet, the pool remains in `partially_booked` status; only when all co-travelers complete their payment is the room confirmed. If a member becomes unresponsive, the initiator can cancel with automated refund tracking.
+3. **AI-Powered Travel Discovery:** Integrated with **Google Gemini AI**, Wanderlust automatically generates tailored multi-day travel itineraries complete with morning/afternoon/evening stops, hotel stays, budgets, and Mapbox visual route maps.
+4. **Smooth Performance & Lazy Loading:** The homepage replaces clunky pagination buttons with smooth infinite scroll lazy loading via `IntersectionObserver`, coupled with dynamic 18% GST tax toggle synchronization.
 
 ---
 
 ## ✨ Key Features
 
-### 🔐 Authentication
-- Local signup/login via Passport (`passport-local-mongoose` — salted & hashed passwords, no plaintext storage)
-- Google OAuth 2.0 login, with automatic account linking when the Google email matches an existing local account
-- Mandatory email verification via a 6-digit, bcrypt-hashed OTP (10-minute expiry) before a user can create listings
-- Passwordless OTP login as an alternative to a password
-- Forgot / reset password flow using a random, time-limited token (1-hour expiry) delivered by email
-- Rate limiting on login, signup, and OTP endpoints to blunt brute-force and spam attempts
-- Sessions persisted in MongoDB (`connect-mongo`), not in server memory
+### 👥 Solo Room Sharing & Companion Matching
+- **Interactive On/Off Toggle Mode:** Clean toggle button (`Post Solo Room Share` [ON / OFF]) that reveals or hides the submission drawer smoothly.
+- **Cascading State & City Hierarchy:** Automatic geographic grouping (`1. State` → `2. City` → `3. Specific Stay`). Only states with valid properties are displayed, dynamically populating matching cities and share-enabled listings without clutter.
+- **Flexible Request Creation:** Post stay requests either with a specific stay chosen upfront OR select State & City to decide the property collaboratively inside the pool chat.
+- **Compatibility Scoring Engine (`services/companionMatcher.js`):** Matches travelers based on travel personality, companion gender preferences (`Open to Any Gender` / `Same Gender Only`), smoking preferences (`Non-Smoker Only` / `Smoker Friendly` / `No Preference`), sleep schedules (`Early Riser` / `Night Owl` / `Flexible`), and target budgets.
+- **Real-Time Group Chat:** Built-in chat room for every pool where verified participants discuss travel dates, activities, and stay choices before committing funds.
+- **Multi-Account Split Payments:** Seamless split payments where each traveler pays their proportional share (e.g. 50/50 split of ₹3,000 = ₹1,500 each) via their own Razorpay account.
+- **Partial Booking & Reservation Lock (30-Min TTL):** Prevents date collision while awaiting companion payments. Confirmed only when all co-travelers pay.
+- **Cancellation & Unresponsive Member Flow:** If a companion fails to complete payment or abandons the pool, the initiator can cancel the request with structured reasons and claim their refund.
 
-### 🏘️ Listings
-- Full CRUD, restricted to the listing's owner for edit/delete
-- Cloudinary-hosted image upload (5MB limit, jpg/jpeg/png) with automatic cleanup of the old image on replace/delete
-- Automatic geocoding of the typed location into map coordinates via Mapbox, with on-demand backfill for older records missing geometry
-- 17 built-in categories (Rooms, Iconic Cities, Mountains, Castles, Camping, etc.) for filtering
-- Full-text search across title/location/country with an automatic regex fallback and server-side pagination (12 per page)
-- Interactive Mapbox map on the listing page — the marker shows the area, with the note that the exact address is shared only after booking
+### 🤖 AI Travel Planner & Chatbot
+- **Gemini AI Multi-Day Itinerary Engine:** Generates comprehensive daily schedules (Day 1..Day 14) with activities, estimated costs, recommended homestays, and packing advice.
+- **Interactive Route Map:** Plotted on Mapbox GL with connected coordinates showing exact sequence of daily stops.
+- **24/7 Contextual Travel Chatbot:** Floating assistant on all pages (`/api/chat`) providing destination tips, weather guidance, and instant stay recommendations based on current location and preferences.
 
-### 📅 Bookings & Payments
-- Flatpickr date picker that fetches already-booked ranges and disables them live, before submission
-- Server-side overlap check rejects a booking if it collides with any pending/confirmed booking for that listing
-- Total price is **always computed server-side** (nights × nightly rate) — the client can't submit its own price
-- Razorpay order creation → hosted checkout → payment signature verified server-side with HMAC-SHA256 before a booking is marked confirmed
-- Booking lifecycle: `pending → confirmed → cancelled`, with guests blocked from cancelling on/after check-in, and hosts able to confirm or cancel bookings on their own listings
-- Automatic booking-confirmation email on successful payment
+### 🏡 Property Listings & Infinite Scroll
+- **Infinite Scroll Lazy Loading:** Responsive grid that asynchronously fetches the next batch of properties (`/listings?format=json&page=...`) using `IntersectionObserver`, with fallback "Load More Stays" button and spinner.
+- **Dynamic 18% GST Tax Switch:** Real-time price display toggle displaying total cost including taxes across all dynamically loaded cards.
+- **Dual View Modes:** Seamlessly switch between the responsive Card Grid view and the interactive Mapbox Cluster Map view.
+- **17 Curated Categories:** Instant filtering across Iconic Cities, Mountains, Castles, Amazing Pools, Camping, Farms, Arctic, Beach, and more.
+- **Cloudinary Image Management:** Optimized image uploads with automated format conversion and thumbnail generation.
+- **Mapbox Forward Geocoding:** Auto-computes latitude and longitude coordinates from plain text addresses.
 
-### ⭐ Reviews
-- 1–5 star rating plus a comment
-- Gated behind a real stay: only guests with a **confirmed** booking whose check-out date has already passed can review a listing
-- Only the original author can delete their review
-- Deleting a listing cascades to delete its associated reviews
+### 💳 Bookings, Multi-Account Split Payments & Refunds
+- **Server-Side Price Calculation:** Server strictly computes nights × nightly rate + taxes — client price tampering is impossible.
+- **Real-Time Calendar Availability:** Flatpickr calendar automatically disables already-booked dates to prevent collision.
+- **Razorpay Payment Verification:** Payment signatures are verified server-side with HMAC-SHA256 before marking bookings as confirmed.
+- **Automated Cancellation Refund Policy:** Graded refund tiers (100% refund > 48h before check-in, 50% within 24-48h, non-refundable < 24h).
+- **Printable Invoices & Receipts:** Clean booking receipt views (`/bookings/:id/receipt`) with QR verification.
 
-### 🎨 UI
-- Server-rendered EJS with `ejs-mate` layouts, a shared navbar/footer, and flash messaging for success/error feedback
-- Responsive, mobile-friendly Bootstrap-based layout
-- Custom CSS per page (auth, listing forms, ratings, listing detail)
+### ⭐ Verified Reviews & Wishlist
+- **Gated Verified Stay Reviews:** Only travelers with a **confirmed** booking whose checkout date has passed can submit a review and 1-5 star rating.
+- **Instant Wishlist (Save to Favorites):** One-click AJAX heart button on property cards, organized in a dedicated `/profile/wishlist` dashboard.
 
-### 🛡️ Security
-- Helmet with a hand-written Content-Security-Policy (only Mapbox, Cloudinary, Razorpay, and known CDNs are allow-listed)
-- CSRF protection (double-submit cookie pattern via `csrf-csrf`) on every state-changing request
-- Server-side Joi validation on every listing, review, and booking submission
-- Ownership and authorization checked server-side on every protected route — never inferred from the client
+### 🔐 Authentication & Authorization
+- **Multi-Strategy Passport Auth:** Local email/username + password, Google OAuth 2.0, and passwordless email OTP.
+- **Strict Role-Based Middleware:** Ownership verification for editing/deleting listings, review author checks, and booking participant authorization.
+- **Session Persistence with Shared Mongo Client:** Sessions stored via `connect-mongo` using a shared client promise with Mongoose to prevent duplicate connections and Windows DNS SRV lookup timeouts.
+
+### 📱 Fully Responsive Cross-Device UI
+- Optimized for **Mobile (< 576px)**, **Tablet (576px - 991px)**, **Laptop (992px - 1399px)**, and **Large Screens (1400px+)**.
+- Mobile-friendly horizontal swipe tabs for itinerary days (Day 1..Day 14).
+- Floating chatbot panel adapts intelligently to mobile viewport heights without overflowing.
+- Mapbox maps stack neatly on mobile while staying sticky on desktop viewports.
 
 ---
 
 ## 🧰 Tech Stack
 
-| Category | Technology | Why it's used |
+| Category | Technology | Purpose |
 |---|---|---|
-| **Runtime** | Node.js | JavaScript runtime for the server |
-| **Framework** | Express.js | Routing, middleware pipeline, request/response handling |
-| **Database** | MongoDB | Document store — flexible schema for listings/bookings/reviews |
-| **ODM** | Mongoose | Schema validation, model relationships, hooks (e.g. cascading review deletes) |
-| **Views** | EJS + `ejs-mate` | Server-rendered HTML with shared layouts/partials |
-| **Auth** | Passport.js (`passport-local`, `passport-google-oauth20`, `passport-local-mongoose`) | Pluggable local + OAuth strategies; handles password hashing |
-| **Sessions** | `express-session` + `connect-mongo` | Persistent, MongoDB-backed sessions (survive server restarts) |
-| **Validation** | Joi | Server-side schema validation for listings, reviews, bookings |
-| **Image storage** | Cloudinary + `multer` + `multer-storage-cloudinary` | Direct-to-cloud image upload and CDN delivery |
-| **Maps/Geocoding** | Mapbox (`@mapbox/mapbox-sdk`) | Converts a typed location into coordinates; renders the listing map |
-| **Payments** | Razorpay | Order creation, hosted checkout, signature-verified payment confirmation |
-| **Email** | Nodemailer | OTP, password-reset, and booking-confirmation emails (falls back to a logged stub if SMTP isn't configured) |
-| **Security** | Helmet, `csrf-csrf`, `express-rate-limit` | CSP headers, CSRF protection, brute-force throttling |
-| **Logging** | Winston + Morgan | Structured application logs and HTTP request logs |
-| **Testing** | Jest, Supertest, `mongodb-memory-server` | Integration tests against a real (in-memory) MongoDB, no external DB needed |
-| **Tooling** | Git, GitHub, npm | Version control and package management |
+| **Runtime** | Node.js (v20+ / v25) | High-performance asynchronous JavaScript server runtime |
+| **Web Framework** | Express.js | Robust HTTP routing, middleware pipeline, REST APIs |
+| **Database & ODM** | MongoDB Atlas & Mongoose | Scalable document database with schema validation and population |
+| **AI Integration** | Google Gemini AI (`@google/genai`) | Intelligent multi-day itinerary generation & travel chatbot |
+| **Template Engine** | EJS + `ejs-mate` | Modular server-rendered views with layouts and partials |
+| **Authentication** | Passport.js (`local`, `google-oauth20`) | Multi-strategy authentication and session serialization |
+| **Session Management** | `express-session` + `connect-mongo` | Resilient, distributed session storage sharing Mongoose client |
+| **Payment Gateway** | Razorpay Node SDK | Split payments, order creation, and HMAC-SHA256 signature verification |
+| **Maps & Geocoding** | Mapbox GL JS & SDK | Interactive vector maps, cluster pins, and coordinate geocoding |
+| **Image Storage** | Cloudinary & Multer | Cloud asset storage, image optimization, and CDN delivery |
+| **Input Validation** | Joi | Strict schema validation for listings, reviews, bookings, and room shares |
+| **Security & Headers** | Helmet, `csrf-csrf`, `express-rate-limit` | Content Security Policy, double-submit cookie CSRF, and rate throttling |
+| **Testing** | Jest, Supertest, `mongodb-memory-server` | 41 unit & integration tests covering auth, bookings, room shares, AI, reviews |
 
 ---
 
 ## 🏗️ Architecture
 
-Wanderlust follows a layered MVC-style structure: routes stay thin, middleware enforces cross-cutting concerns (auth, validation, security), and controllers own the business logic.
-
 ```mermaid
 flowchart TD
-    A[Browser] -->|HTTP Request| B[Express App — app.js]
-    B --> C["Security & Session Layer<br/>Helmet · CSRF · Rate Limiting · express-session"]
-    C --> D["Route Layer<br/>routes/listing.js · review.js · booking.js · user.js"]
-    D --> E["Auth Middleware<br/>isLoggedIn · isOwner · isEmailVerified · isBookingGuest/Owner"]
-    E --> F["Validation Middleware<br/>Joi schemas (schema.js)"]
-    F --> G["Controllers<br/>business logic"]
-    G --> H[("MongoDB<br/>via Mongoose Models")]
-    G --> I["Cloudinary<br/>image storage"]
-    G --> J["Mapbox<br/>geocoding"]
-    G --> K["Razorpay<br/>payments"]
-    G --> L["Nodemailer<br/>transactional email"]
-    G --> M["EJS Views<br/>ejs-mate layouts"]
-    M -->|HTML Response| A
-```
-
-**Layer responsibilities**
-
-| Layer | Responsibility |
-|---|---|
-| `routes/` | Declares URLs, wires up middleware chains, delegates to controllers |
-| `middleware.js` | Auth checks, ownership checks, Joi validation gates |
-| `controllers/` | Business logic — the only layer that talks to models and external APIs |
-| `modals/` *(model schemas)* | Mongoose schemas: `User`, `Listing`, `Review`, `Booking` |
-| `views/` | EJS templates rendered by controllers |
-| `config/` | DB connection, session store, Passport strategies, email transport, logger, env validation |
-
-> **Note:** the schema/model directory is named `modals/` in the repository (rather than the conventional `models/`). It's a naming quirk, not a functional issue — see the [repository improvement checklist](#repository-improvement-checklist) at the end of this document.
-
----
-
-## 🔄 Application Flow
-
-### Signup → Email Verification → Login
-
-```mermaid
-sequenceDiagram
-    participant U as Guest
-    participant S as Server
-    participant DB as MongoDB
-
-    U->>S: POST /signup (username, email, password)
-    S->>DB: Create user (password hashed by passport-local-mongoose)
-    S->>U: Email a 6-digit OTP (bcrypt-hashed, 10 min expiry)
-    S->>U: Redirect to /login/otp/verify
-    U->>S: POST /login/otp/verify (code)
-    S->>DB: Compare bcrypt hash + check expiry
-    DB-->>S: Match
-    S->>S: emailVerified = true, session created
-    S->>U: Redirect to /listings
-```
-
-### Listing Creation
-
-```mermaid
-sequenceDiagram
-    participant U as Host
-    participant S as Server
-    participant Map as Mapbox
-    participant Cloud as Cloudinary
-    participant DB as MongoDB
-
-    U->>S: POST /listings (form + image)
-    S->>S: isLoggedIn → isEmailVerified → upload → validateListing (Joi)
-    S->>Cloud: Upload image
-    S->>Map: Forward-geocode the location text
-    S->>DB: Save listing with image URL + coordinates
-    S->>U: Redirect to /listings
-```
-
-### Booking & Payment
-
-```mermaid
-sequenceDiagram
-    participant U as Guest
-    participant S as Server
-    participant DB as MongoDB
-    participant R as Razorpay
-
-    U->>S: POST /listings/:id/bookings (checkIn, checkOut)
-    S->>DB: Reject if dates overlap an existing pending/confirmed booking
-    S->>S: Compute totalPrice server-side (nights × price)
-    S->>DB: Save booking (status: pending)
-    S->>R: Create Razorpay order
-    S->>U: Render checkout page
-    U->>R: Pay via Razorpay Checkout
-    U->>S: POST /verify-payment (order/payment/signature)
-    S->>S: Verify HMAC-SHA256 signature
-    S->>DB: booking.status = confirmed
-    S->>U: Send confirmation email
-```
-
-### Review
-
-```
-Guest → GET /listings/:id → POST /listings/:id/reviews
-      → isLoggedIn → Joi validateReview
-      → Server checks: does this guest have a CONFIRMED booking
-        on this listing with checkOut already in the past?
-      → No  → flash error, redirect to listing
-      → Yes → review saved, pushed onto listing.reviews
+    Client["Client Devices (Mobile / Tablet / Desktop)"] -->|HTTPS Requests| ExpressApp["Express Application (app.js)"]
+    
+    subgraph SecurityPipeline ["Security & Session Pipeline"]
+        Helmet["Helmet (CSP Headers)"]
+        RateLimit["Rate Limiting"]
+        CSRF["Double-Submit CSRF (csrf-csrf)"]
+        Session["express-session + connect-mongo"]
+    end
+    ExpressApp --> SecurityPipeline
+    
+    subgraph RoutingLayer ["Express Routing Layer"]
+        R_Listing["/listings (Listing CRUD, Search, Lazy Loading)"]
+        R_RoomShare["/room-shares (Matching, Chat, Split Pay)"]
+        R_Itinerary["/itineraries (AI Generator, Route Map)"]
+        R_Chatbot["/api/chat (Gemini AI Assistant)"]
+        R_Booking["/bookings (Checkout, Razorpay Verification)"]
+        R_User["/user (Auth, OTP, Google OAuth, Wishlist)"]
+    end
+    SecurityPipeline --> RoutingLayer
+    
+    subgraph ServiceLayer ["Business Logic & Services"]
+        Matcher["Companion Matcher (services/companionMatcher.js)"]
+        LocTree["Location Hierarchy (utils/locationHierarchy.js)"]
+        GeminiClient["Gemini AI Client (utility/geminiClient.js)"]
+        BookingHelper["Pricing & Razorpay Helper (utility/bookingHelpers.js)"]
+    end
+    RoutingLayer --> ServiceLayer
+    
+    subgraph ExternalServices ["External Services & Storage"]
+        MongoAtlas[("MongoDB Atlas")]
+        Cloudinary["Cloudinary CDN"]
+        Mapbox["Mapbox Geocoding & Tiles"]
+        Razorpay["Razorpay Gateway"]
+        GeminiAPI["Google Gemini AI"]
+        Nodemailer["Nodemailer (SMTP / Log Stub)"]
+    end
+    ServiceLayer --> ExternalServices
 ```
 
 ---
 
-## 🔑 Authentication & Authorization
+## 🔄 Application Flow & Sequence Diagrams
 
-These are two different questions, and Wanderlust answers them with two different mechanisms:
+### 1. Solo Room Sharing & Split Payment Lifecycle
 
-- **Authentication** — *"Who are you?"* Handled by Passport: a local username/password strategy, a Google OAuth2 strategy, and an OTP-based passwordless path. All three end the same way — a server-side session is created and stored in MongoDB.
-- **Authorization** — *"What are you allowed to do?"* Handled by dedicated middleware in `middleware.js`, applied per-route:
+```mermaid
+sequenceDiagram
+    autonumber
+    participant S1 as Solo Traveler 1 (Initiator)
+    participant Server as Wanderlust Server
+    participant DB as MongoDB Atlas
+    participant S2 as Solo Traveler 2 (Companion)
+    participant RZ as Razorpay Gateway
 
-| Middleware | Enforces |
-|---|---|
-| `isLoggedIn` | A session must exist to reach the route |
-| `isEmailVerified` | The user's email must be verified before creating/editing a listing |
-| `isOwner` | Only the listing's `owner` can edit or delete it |
-| `isReviewAuthor` | Only a review's `author` can delete it |
-| `isBookingGuest` | Only the booking's `guest` can pay for or view checkout on it |
-| `isBookingOwner` | Only the listing's owner can confirm a booking on it |
-| `isBookingGuestOrOwner` | Either party can cancel a booking |
-| `validateListing` / `validateReview` / `validateBooking` | Joi schema validation before the controller runs |
+    S1->>Server: POST /room-shares (Select State, City, Category, Dates)
+    Server->>DB: Save RoomSharePool (status: "open")
+    S2->>Server: GET /room-shares (Filter by State & City)
+    Server->>S2: Return Compatible Pools (Compatibility Score calculated)
+    S2->>Server: POST /room-shares/:id/join (Request to join pool)
+    S1->>Server: POST /room-shares/:id/accept/:userId (Accept co-traveler)
+    Note over S1, S2: Both travelers collaborate in Pool Real-Time Chat
+    S1->>Server: POST /room-shares/:id/select-stay (Lock agreed property)
+    Server->>DB: Status -> "locked" (30-minute reservation lock)
+    S1->>RZ: Pay Split Share (e.g. ₹1,500 of ₹3,000)
+    RZ-->>Server: Payment Verified
+    Server->>DB: S1 status = "paid", Pool status = "partially_booked"
+    S2->>RZ: Pay Split Share (e.g. ₹1,500 of ₹3,000)
+    RZ-->>Server: Payment Verified
+    Server->>DB: S2 status = "paid", Pool status = "confirmed"
+    Server->>DB: Generate Confirmed Booking for Property
+    Server-->>S1: Booking Confirmed & Receipt Issued
+    Server-->>S2: Booking Confirmed & Receipt Issued
+```
 
-**Why this matters in practice:** if User A creates Listing X, User B can view it but the `PUT`/`DELETE` routes for `/listings/X` are guarded by `isOwner`, which re-fetches the listing from MongoDB and compares `listing.owner` against `res.locals.currUser._id` on the server. The UI simply doesn't render an edit button for User B — but even if User B crafted the request by hand, the server would reject it. The same pattern applies to bookings and reviews: ownership is a database fact, checked on the server, never a trust assumption based on what the client claims.
+### 2. AI Multi-Day Itinerary Generation Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant User as Traveler
+    participant Server as Wanderlust Server
+    participant Gemini as Google Gemini AI
+    participant Map as Mapbox SDK
+    participant DB as MongoDB Atlas
+
+    User->>Server: POST /itineraries (Destination, Duration, Budget, Pace, Interests)
+    Server->>Gemini: Request Structured JSON Itinerary Plan
+    Gemini-->>Server: Daily Schedule (Morning, Afternoon, Evening, Stay & Cost)
+    loop For each daily stop
+        Server->>Map: Geocode place name to coordinates [lng, lat]
+        Map-->>Server: Point Coordinates
+    end
+    Server->>DB: Persist Itinerary with Route Waypoints
+    Server-->>User: Render Interactive Itinerary with Mapbox Route Map
+```
 
 ---
 
 ## 🗄️ Database Design
 
-Four collections, related by ObjectId reference (Mongoose `populate`):
+Six Mongoose models form the application schema:
 
 ```
 User
- ├── owns          → Listing.owner
- ├── writes        → Review.author
- └── books         → Booking.guest
+ ├── owns                  → Listing.owner
+ ├── writes                → Review.author
+ ├── books                 → Booking.guest
+ ├── initiates/joins       → RoomSharePool.participants
+ └── generates             → Itinerary.user
 
 Listing
- ├── belongs to    → User (owner)
- ├── has many      → Review (embedded ref array)
- └── has many      → Booking
+ ├── belongs to            → User (owner)
+ ├── has many              → Review (embedded ref array)
+ ├── has many              → Booking
+ └── featured in           → RoomSharePool.listing
 
-Review
- ├── belongs to    → User (author)
- └── belongs to    → Listing (via Listing.reviews[])
+RoomSharePool
+ ├── initiated by          → User (initiator)
+ ├── references stay       → Listing
+ ├── participants          → Array of { user, joinStatus, paymentStatus, amountDue }
+ └── messages              → Array of { sender, message, sentAt }
+
+Itinerary
+ ├── generated by          → User
+ └── contains              → Days array (stops, coordinates, estimatedCost)
 
 Booking
- ├── belongs to    → Listing
- └── belongs to    → User (guest)
+ ├── references stay       → Listing
+ ├── guest account         → User
+ └── split pool reference  → RoomSharePool (optional for group bookings)
+
+Review
+ ├── written by            → User (author)
+ └── reviewed stay         → Listing
 ```
-
-**Actual schema fields** (from `modals/*.js`):
-
-<details>
-<summary><strong>User</strong></summary>
-
-| Field | Type | Notes |
-|---|---|---|
-| `username`, `hash`, `salt` | — | Added automatically by `passport-local-mongoose` |
-| `email` | String | Required, unique |
-| `googleId` | String | Unique, sparse (only set for Google-auth users) |
-| `authProvider` | String | `"local"` \| `"google"` |
-| `otpHash`, `otpExpiresAt` | String, Date | Bcrypt-hashed OTP + expiry |
-| `emailVerified` | Boolean | Default `false` |
-| `resetPasswordToken`, `resetPasswordExpires` | String, Date | Forgot-password flow |
-
-</details>
-
-<details>
-<summary><strong>Listing</strong></summary>
-
-| Field | Type | Notes |
-|---|---|---|
-| `title` | String | Required |
-| `description`, `location`, `country` | String | — |
-| `image` | `{ url, filename }` | Cloudinary reference |
-| `price` | Number | — |
-| `category` | String | Enum of 17 predefined categories |
-| `geometry` | GeoJSON `Point` | `{ type, coordinates: [lng, lat] }` |
-| `owner` | ObjectId → `User` | — |
-| `reviews` | `[ObjectId → Review]` | — |
-
-Indexed with a MongoDB text index on `title`, `location`, and `country` for search. A `post("findOneAndDelete")` hook deletes all associated reviews when a listing is removed.
-
-</details>
-
-<details>
-<summary><strong>Review</strong></summary>
-
-| Field | Type | Notes |
-|---|---|---|
-| `comment` | String | — |
-| `rating` | Number | 1–5 |
-| `createdAt` | Date | Default `Date.now()` |
-| `author` | ObjectId → `User` | — |
-
-</details>
-
-<details>
-<summary><strong>Booking</strong></summary>
-
-| Field | Type | Notes |
-|---|---|---|
-| `listing` | ObjectId → `Listing` | Required |
-| `guest` | ObjectId → `User` | Required |
-| `checkIn`, `checkOut` | Date | Required; a `pre("save")` hook rejects `checkOut <= checkIn` |
-| `totalPrice` | Number | Computed server-side |
-| `status` | String | `"pending"` \| `"confirmed"` \| `"cancelled"` |
-| `paymentId` | String | Set once Razorpay payment is verified |
-| `createdAt` | Date | Default `Date.now` |
-
-</details>
 
 ---
 
 ## 🔌 API / Routes
 
-All routes below are taken directly from `routes/*.js`.
-
-**Listings** — mounted at `/listings`
-
-| Method | Route | Purpose | Guarded by |
+### Listings (`/listings`)
+| Method | Route | Description | Access Control |
 |---|---|---|---|
-| GET | `/` | List, search (`?q=`), filter (`?category=`), paginate | Public |
-| POST | `/` | Create a listing | `isLoggedIn`, `isEmailVerified`, `validateListing` |
-| GET | `/new` | Render the new-listing form | `isLoggedIn`, `isEmailVerified` |
-| GET | `/:id` | View a listing | Public |
-| PUT | `/:id` | Update a listing | `isLoggedIn`, `isOwner`, `validateListing` |
-| DELETE | `/:id` | Delete a listing | `isLoggedIn`, `isOwner` |
-| GET | `/:id/edit` | Render the edit form | `isLoggedIn`, `isOwner` |
+| `GET` | `/listings` | List stays with search, category filters, and lazy load JSON pagination | Public |
+| `POST` | `/listings` | Create a new property with Cloudinary image and Mapbox geocoding | `isLoggedIn`, `isEmailVerified` |
+| `GET` | `/listings/new` | Form to create a property | `isLoggedIn`, `isEmailVerified` |
+| `GET` | `/listings/:id` | View property details, availability calendar, and reviews | Public |
+| `PUT` | `/listings/:id` | Update property details | `isLoggedIn`, `isOwner` |
+| `DELETE` | `/listings/:id` | Delete listing and cascade delete its reviews | `isLoggedIn`, `isOwner` |
+| `POST` | `/listings/:id/wishlist`| Toggle stay in user's saved wishlist | `isLoggedIn` |
 
-**Reviews** — mounted at `/listings/:id/reviews`
-
-| Method | Route | Purpose | Guarded by |
+### Solo Room Shares (`/room-shares`)
+| Method | Route | Description | Access Control |
 |---|---|---|---|
-| POST | `/` | Create a review | `isLoggedIn`, `validateReview`, completed-stay check |
-| DELETE | `/:reviewId` | Delete a review | `isLoggedIn`, `isReviewAuthor` |
+| `GET` | `/room-shares` | Explore room share requests with State & City filters and match scores | Public |
+| `POST` | `/room-shares` | Post a solo room share request | `isLoggedIn` |
+| `GET` | `/room-shares/:id` | View pool details, compatibility scorecard, and live chat | Public / Participant |
+| `POST` | `/room-shares/:id/join` | Request to join an open pool | `isLoggedIn` |
+| `POST` | `/room-shares/:id/chat` | Send a message in the pool live chat | Pool Participant |
+| `POST` | `/room-shares/:id/select-stay` | Pick the agreed property for split booking | Pool Initiator |
+| `GET` | `/room-shares/:id/checkout` | Render personal split payment Razorpay checkout | Accepted Pool Member |
+| `POST` | `/room-shares/:id/verify-payment` | Verify Razorpay HMAC signature for member's split | Accepted Pool Member |
+| `POST` | `/room-shares/:id/cancel` | Cancel pool request or refund partially paid shares | Pool Participant |
 
-**Bookings** — mounted at `/`
-
-| Method | Route | Purpose | Guarded by |
+### AI Travel Planner & Chatbot (`/itineraries`, `/api/chat`)
+| Method | Route | Description | Access Control |
 |---|---|---|---|
-| POST | `/listings/:id/bookings` | Create a booking | `isLoggedIn`, `validateBooking` |
-| GET | `/listings/:id/bookings/booked-dates` | Fetch booked date ranges (JSON, for the date picker) | Public |
-| GET | `/bookings` | View my bookings | `isLoggedIn` |
-| PATCH | `/bookings/:bookingId/cancel` | Cancel a booking | `isLoggedIn`, `isBookingGuestOrOwner` |
-| PATCH | `/bookings/:bookingId/confirm` | Confirm a booking | `isLoggedIn`, `isBookingOwner` |
-| GET | `/bookings/:bookingId/checkout` | Render Razorpay checkout | `isLoggedIn`, `isBookingGuest` |
-| POST | `/bookings/:bookingId/verify-payment` | Verify Razorpay signature, confirm booking | `isLoggedIn`, `isBookingGuest` |
+| `GET` | `/itineraries` | View user's saved AI itineraries | `isLoggedIn` |
+| `GET` | `/itineraries/new` | Interactive form to generate customized multi-day travel plans | `isLoggedIn` |
+| `POST` | `/itineraries` | Trigger Google Gemini AI generation and Mapbox coordinate plotting | `isLoggedIn` |
+| `GET` | `/itineraries/:id` | View day-by-day plan with interactive route map | `isLoggedIn` |
+| `POST` | `/api/chat` | AI chatbot conversation endpoint for travel guidance | Public |
+| `GET` | `/api/chat/suggestions` | Contextual prompt chips based on active location and stay | Public |
 
-**Users** — mounted at `/`
-
-| Method | Route | Purpose | Guarded by |
+### Bookings & Checkout (`/bookings`)
+| Method | Route | Description | Access Control |
 |---|---|---|---|
-| GET / POST | `/signup` | Render / submit registration | Public |
-| GET / POST | `/login` | Render / submit local login | Public, rate-limited |
-| GET | `/logout` | End the session | — |
-| GET / POST | `/forgot-password` | Render / submit reset request | Public |
-| GET / POST | `/reset-password/:token` | Render / submit new password | Public |
-| GET | `/auth/google` | Start Google OAuth | Public |
-| GET | `/auth/google/callback` | Google OAuth callback | Public |
-| GET / POST | `/login/otp/request` | Render / request an OTP | Public, rate-limited |
-| GET / POST | `/login/otp/verify` | Render / verify an OTP | Public, rate-limited |
+| `POST` | `/listings/:id/bookings` | Create a booking reservation with date overlap validation | `isLoggedIn` |
+| `GET` | `/listings/:id/bookings/booked-dates` | Return booked date ranges (JSON for calendar disabling) | Public |
+| `GET` | `/bookings` | Guest dashboard for personal bookings | `isLoggedIn` |
+| `GET` | `/bookings/:id/checkout` | Razorpay payment checkout page | `isLoggedIn`, `isBookingGuest` |
+| `POST` | `/bookings/:id/verify-payment` | Verify Razorpay HMAC-SHA256 signature and confirm stay | `isLoggedIn`, `isBookingGuest` |
+| `PATCH`| `/bookings/:id/cancel` | Cancel booking with automated tier-based refund calculation | `isLoggedIn`, `isBookingGuestOrOwner` |
+| `GET` | `/bookings/:id/receipt` | View or print formal booking receipt / tax invoice | `isLoggedIn`, `isBookingGuestOrOwner` |
 
 ---
 
 ## 📁 Project Structure
 
 ```text
-Wanderlust-Travel-Stay-Booking-Application/
-│
+Major Project Using HCJNE Stacks/
 ├── config/
-│   ├── db.js              # MongoDB connection
-│   ├── email.js           # Nodemailer transport (falls back to a logged stub)
-│   ├── logger.js          # Winston logger configuration
-│   ├── passport.js        # Local + Google OAuth2 strategy setup
-│   ├── session.js         # express-session + connect-mongo store
-│   └── validateEnv.js     # Fails fast at boot if required env vars are missing
+│   ├── csrf.js                 # Double-submit cookie CSRF configuration
+│   ├── db.js                   # Mongoose connection with exponential backoff retry
+│   ├── email.js                # Nodemailer transport (with development logger stub)
+│   ├── logger.js               # Winston structured logging
+│   ├── passport.js             # Local & Google OAuth 2.0 Passport strategies
+│   ├── session.js              # express-session sharing Mongoose client with connect-mongo
+│   └── validateEnv.js          # Startup environment variables validation
 │
 ├── controllers/
-│   ├── booking.js         # Booking lifecycle + Razorpay integration
-│   ├── listing.js         # Listing CRUD, search, geocoding
-│   ├── otp.js              # OTP request/verify logic
-│   ├── review.js          # Review create/delete
-│   └── user.js             # Signup, login, logout, password reset, Google callback
+│   ├── booking.js              # Reservation logic, Razorpay checkout & refund calculation
+│   ├── chatbot.js              # Gemini AI chat endpoint and contextual suggestion chips
+│   ├── host.js                 # Host dashboard analytics, earnings & occupancy metrics
+│   ├── itinerary.js            # Gemini AI multi-day planner & Mapbox route generation
+│   ├── listing.js              # Listing CRUD, text search, JSON API & infinite scroll
+│   ├── review.js               # Review creation (verified stay check) & deletion
+│   ├── roomShare.js            # Solo room sharing matching, pool chat & split payments
+│   └── user.js                 # Local signup/login, Google OAuth, OTP verification & wishlist
 │
-├── init/
-│   ├── data.js             # Seed listing data
-│   └── index.js            # Seed script entry point
-│
-├── modals/                 # Mongoose schemas (see naming note above)
+├── modals/                     # Mongoose Schemas & Models
 │   ├── booking.js
+│   ├── itinerary.js
 │   ├── listing.js
 │   ├── review.js
+│   ├── roomShare.js
 │   └── user.js
 │
 ├── public/
-│   ├── css/                 # Per-page stylesheets
+│   ├── css/
+│   │   ├── index.css           # Responsive filters & infinite scroll styling
+│   │   └── style.css           # Global Wanderlust themes, mobile breakpoints & navbar
 │   └── js/
-│       ├── map.js           # Mapbox GL rendering on the listing page
-│       └── script.js
+│       ├── cascadingLocationSelect.js # Shared State -> City -> Stay dropdown controller
+│       ├── chatbot.js          # Client floating AI travel assistant UI
+│       ├── map.js              # Mapbox GL listing & cluster map controller
+│       └── script.js           # Form validations & UI utilities
 │
 ├── routes/
 │   ├── booking.js
+│   ├── chatbot.js
+│   ├── host.js
+│   ├── itinerary.js
 │   ├── listing.js
+│   ├── pages.js
 │   ├── review.js
+│   ├── roomShare.js
 │   └── user.js
 │
+├── services/
+│   └── companionMatcher.js     # Travel compatibility scoring engine
+│
 ├── tests/
-│   ├── auth.test.js         # Signup, login, OTP, Google OAuth, password reset
-│   ├── bookings.test.js     # Overlap detection, pricing, Razorpay verification
-│   └── listings.test.js     # CRUD + ownership authorization
+│   ├── auth.test.js            # Auth, OTP, Google OAuth & password reset tests
+│   ├── bookings.test.js        # Date overlap, server-side pricing & payment verification
+│   ├── chatbot.test.js         # Chatbot suggestion API & message handling tests
+│   ├── itineraries.test.js     # AI itinerary validation & route saving tests
+│   ├── listings.test.js        # Listing CRUD, authorization & lazy load API tests
+│   ├── reviews.test.js         # Verified stay review gating tests
+│   └── roomShares.test.js      # Room share pool matching, chat & split pay tests
+│
+├── utils/
+│   └── locationHierarchy.js    # Data tree builder for State/City/Stay cascading selects
 │
 ├── utility/
-│   ├── ExpressError.js      # Custom error class
-│   └── wrapAsync.js          # Async route error wrapper
+│   ├── bookingHelpers.js       # Razorpay client & tax pricing calculators
+│   ├── ExpressError.js         # Custom application error handler
+│   ├── geminiClient.js         # Google Gemini AI SDK integration
+│   └── wrapAsync.js            # Async wrapper for route controllers
 │
 ├── views/
-│   ├── bookings/             # Checkout + my-bookings pages
-│   ├── includes/              # navbar, footer, flash partials
+│   ├── bookings/               # Checkout, my-bookings & receipt views
+│   ├── host/                   # Host analytics dashboard
+│   ├── includes/               # Navbar, footer, flash alerts, chatbot widget
+│   ├── itineraries/            # AI itinerary generator & interactive route map
 │   ├── layouts/                # ejs-mate boilerplate layout
-│   ├── listings/                # index, show, new, edit
-│   ├── users/                    # signup, login, forgot/reset, OTP forms
-│   └── error.ejs
+│   ├── listings/               # Index (lazy load), show, new, edit views
+│   ├── roomShares/             # Solo room share hub, pool show & split checkout
+│   └── users/                  # Login, signup, OTP, profile & wishlist
 │
-├── app.js                    # Express app, middleware pipeline, route mounting
-├── cloudconfig.js            # Cloudinary + multer-storage-cloudinary setup
-├── middleware.js              # Auth/authorization/validation middleware
+├── app.js                      # Express application entry point
+├── cloudconfig.js              # Cloudinary storage configuration
+├── middleware.js               # Route protection & Joi validation middlewares
 ├── schema.js                   # Joi validation schemas
-├── .env.example                 # Template for required environment variables
-├── .gitignore
 ├── package.json
-└── Readme.md
+└── README.md
 ```
 
 ---
 
-## ⚙️ Installation
+## ⚙️ Installation & Setup
 
 ### 1. Clone the repository
 
@@ -519,210 +449,78 @@ npm install
 
 ### 3. Configure environment variables
 
+Create a `.env` file in the project root based on `.env.example`:
+
 ```bash
 cp .env.example .env
 ```
-
-Then fill in the values described below. **Never commit `.env`** — it's already excluded via `.gitignore`.
 
 ---
 
 ## 🔐 Environment Variables
 
-Taken directly from `.env.example` and `config/validateEnv.js`. The app **will not start** outside of test mode if any required variable is missing.
-
-| Variable | Required | Purpose |
+| Variable | Required | Description |
 |---|---|---|
-| `SECRET` | ✅ | Session/cookie signing secret |
-| `MONGODB_ATLAS` | ✅ | MongoDB connection string |
-| `CLOUDINARY_CLOUD_NAME` | ✅ | Cloudinary account |
-| `CLOUDINARY_API_KEY` | ✅ | Cloudinary account |
-| `CLOUDINARY_API_SECRET` | ✅ | Cloudinary account |
-| `MAP_TOKEN` | ✅ | Mapbox access token (geocoding + map rendering) |
-| `RAZORPAY_KEY_ID` | ✅ | Razorpay account |
-| `RAZORPAY_KEY_SECRET` | ✅ | Razorpay account |
-| `GOOGLE_CLIENT_ID` | ✅ | Google OAuth2 |
-| `GOOGLE_CLIENT_SECRET` | ✅ | Google OAuth2 |
-| `GOOGLE_CALLBACK_URL` | ✅ | Google OAuth2 redirect URL |
-| `PORT` | Optional | Defaults to `8080` |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Optional | If unset, outgoing emails are logged via Winston instead of sent (`config/email.js`) |
-
-> ⚠️ **Verify:** `.env.example` sets `PORT=8080`, but the sample `GOOGLE_CALLBACK_URL` points at `http://localhost:8081/...`. `app.js` defaults to port `8080` if `PORT` is unset. Double-check your `.env` uses matching ports before testing Google OAuth locally.
+| `SECRET` | ✅ | Session encryption and CSRF cookie secret |
+| `MONGODB_ATLAS` | ✅ | MongoDB Atlas connection string (`mongodb+srv://...`) |
+| `PORT` | Optional | Port to run server on (default: `8081`) |
+| `MAP_TOKEN` | ✅ | Mapbox public access token for vector maps & geocoding |
+| `CLOUDINARY_CLOUD_NAME` | ✅ | Cloudinary cloud account name |
+| `CLOUDINARY_API_KEY` | ✅ | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | ✅ | Cloudinary API secret |
+| `RAZORPAY_KEY_ID` | ✅ | Razorpay Sandbox Key ID |
+| `RAZORPAY_KEY_SECRET` | ✅ | Razorpay Sandbox Key Secret |
+| `GOOGLE_CLIENT_ID` | ✅ | Google OAuth 2.0 Web Client ID |
+| `GOOGLE_CLIENT_SECRET` | ✅ | Google OAuth 2.0 Client Secret |
+| `GOOGLE_CALLBACK_URL` | ✅ | OAuth redirect URL (e.g. `http://localhost:8081/auth/google/callback`) |
+| `GEMINI_API_KEY` | Optional | Google Gemini AI API key for AI Planner & Chatbot |
+| `GEMINI_MODEL` | Optional | Gemini model identifier (default: `gemini-flash-lite-latest`) |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | Optional | SMTP mail credentials (falls back to Winston logger stub if unset) |
 
 ---
 
 ## ▶️ Running Locally
 
+### Start Server
 ```bash
 npm start
 ```
+The server will initialize on `http://localhost:8081`. 
 
-This runs `node app.js` (see `package.json`). By default the app listens on `http://localhost:8080` (or whatever `PORT` you set), and `/` redirects to `/listings`.
-
-> `nodemon` is listed as a dev dependency but there's currently no `dev` script wired up in `package.json`. Until one is added, you can run `npx nodemon app.js` directly for auto-restart during development.
-
----
-
-## 🌱 Seed Data
-
-`init/index.js` connects to `MONGODB_ATLAS`, wipes the `Listing` collection, and inserts the sample listings from `init/data.js`.
-
+### Seed Initial Sample Stays
 ```bash
 node init/index.js
 ```
-
-Use this on a fresh database to populate listings for local testing.
+This populates sample properties with categories, images, and Mapbox coordinates across multiple states and cities.
 
 ---
 
 ## 🧪 Testing
 
+The platform includes **41 automated tests** across **7 test suites** powered by Jest, Supertest, and `mongodb-memory-server` (runs completely isolated without modifying your production or Atlas database):
+
 ```bash
 npm test
 ```
 
-Runs `jest --runInBand --detectOpenHandles --forceExit`. Tests spin up `mongodb-memory-server`, so **no real database connection is needed** to run the suite.
-
-| File | Covers |
-|---|---|
-| `tests/auth.test.js` | Signup + auto-login, wrong-password rejection, protected-route redirects, forgot/reset password, Google OAuth signup + account linking, email-verification gating, OTP request/verify |
-| `tests/bookings.test.js` | Non-overlapping bookings + server-side price calculation, overlap rejection, Razorpay signature verification confirming a booking |
-| `tests/listings.test.js` | Owner CRUD flow, non-owner update/delete rejection |
-
-13 test cases total across the three files.
-
----
-
-## 🚀 Deployment
-
-The live application is deployed and publicly accessible at:
-🌐 **[https://wanderlust.swarajvecha.in/](https://wanderlust.swarajvecha.in/)**
-
-To deploy your own instance on any Node-friendly host (Render, Railway, Fly.io, an EC2/VM, etc.):
-
-1. Provision a MongoDB Atlas cluster and set `MONGODB_ATLAS`.
-2. Set every variable listed in [Environment Variables](#-environment-variables) in your host's environment/secrets manager — never in source control.
-3. Set `NODE_ENV=production` (this switches Morgan/Winston to combined/JSON logging).
-4. Ensure the host allows outbound HTTPS to Cloudinary, Mapbox, and Razorpay — `app.js`'s Helmet CSP already allow-lists these domains.
-5. `app.set("trust proxy", 1)` is already configured for use behind a reverse proxy/load balancer.
-6. Once deployed over HTTPS, flip the CSRF cookie's `secure` flag to `true` in `app.js` (currently `false` for local HTTP development — see the code comment).
-7. Static assets are served from `public/` by Express; Cloudinary handles listing images independently.
-
-- **Production URL:** [https://wanderlust.swarajvecha.in/](https://wanderlust.swarajvecha.in/)
+### Test Coverage Summary:
+- **`tests/roomShares.test.js`**: Pool creation, companion matching score calculations, State/City hierarchy, live group chat, 50/50 split payments, and cancellation flows.
+- **`tests/listings.test.js`**: CRUD operations, owner-only authorization, text search, and JSON pagination API (`/listings?format=json`).
+- **`tests/bookings.test.js`**: Double-booking date overlap rejection, server-side tax pricing (18% GST), and HMAC-SHA256 signature verification.
+- **`tests/itineraries.test.js`**: Gemini AI prompt handling, structured day-by-day plan storage, and route coordinate saving.
+- **`tests/chatbot.test.js`**: Chatbot query response validation and contextual suggestion chips.
+- **`tests/reviews.test.js`**: Verified-stay review gating (preventing non-guests or future checkouts from posting reviews).
+- **`tests/auth.test.js`**: Local signup, password hashing, Google OAuth, 6-digit OTP verification, and rate limiting.
 
 ---
 
-## 🔒 Security
+## 🔒 Security & Performance
 
-**Implemented**
-
-- Passwords never stored in plaintext — hashed/salted by `passport-local-mongoose`
-- OTPs and password-reset tokens are single-use, time-limited, and hashed/random respectively
-- CSRF protection (double-submit cookie) on all state-changing requests
-- Helmet with a custom Content-Security-Policy scoped to known third-party origins
-- `express-rate-limit` on login, signup, and OTP endpoints
-- Server-side Joi validation on every mutating route
-- Server-side ownership checks on every protected resource — never trusts client-submitted IDs
-- Booking price always computed server-side, never accepted from the client
-- Razorpay payment signatures verified server-side via HMAC-SHA256 before confirming a booking
-- Search input is regex-escaped before being used in a MongoDB query
-- Startup fails fast if required secrets are missing (`config/validateEnv.js`)
-- Secrets excluded from git via `.gitignore`, with a `.env.example` template for onboarding
-
-**Recommended Improvements**
-
-- Flip the CSRF/session cookie `secure` flag to `true` once served over HTTPS
-- Add CAPTCHA/challenge on signup and OTP-request routes to complement rate limiting
-- Add automated dependency scanning (Dependabot, `npm audit` in CI, or CodeQL)
-- Add a `SECURITY.md` with a disclosure process
-- Load/penetration-test the payment and auth flows before a production launch
-
----
-
-## ⚡ Performance & Scalability
-
-**Currently implemented**
-
-- Gzip compression (`compression` middleware)
-- MongoDB text index on `title`/`location`/`country` for fast search
-- Offset-based pagination (12 listings per page) instead of loading the full collection
-- Sessions stored in MongoDB (`connect-mongo`), not server memory — the app is already close to stateless
-- `trust proxy` already configured for deployment behind a load balancer
-- Image storage/delivery offloaded to Cloudinary's own CDN
-
-**Future scalability improvements**
-
-- Redis for session storage and/or caching hot listing queries
-- CDN in front of static assets served from `public/`
-- Additional indexes on frequently filtered fields (`category`, `owner`)
-- Rate limiting on public read endpoints, not just auth routes
-- A background job queue for outbound email instead of inline async calls
-- Horizontal scaling behind a load balancer (the app's session design already supports this)
-
----
-
-## 🗺️ Future Improvements
-
-Booking, payments, availability, and email notifications are already built — the roadmap below is what's genuinely still open:
-
-- [ ] Wishlist / saved listings
-- [ ] Advanced search filters (price range, guest count, amenities)
-- [ ] Map-based browsing (search listings by dragging the map, not just viewing one)
-- [ ] Admin dashboard for moderating listings/users
-- [ ] Refund handling for cancelled, already-paid bookings
-- [ ] Multi-currency support (currently hardcoded to INR for Razorpay)
-- [ ] Recommendation system based on booking/search history
-- [ ] Redis-backed caching layer
-- [ ] CI pipeline (GitHub Actions) running lint + `npm test` on every PR
-- [ ] Code coverage reporting
-
----
-
-## 🎓 Learning Outcomes
-
-This project was hands-on practice with:
-
-- Layered (route → middleware → controller → model) architecture in Express
-- RESTful, resource-nested routing (`/listings/:id/reviews`, `/listings/:id/bookings`)
-- MongoDB schema design with Mongoose, including refs, population, and lifecycle hooks
-- Session-based authentication, OAuth2 (Google), and a second-factor-style OTP flow
-- Server-side authorization patterns that never trust client-submitted state
-- Integrating three real third-party APIs end-to-end: Cloudinary (storage), Mapbox (geocoding), Razorpay (payments) — including verifying a payment signature server-side
-- Writing Joi validation schemas and wiring them in as middleware
-- Security middleware: Helmet CSP, CSRF protection, rate limiting
-- Integration testing with Jest, Supertest, and an in-memory MongoDB instance
-- Structured logging (Winston) and HTTP request logging (Morgan)
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome.
-
-```bash
-# 1. Fork the repository, then clone your fork
-git clone https://github.com/<your-username>/Wanderlust-Travel-Stay-Booking-Application.git
-
-# 2. Create a feature branch
-git checkout -b feature/your-feature-name
-
-# 3. Make your changes, then commit
-git add .
-git commit -m "Add: short description of the change"
-
-# 4. Push to your fork
-git push origin feature/your-feature-name
-
-# 5. Open a pull request against main
-```
-
-Please run `npm test` before opening a PR.
-
----
-
-## 📄 License
-
-License not currently specified. If you'd like to use this code, please open an issue to check with the author first.
+- **Double-Submit CSRF Protection:** All state-modifying requests (`POST`, `PUT`, `PATCH`, `DELETE`) require a cryptographically verified CSRF token via `csrf-csrf`.
+- **Shared Session Client:** `connect-mongo` reuses the Mongoose database connection client directly (`MongoStore.create({ clientPromise })`), eliminating redundant connections and preventing Windows DNS SRV lookup timeouts.
+- **Content Security Policy (CSP):** Strict Helmet headers restrict scripts, styles, and image connections exclusively to trusted origins (Mapbox, Cloudinary, Razorpay, Google Fonts).
+- **Server-Side Trust Model:** Price computations, booking date checks, authorization rights, and payment confirmation hashes are executed entirely server-side — client payloads are never trusted.
+- **Infinite Scroll Optimization:** Replaces heavy pagination with lazy loaded batches, reducing DOM memory footprint and network payload sizes.
 
 ---
 
@@ -732,13 +530,9 @@ License not currently specified. If you'd like to use this code, please open an 
 
 [![GitHub](https://img.shields.io/badge/GitHub-Swarajbabu-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Swarajbabu)
 [![Portfolio](https://img.shields.io/badge/Portfolio-swarajvecha.in-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://swarajvecha.in)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](YOUR_LINKEDIN_URL)
-[![Email](https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:YOUR_EMAIL_HERE)
 
-</div>
+---
 
-<!--
-Keywords for discoverability: MERN, Node.js, Express.js, MongoDB, Mongoose, EJS, full-stack, travel booking,
-vacation rental, Airbnb clone, REST API, MVC architecture, session authentication, OAuth2, Razorpay, Mapbox,
-Cloudinary, CRUD, web development.
--->
+## 📄 License
+
+This project is developed as a major academic and engineering project. All rights reserved.

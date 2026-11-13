@@ -1,0 +1,167 @@
+<% layout('layouts/boilerplate') -%>
+<div class="container mt-4 mb-5">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold m-0"><i class="fa-solid fa-chart-line text-danger me-2"></i>Host Dashboard</h2>
+      <p class="text-muted small mb-0">Manage your properties, incoming reservations, and earnings in one place</p>
+    </div>
+    <a href="/listings/new" class="btn btn-danger rounded-pill px-4 py-2 fw-semibold shadow-sm">
+      <i class="fa-solid fa-plus me-1"></i>Add New Stay
+    </a>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border border-light-subtle h-100">
+        <div class="text-muted small fw-semibold">Total Revenue</div>
+        <div class="fs-3 fw-bold text-success mt-1">&#8377; <%= Number(stats.totalRevenue || 0).toLocaleString("en-IN") %></div>
+        <div class="text-muted small">From <%= stats.confirmedCount %> confirmed stay<%= stats.confirmedCount === 1 ? '' : 's' %></div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border border-light-subtle h-100">
+        <div class="text-muted small fw-semibold">Your Listings</div>
+        <div class="fs-3 fw-bold text-dark mt-1"><%= stats.totalListings %></div>
+        <div class="text-muted small">Active properties</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border border-light-subtle h-100">
+        <div class="text-muted small fw-semibold">Pending Requests</div>
+        <div class="fs-3 fw-bold text-warning-emphasis mt-1"><%= stats.pendingCount %></div>
+        <div class="text-muted small">Awaiting payment or confirmation</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border border-light-subtle h-100">
+        <div class="text-muted small fw-semibold">Cancelled</div>
+        <div class="fs-3 fw-bold text-secondary mt-1"><%= stats.cancelledCount %></div>
+        <div class="text-muted small">Historical cancellations</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reservations Table -->
+  <div class="card border-0 shadow-sm p-4 mb-5 bg-white rounded-4 border border-light-subtle">
+    <h4 class="fw-bold mb-3"><i class="fa-solid fa-calendar-check text-danger me-2"></i>All Reservations Across Your Stays</h4>
+    <% if (bookings.length === 0) { %>
+      <p class="text-muted mb-0">No reservations received yet. Share or enhance your listings to attract guests!</p>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Property</th>
+              <th>Guest</th>
+              <th>Dates</th>
+              <th>Guests</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% bookings.forEach(function(booking) { %>
+              <tr>
+                <td>
+                  <% if (booking.listing) { %>
+                    <a href="/listings/<%= booking.listing._id %>" class="fw-bold text-dark text-decoration-none"><%= booking.listing.title %></a>
+                    <div class="small text-muted"><%= booking.listing.location %></div>
+                  <% } else { %>
+                    <span class="text-muted">Deleted Listing</span>
+                  <% } %>
+                </td>
+                <td><b><%= booking.guest ? booking.guest.username : 'Guest' %></b></td>
+                <td class="small">
+                  <%= new Date(booking.checkIn).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                  &rarr;
+                  <%= new Date(booking.checkOut).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                </td>
+                <td><%= booking.guests || 1 %></td>
+                <td class="fw-bold">&#8377; <%= Number(booking.totalPrice || 0).toLocaleString("en-IN") %></td>
+                <td>
+                  <% if (booking.status === "confirmed") { %>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">Confirmed</span>
+                  <% } else if (booking.status === "cancelled") { %>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">Cancelled</span>
+                  <% } else { %>
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">Pending</span>
+                  <% } %>
+                </td>
+                <td>
+                  <div class="d-flex flex-wrap gap-1">
+                    <% if (booking.status === "pending") { %>
+                      <form action="/bookings/<%= booking._id %>/confirm?_method=PATCH" method="POST" class="m-0">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn btn-sm btn-success rounded-pill px-3">Confirm</button>
+                      </form>
+                    <% } %>
+                    <% if (booking.status !== "cancelled") { %>
+                      <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#dashCancelModal<%= booking._id %>">
+                        Cancel
+                      </button>
+                    <% } %>
+                    <a href="/bookings/<%= booking._id %>/receipt" class="btn btn-sm btn-outline-dark rounded-pill px-3">Receipt</a>
+                  </div>
+
+                  <% if (booking.status !== "cancelled") { %>
+                    <div class="modal fade" id="dashCancelModal<%= booking._id %>" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4 border-0 shadow">
+                          <div class="modal-header border-bottom-0 pb-0">
+                            <h5 class="modal-title fw-bold text-danger">Cancel Guest Booking</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <form action="/bookings/<%= booking._id %>/cancel?_method=PATCH" method="POST" class="needs-validation" novalidate>
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <div class="modal-body text-start">
+                              <p class="text-secondary small">Cancel reservation for <strong><%= booking.guest ? booking.guest.username : 'guest' %></strong>?</p>
+                              <textarea class="form-control rounded-3" name="cancellationReason" rows="3" required minlength="5" maxlength="500" placeholder="Cancellation reason (min 5 characters)..."></textarea>
+                            </div>
+                            <div class="modal-footer border-top-0 pt-0">
+                              <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+                              <button type="submit" class="btn btn-danger rounded-pill px-4">Confirm Cancellation</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Host Listings Grid -->
+  <h4 class="fw-bold mb-3"><i class="fa-solid fa-house-chimney text-danger me-2"></i>Your Properties</h4>
+  <% if (listings.length === 0) { %>
+    <div class="card border-0 shadow-sm p-4 rounded-4 bg-white text-center">
+      <p class="text-muted mb-3">You haven't listed any properties yet.</p>
+      <div><a href="/listings/new" class="btn btn-outline-danger rounded-pill px-4">Host Your First Stay</a></div>
+    </div>
+  <% } else { %>
+    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4">
+      <% listings.forEach(function(listing) { %>
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white border border-light-subtle">
+            <img src="<%= (listing.image && listing.image.url) ? listing.image.url : 'https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?auto=format&fit=crop&w=800&q=60' %>" style="height: 180px; object-fit: cover;" alt="<%= listing.title %>">
+            <div class="card-body d-flex flex-column p-3">
+              <h5 class="fw-bold mb-1"><%= listing.title %></h5>
+              <p class="text-muted small mb-2"><%= listing.location %>, <%= listing.country %></p>
+              <div class="fw-bold text-dark mb-3">&#8377; <%= Number(listing.price || 0).toLocaleString("en-IN") %> / night</div>
+              <div class="mt-auto d-flex gap-2">
+                <a href="/listings/<%= listing._id %>" class="btn btn-outline-dark btn-sm rounded-pill px-3">View</a>
+                <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark btn-sm rounded-pill px-3">Edit</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>

@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node app.js",
     "seed": "node init/index.js",
-    "test": "jest --runInBand --detectOpenHandles --forceExit"
+    "dev": "nodemon app.js",
+    "test": "jest --runInBand --detectOpenHandles --forceExit",
+    "test:coverage": "jest --coverage --runInBand --detectOpenHandles --forceExit"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x"
