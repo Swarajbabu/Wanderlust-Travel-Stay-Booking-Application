@@ -17,6 +17,7 @@ router.get("/listings/:id/room-shares/new", isLoggedIn, isEmailVerified, wrapAsy
 router.post("/listings/:id/room-shares", isLoggedIn, isEmailVerified, validateRoomShare, wrapAsync(roomShareController.createPool));
 
 router.get("/room-shares/:poolId", wrapAsync(roomShareController.showPool));
+router.get("/room-shares/:poolId/sync", wrapAsync(roomShareController.syncPoolStateJson));
 router.post("/room-shares/:poolId/select-stay", isLoggedIn, isEmailVerified, validateRoomShareSelectStay, wrapAsync(roomShareController.selectStayForPool));
 router.post("/room-shares/:poolId/join", isLoggedIn, isEmailVerified, validateRoomShareJoin, wrapAsync(roomShareController.requestJoin));
 router.patch("/room-shares/:poolId/participants/:participantId", isLoggedIn, wrapAsync(roomShareController.updateParticipantStatus));

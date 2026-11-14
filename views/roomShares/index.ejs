@@ -409,5 +409,16 @@
         syncToggleUi(false);
       });
     }
+
+    // Auto-refresh room-shares hub on tab re-entry
+    let lastActiveTime = Date.now();
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        if (Date.now() - lastActiveTime > 20000) {
+          window.location.reload();
+        }
+        lastActiveTime = Date.now();
+      }
+    });
   });
 </script>

@@ -501,6 +501,21 @@ module.exports.showPool = async (req, res) => {
         selectedListing: pool.listing
     });
 
+    const participantsFingerprint = (pool.participants || []).map((p) => {
+        const uId = p.user && p.user._id ? p.user._id.toString() : (p.user ? p.user.toString() : "");
+        return `${uId}:${p.joinStatus}:${p.paymentStatus}:${p.amountDue || 0}`;
+    }).join("|");
+
+    const poolStateHash = [
+        pool.status,
+        pool.listing ? (pool.listing._id || pool.listing).toString() : "no_listing",
+        Number(pool.totalPrice || 0),
+        Number(pool.pricePerPerson || 0),
+        participantsFingerprint,
+        pool.booking ? pool.booking.toString() : "no_booking",
+        pool.cancellationReason || ""
+    ].join("::");
+
     res.render("roomShares/show.ejs", {
         pool,
         accepted,
@@ -514,6 +529,7 @@ module.exports.showPool = async (req, res) => {
         destinationStays,
         locationTree,
         initialStaySelection,
+        poolStateHash,
         title: `Room Share · ${pool.listing ? pool.listing.title : (pool.destination || "Details")}`
     });
 };
@@ -897,7 +913,7 @@ module.exports.getMessagesJson = async (req, res) => {
 module.exports.postMessage = async (req, res) => {
     const { poolId } = req.params;
     const { text } = req.body;
-    const wantsJson = Boolean(req.headers.accept && req.headers.accept.includes("application/json"));
+    const wantsJson = Boolean(req.xhr || req.is("json") || (req.headers.accept && req.headers.accept.includes("application/json")));
     const pool = await RoomSharePool.findById(poolId);
     if (!pool) {
         if (wantsJson) return res.status(404).json({ error: "Room share pool not found" });
@@ -921,6 +937,7 @@ module.exports.postMessage = async (req, res) => {
     if (wantsJson) {
         const added = pool.messages[pool.messages.length - 1];
         return res.status(201).json({
+            success: true,
             message: {
                 _id: added._id,
                 sender: req.user.username,
@@ -930,4 +947,78 @@ module.exports.postMessage = async (req, res) => {
         });
     }
     res.redirect(`/room-shares/${poolId}`);
+};
+
+module.exports.syncPoolStateJson = async (req, res) => {
+    const { poolId } = req.params;
+    const pool = await RoomSharePool.findById(poolId)
+        .populate("listing", "title location country price")
+        .populate("initiator", "username emailVerified")
+        .populate("cancelledBy", "username")
+        .populate("participants.user", "username emailVerified")
+        .populate("messages.sender", "username");
+
+    if (!pool) {
+        return res.status(404).json({ error: "Room share pool not found" });
+    }
+
+    const accepted = getAcceptedParticipants(pool);
+    const isInitiator = Boolean(req.user && pool.initiator && pool.initiator._id.equals(req.user._id));
+    const currentParticipant = req.user
+        ? (pool.participants || []).find((p) => p.user && p.user._id && p.user._id.equals(req.user._id) && p.joinStatus !== "left")
+        : null;
+    const canChat = Boolean(req.user && canParticipateInChat(pool, req.user._id));
+    const isPaidMember = Boolean(currentParticipant && currentParticipant.joinStatus === "accepted" && currentParticipant.paymentStatus === "paid");
+    const paymentSummary = getPoolPaymentSummary(pool);
+
+    const participantsFingerprint = (pool.participants || []).map((p) => {
+        const uId = p.user && p.user._id ? p.user._id.toString() : (p.user ? p.user.toString() : "");
+        return `${uId}:${p.joinStatus}:${p.paymentStatus}:${p.amountDue || 0}`;
+    }).join("|");
+
+    const stateHash = [
+        pool.status,
+        pool.listing ? (pool.listing._id || pool.listing).toString() : "no_listing",
+        Number(pool.totalPrice || 0),
+        Number(pool.pricePerPerson || 0),
+        participantsFingerprint,
+        pool.booking ? pool.booking.toString() : "no_booking",
+        pool.cancellationReason || ""
+    ].join("::");
+
+    const formattedMessages = canChat
+        ? (pool.messages || []).map((m) => ({
+            _id: m._id,
+            sender: m.sender ? m.sender.username : "member",
+            text: m.text,
+            createdAt: m.createdAt
+        }))
+        : [];
+
+    return res.json({
+        poolId: pool._id,
+        status: pool.status,
+        stateHash,
+        listing: pool.listing ? {
+            _id: pool.listing._id,
+            title: pool.listing.title,
+            location: pool.listing.location,
+            country: pool.listing.country,
+            price: pool.listing.price
+        } : null,
+        destination: pool.destination,
+        totalPrice: pool.totalPrice,
+        pricePerPerson: pool.pricePerPerson,
+        paymentSummary,
+        canChat,
+        canCancel: (isInitiator && pool.status !== 'cancelled') || (isPaidMember && ['locked', 'partially_booked'].includes(pool.status)),
+        isInitiator,
+        isPaidMember,
+        myParticipantStatus: currentParticipant ? {
+            joinStatus: currentParticipant.joinStatus,
+            paymentStatus: currentParticipant.paymentStatus,
+            amountDue: currentParticipant.amountDue
+        } : null,
+        messages: formattedMessages
+    });
 };

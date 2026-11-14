@@ -1,14 +1,27 @@
 <% if (typeof success !== 'undefined' && success && success.length) { %>
-    <div class="alert alert-success alert-dismissible fade show col-6 offset-3 mt-2" role="alert">
-        <%= success %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="flash-alert-container mt-3 mb-3">
+        <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm d-flex align-items-center gap-3 py-3 px-3 px-sm-4 mb-0" role="alert" style="background-color: #ecfdf5; border-left: 4px solid #10b981 !important; color: #064e3b;">
+            <div class="flash-icon-box text-success flex-shrink-0 d-flex align-items-center justify-content-center" style="font-size: 1.3rem;">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="flash-text-content flex-grow-1" style="font-size: 0.92rem; line-height: 1.45; word-break: break-word;">
+                <%= success %>
+            </div>
+            <button type="button" class="btn-close shadow-none flex-shrink-0 ms-2 p-2 position-static" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     </div>
 <% } %>
 
 <% if (typeof error !== 'undefined' && error && error.length) { %>
-    <div class="alert alert-danger alert-dismissible fade show col-6 offset-3 mt-2" role="alert">
-        <%= error %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="flash-alert-container mt-3 mb-3">
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm d-flex align-items-center gap-3 py-3 px-3 px-sm-4 mb-0" role="alert" style="background-color: #fef2f2; border-left: 4px solid #ef4444 !important; color: #7f1d1d;">
+            <div class="flash-icon-box text-danger flex-shrink-0 d-flex align-items-center justify-content-center" style="font-size: 1.3rem;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <div class="flash-text-content flex-grow-1" style="font-size: 0.92rem; line-height: 1.45; word-break: break-word;">
+                <%= error %>
+            </div>
+            <button type="button" class="btn-close shadow-none flex-shrink-0 ms-2 p-2 position-static" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     </div>
 <% } %>
-

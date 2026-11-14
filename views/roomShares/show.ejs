@@ -9,6 +9,12 @@
   data-country="<%= pool.listing ? (pool.listing.country || '') : '' %>"
   data-title="<%= pool.listing ? (pool.listing.title || '') : (pool.destination || '') %>"
   hidden></div>
+<div id="roomShareSyncMeta"
+  data-pool-id="<%= pool._id %>"
+  data-state-hash="<%= typeof poolStateHash !== 'undefined' ? poolStateHash : '' %>"
+  data-can-chat="<%= canChat ? '1' : '0' %>"
+  data-curr-user="<%= currUser ? currUser.username : '' %>"
+  hidden></div>
 <div class="container mt-4 mb-5">
   <div class="mb-3">
     <a href="/room-shares" class="text-decoration-none text-secondary small"><i class="fa-solid fa-arrow-left me-1"></i>Back to Room Shares</a>
@@ -378,80 +384,168 @@
     const chatBox = document.getElementById("poolChatMessages");
     const chatForm = document.getElementById("poolChatForm");
     const chatInput = document.getElementById("poolChatInput");
-    if (!chatBox || !chatForm || !chatInput) return;
 
-    chatBox.scrollTop = chatBox.scrollHeight;
+    // Real-Time Live Sync & Instant Messaging Engine
+    const syncMeta = document.getElementById("roomShareSyncMeta");
+    const poolId = syncMeta ? syncMeta.dataset.poolId : "<%= pool._id %>";
+    let currentStateHash = syncMeta ? (syncMeta.dataset.stateHash || "") : "";
+    const currentUsername = syncMeta ? (syncMeta.dataset.currUser || "") : "";
+    let isSyncing = false;
 
-    function renderMessages(messages) {
-      if (!Array.isArray(messages) || messages.length === 0) return;
-      const existingCount = chatBox.querySelectorAll("[data-msg-id]").length;
-      if (messages.length === existingCount) return;
-
-      const atBottom = (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight) < 40;
-      chatBox.innerHTML = "";
-      messages.forEach((msg) => {
-        const row = document.createElement("div");
-        row.className = "mb-2";
-        row.dataset.msgId = msg._id || "";
-
-        const userSpan = document.createElement("span");
-        userSpan.className = "fw-bold small";
-        userSpan.textContent = `@${msg.sender || "member"} `;
-
-        const timeSpan = document.createElement("span");
-        timeSpan.className = "text-muted";
-        timeSpan.style.fontSize = "0.72rem";
-        timeSpan.textContent = new Date(msg.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-
-        const bubble = document.createElement("div");
-        bubble.className = "bg-white rounded-3 px-3 py-2 border small mt-1";
-        bubble.textContent = msg.text;
-
-        row.appendChild(userSpan);
-        row.appendChild(timeSpan);
-        row.appendChild(bubble);
-        chatBox.appendChild(row);
+    // Track known message IDs
+    const knownMessageIds = new Set();
+    if (chatBox) {
+      chatBox.querySelectorAll("[data-msg-id]").forEach((el) => {
+        const id = el.dataset.msgId;
+        if (id) knownMessageIds.add(id);
       });
-      if (atBottom) chatBox.scrollTop = chatBox.scrollHeight;
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    async function fetchLatestMessages() {
-      try {
-        const res = await fetch("/room-shares/<%= pool._id %>/messages", { headers: { Accept: "application/json" } });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data && Array.isArray(data.messages)) {
-          renderMessages(data.messages);
-        }
-      } catch (e) {}
+    function appendSingleMessage(msg, isOptimistic = false) {
+      if (!chatBox) return null;
+      const emptyHint = document.getElementById("poolChatEmptyHint");
+      if (emptyHint) emptyHint.remove();
+
+      const row = document.createElement("div");
+      row.className = "mb-2";
+      if (msg._id) {
+        row.dataset.msgId = msg._id;
+        knownMessageIds.add(msg._id);
+      }
+      if (isOptimistic) {
+        row.dataset.optimistic = "1";
+        row.style.opacity = "0.75";
+      }
+
+      const userSpan = document.createElement("span");
+      userSpan.className = "fw-bold small";
+      userSpan.textContent = `@${msg.sender || "member"} `;
+
+      const timeSpan = document.createElement("span");
+      timeSpan.className = "text-muted";
+      timeSpan.style.fontSize = "0.72rem";
+      timeSpan.textContent = msg.createdAt
+        ? new Date(msg.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
+        : "Just now";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bg-white rounded-3 px-3 py-2 border small mt-1 shadow-sm";
+      bubble.style.wordBreak = "break-word";
+      bubble.textContent = msg.text;
+
+      row.appendChild(userSpan);
+      row.appendChild(timeSpan);
+      row.appendChild(bubble);
+      chatBox.appendChild(row);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return row;
     }
 
-    chatForm.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const text = chatInput.value.trim();
-      if (!text) return;
-      const csrfField = chatForm.querySelector('input[name="_csrf"]');
+    async function syncPoolState() {
+      if (isSyncing) return;
+      isSyncing = true;
       try {
-        const res = await fetch(chatForm.action, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "X-CSRF-Token": csrfField ? csrfField.value : ""
-          },
-          body: JSON.stringify({ text, _csrf: csrfField ? csrfField.value : "" })
+        const res = await fetch(`/room-shares/${poolId}/sync`, {
+          headers: { "Accept": "application/json" }
         });
-        if (res.ok) {
-          chatInput.value = "";
-          await fetchLatestMessages();
-        } else {
+        if (!res.ok) {
+          isSyncing = false;
+          return;
+        }
+        const data = await res.json();
+        if (!data || !data.stateHash) {
+          isSyncing = false;
+          return;
+        }
+
+        // 1. Check if group booking status, stay, pricing, or participants changed
+        if (currentStateHash && data.stateHash !== currentStateHash) {
+          console.log("[Wanderlust Sync] Pool state change detected! Auto-refreshing view...");
+          window.location.reload();
+          return;
+        }
+
+        // 2. Check for incoming chat messages
+        if (chatBox && Array.isArray(data.messages)) {
+          let hasNew = false;
+          data.messages.forEach((m) => {
+            if (m._id && !knownMessageIds.has(m._id)) {
+              appendSingleMessage(m, false);
+              hasNew = true;
+            }
+          });
+          if (hasNew) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+          }
+        }
+      } catch (e) {
+        // Silently ignore temporary network hiccups
+      } finally {
+        isSyncing = false;
+      }
+    }
+
+    // Chat submit with instant optimistic rendering
+    if (chatForm && chatInput) {
+      chatForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        const csrfField = chatForm.querySelector('input[name="_csrf"]');
+        const csrfToken = csrfField ? csrfField.value : "";
+
+        // Optimistic UI: display message bubble immediately
+        const optRow = appendSingleMessage({
+          sender: currentUsername || "you",
+          text: text,
+          createdAt: null
+        }, true);
+
+        chatInput.value = "";
+        chatInput.focus();
+
+        try {
+          const res = await fetch(chatForm.action, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+              "X-CSRF-Token": csrfToken
+            },
+            body: JSON.stringify({ text, _csrf: csrfToken })
+          });
+
+          if (res.ok) {
+            const result = await res.json();
+            if (result && result.message && optRow) {
+              optRow.style.opacity = "1";
+              if (result.message._id) {
+                optRow.dataset.msgId = result.message._id;
+                knownMessageIds.add(result.message._id);
+              }
+            }
+          } else {
+            chatForm.submit();
+          }
+        } catch (err) {
           chatForm.submit();
         }
-      } catch (err) {
-        chatForm.submit();
+      });
+    }
+
+    // Auto-sync polling every 1.5 seconds (1500ms)
+    setInterval(syncPoolState, 1500);
+
+    // Instant check when switching back to tab or unlocking phone
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        syncPoolState();
       }
     });
-
-    setInterval(fetchLatestMessages, 3500);
+    window.addEventListener("focus", () => {
+      syncPoolState();
+    });
   });
 </script>

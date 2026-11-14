@@ -558,4 +558,14 @@ describe("Solo Room Share & Companion Matching Tests", () => {
             listingId: ""
         });
     });
+
+    test("GET /room-shares/:poolId/sync returns stateHash, status, paymentSummary and messages", async () => {
+        const pool = await RoomSharePool.findOne();
+        if (!pool) return;
+        const res = await request(app).get(`/room-shares/${pool._id}/sync`).expect(200);
+        expect(res.body).toHaveProperty("stateHash");
+        expect(res.body).toHaveProperty("status");
+        expect(res.body).toHaveProperty("paymentSummary");
+        expect(Array.isArray(res.body.messages)).toBe(true);
+    });
 });
