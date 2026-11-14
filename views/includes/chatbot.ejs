@@ -4,19 +4,19 @@
     type="button"
     id="wl-chatbot-toggle"
     class="wl-chat-fab"
-    aria-label="Open Wanderlust Travel Assistant"
+    aria-label="Open travel guide"
     aria-expanded="false"
     aria-controls="wl-chatbot-panel"
   >
-    <i class="fa-solid fa-comments wl-chat-fab-icon"></i>
-    <span class="wl-chat-fab-label">Travel Chat</span>
+    <i class="fa-regular fa-compass wl-chat-fab-icon"></i>
+    <span class="wl-chat-fab-label">Travel guide</span>
   </button>
 
   <section
     id="wl-chatbot-panel"
     class="wl-chat-panel d-none"
     role="dialog"
-    aria-label="Wanderlust Travel Assistant"
+    aria-label="Travel guide assistant"
   >
     <header class="wl-chat-header">
       <div class="wl-chat-title-wrap">
@@ -24,9 +24,9 @@
           <i class="fa-solid fa-compass"></i>
         </div>
         <div>
-          <h6 class="wl-chat-title mb-0">Wanderlust Travel Chat</h6>
+          <h6 class="wl-chat-title mb-0">Travel guide</h6>
           <div class="wl-chat-subtitle-row">
-            <span class="wl-chat-subtitle">AI guide for places, distances &amp; local highlights</span>
+            <span class="wl-chat-subtitle">Places, routes &amp; local highlights</span>
             <span id="wl-chatbot-location-pill" class="wl-chat-loc-pill d-none"></span>
           </div>
         </div>
@@ -60,7 +60,7 @@
         type="text"
         id="wl-chatbot-input"
         class="form-control wl-chat-input"
-        placeholder="Ask AI about any place, distance, specialty..."
+        placeholder="Ask about places, distances, or recommendations..."
         maxlength="1000"
         required
       />

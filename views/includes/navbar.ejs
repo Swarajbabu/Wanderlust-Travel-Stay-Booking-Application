@@ -10,11 +10,11 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav align-items-xl-center gap-1">
                 <a class="nav-link nav-pill-btn" href="/listings">Explore</a>
-                <a class="nav-link nav-pill-btn" href="/room-shares" title="Find Solo Roommates & Split Stays">
-                    <i class="fa-solid fa-user-group me-1 text-danger"></i>Room Shares
+                <a class="nav-link nav-pill-btn" href="/room-shares" title="Find roommates and shared stays">
+                    <i class="fa-solid fa-user-group me-1"></i>Room shares
                 </a>
-                <a class="nav-link nav-pill-btn" id="wl-nav-ai-planner" href="/itineraries/new" title="AI Personalized Trip Planner">
-                    <i class="fa-solid fa-route me-1 text-danger"></i>AI Planner
+                <a class="nav-link nav-pill-btn" id="wl-nav-ai-planner" href="/itineraries/new" title="Trip planner">
+                    <i class="fa-solid fa-route me-1"></i>Trip planner
                 </a>
             </div>
 
@@ -31,54 +31,54 @@
 
             <div class="navbar-nav ms-xl-auto align-items-xl-center gap-1">
                 <% if(typeof currUser === 'undefined' || !currUser){ %>
-                    <a class="btn btn-guest-nav" href="/guest-login" title="Instant 1-Click Guest Login for Assessment Review">
-                        <i class="fa-solid fa-bolt text-warning me-1"></i>Guest Login
+                    <a class="btn btn-guest-nav" href="/guest-login" title="Quick guest login">
+                        <i class="fa-regular fa-user me-1"></i>Guest login
                     </a>
                 <% } %>
                 <% if(typeof currUser !== 'undefined' && currUser){ %>
-                    <a class="nav-link nav-pill-btn d-xl-none d-xxl-inline-flex" href="/wishlist" title="Saved Stays">
-                        <i class="fa-regular fa-heart me-1 text-danger"></i>Saved
+                    <a class="nav-link nav-pill-btn d-xl-none d-xxl-inline-flex" href="/wishlist" title="Saved stays">
+                        <i class="fa-regular fa-heart me-1"></i>Saved
                     </a>
                     <a class="nav-link nav-pill-btn" href="/bookings">
-                        <i class="fa-regular fa-calendar-check me-1 text-danger"></i>My Bookings
+                        <i class="fa-regular fa-calendar-check me-1"></i>My bookings
                     </a>
                 <% } %>
                 <a class="nav-link nav-pill-btn" href="/listings/new">
-                    <span class="d-none d-xxl-inline">Wanderlust your home</span>
-                    <span class="d-xxl-none">Host Stay</span>
+                    <span class="d-none d-xxl-inline">Host a stay</span>
+                    <span class="d-xxl-none">Host stay</span>
                 </a>
 
                 <div class="dropdown ms-xl-1">
-                    <button class="btn btn-profile-menu dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Menu">
+                    <button class="btn btn-profile-menu dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
                         <i class="fa-solid fa-bars me-2"></i>
                         <i class="fa-solid fa-circle-user profile-icon"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border mt-2">
                         <% if(typeof currUser === 'undefined' || !currUser){ %>
-                            <li><a class="dropdown-item fw-bold text-danger" href="/guest-login"><i class="fa-solid fa-bolt me-2"></i>Guest Login (1-Click)</a></li>
+                            <li><a class="dropdown-item fw-semibold" href="/guest-login"><i class="fa-regular fa-user me-2 text-muted"></i>Guest login</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item fw-semibold" href="/signup">Sign up</a></li>
+                            <li><a class="dropdown-item" href="/signup">Sign up</a></li>
                             <li><a class="dropdown-item" href="/login">Log in</a></li>
                         <% } %>
                         <% if(typeof currUser !== 'undefined' && currUser){ %>
                             <li>
                                 <span class="dropdown-item-text text-muted">
-                                    Hello, <b><%= currUser.username %></b>
+                                    Signed in as <b><%= currUser.username %></b>
                                     <% if(currUser.username === "guest_user"){ %>
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1">Guest Mode</span>
+                                        <span class="badge bg-light text-secondary border ms-1">Guest</span>
                                     <% } %>
                                 </span>
                             </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/profile"><i class="fa-regular fa-user me-2 text-secondary"></i>My Profile</a></li>
-                            <li><a class="dropdown-item" href="/host/dashboard"><i class="fa-solid fa-chart-line me-2 text-secondary"></i>Host Dashboard</a></li>
-                            <li><a class="dropdown-item" href="/wishlist"><i class="fa-regular fa-heart me-2 text-secondary"></i>Saved Stays</a></li>
-                            <li><a class="dropdown-item" href="/bookings"><i class="fa-regular fa-calendar-check me-2 text-secondary"></i>My Bookings</a></li>
-                            <li><a class="dropdown-item" href="/itineraries"><i class="fa-solid fa-route me-2 text-secondary"></i>My AI Trips</a></li>
-                            <li><a class="dropdown-item" href="/room-shares"><i class="fa-solid fa-user-group me-2 text-secondary"></i>Room Shares</a></li>
-                            <li><a class="dropdown-item" href="/listings/new"><i class="fa-solid fa-house-chimney me-2 text-secondary"></i>Wanderlust your home</a></li>
+                            <li><a class="dropdown-item" href="/profile"><i class="fa-regular fa-user me-2 text-muted"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="/host/dashboard"><i class="fa-solid fa-chart-line me-2 text-muted"></i>Host dashboard</a></li>
+                            <li><a class="dropdown-item" href="/wishlist"><i class="fa-regular fa-heart me-2 text-muted"></i>Saved stays</a></li>
+                            <li><a class="dropdown-item" href="/bookings"><i class="fa-regular fa-calendar-check me-2 text-muted"></i>My bookings</a></li>
+                            <li><a class="dropdown-item" href="/itineraries"><i class="fa-solid fa-route me-2 text-muted"></i>My trips</a></li>
+                            <li><a class="dropdown-item" href="/room-shares"><i class="fa-solid fa-user-group me-2 text-muted"></i>Room shares</a></li>
+                            <li><a class="dropdown-item" href="/listings/new"><i class="fa-solid fa-house-chimney me-2 text-muted"></i>Host a stay</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item fw-bold text-danger" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Log out</a></li>
+                            <li><a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Log out</a></li>
                         <% } %>
                     </ul>
                 </div>

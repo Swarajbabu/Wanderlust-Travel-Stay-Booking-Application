@@ -20,7 +20,7 @@
         <div class="filters" id="filters-list">
             <div class="filter <%= !category ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings'">
                 <i class="fa-solid fa-fire"></i>
-                <p>All Stays</p>
+                <p>All stays</p>
             </div>
             <div class="filter <%= category === 'Rooms' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Rooms'">
                 <i class="fa-solid fa-bed"></i>
@@ -28,7 +28,7 @@
             </div>
             <div class="filter <%= category === 'Iconic Cities' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Iconic%20Cities'">
                 <i class="fa-solid fa-mountain-city"></i>
-                <p>Iconic Cities</p>
+                <p>Cities</p>
             </div>
             <div class="filter <%= category === 'Mountains' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Mountains'">
                 <i class="fa-solid fa-mountain"></i>
@@ -40,7 +40,7 @@
             </div>
             <div class="filter <%= category === 'Amazing Pools' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Amazing%20Pools'">
                 <i class="fa-solid fa-person-swimming"></i>
-                <p>Amazing Pools</p>
+                <p>Pools</p>
             </div>
             <div class="filter <%= category === 'Camping' ? 'opacity-100 fw-bold border-bottom border-dark border-2' : '' %>" onclick="location.href='/listings?category=Camping'">
                 <i class="fa-solid fa-campground"></i>
@@ -98,11 +98,11 @@
     </div>
 
     <div class="d-flex align-items-center gap-2 flex-wrap">
-        <button class="btn btn-outline-dark rounded-4 px-3 py-2 fw-semibold btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFiltersPanel" aria-expanded="<%= hasAdvancedFilters ? 'true' : 'false' %>">
+        <button class="btn btn-outline-dark rounded-3 px-3 py-2 fw-medium btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFiltersPanel" aria-expanded="<%= hasAdvancedFilters ? 'true' : 'false' %>">
             <i class="fa-solid fa-sliders me-1"></i>Filters
         </button>
-        <button class="btn btn-dark rounded-4 px-3 py-2 fw-semibold btn-sm" type="button" id="toggleMapViewBtn">
-            <i class="fa-solid fa-map-location-dot me-1"></i><span>Show Map</span>
+        <button class="btn btn-dark rounded-3 px-3 py-2 fw-medium btn-sm" type="button" id="toggleMapViewBtn">
+            <i class="fa-solid fa-map-location-dot me-1"></i><span>Show map</span>
         </button>
         <div class="tax-toggle">
             <div class="form-check-reverse form-switch">
@@ -210,10 +210,10 @@
               <div class="card-img-overlay"></div>
               <div class="card-body">
                 <p class="card-text">
-                  <b><%= listing.title %></b><br>
+                  <span class="listing-title"><%= listing.title %></span><br>
                   <span class="text-muted small"><%= listing.location %>, <%= listing.country %></span><br>
-                  <span class="listing-price" data-base-price="<%= Number(listing.price || 0) %>">&#8377; <%= Number(listing.price || 0).toLocaleString("en-IN") %></span> / Night
-                  <i class="tax-info"> &nbsp; (incl. 18% GST)</i>
+                  <span class="listing-price" data-base-price="<%= Number(listing.price || 0) %>">&#8377; <%= Number(listing.price || 0).toLocaleString("en-IN") %></span> <span class="price-period">/ night</span>
+                  <span class="tax-info text-muted small"> &middot; incl. taxes</span>
                 </p>
               </div>
             </div>
@@ -374,10 +374,10 @@
               <div class="card-img-overlay"></div>
               <div class="card-body">
                 <p class="card-text">
-                  <b>${listing.title}</b><br>
+                  <span class="listing-title">${listing.title}</span><br>
                   <span class="text-muted small">${listing.location}, ${listing.country}</span><br>
-                  <span class="listing-price" data-base-price="${basePrice}">₹ ${displayPrice.toLocaleString("en-IN")}</span> / Night
-                  <i class="tax-info" style="display: ${showWithTax ? 'inline' : 'none'};"> &nbsp; (incl. 18% GST)</i>
+                  <span class="listing-price" data-base-price="${basePrice}">₹ ${displayPrice.toLocaleString("en-IN")}</span> <span class="price-period">/ night</span>
+                  <span class="tax-info text-muted small" style="display: ${showWithTax ? 'inline' : 'none'};"> &middot; incl. taxes</span>
                 </p>
               </div>
             </div>
