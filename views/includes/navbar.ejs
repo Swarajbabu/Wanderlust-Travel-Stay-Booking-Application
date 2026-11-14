@@ -1,20 +1,34 @@
-<nav class="navbar navbar-expand-xl sticky-top">
+<nav class="navbar navbar-expand-xl sticky-top main-navbar">
     <div class="container-fluid px-xl-4 px-3">
+        <!-- Brand Logo -->
         <a class="navbar-brand d-flex align-items-center me-2 me-xl-3" href="/listings">
             <i class="fa-solid fa-compass brand-icon me-2"></i>
             <span class="brand-text">wanderlust</span>
         </a>
-        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+
+        <!-- Mobile Controls (Visible on mobile/tablet < 1200px) -->
+        <div class="d-flex d-xl-none align-items-center gap-2 ms-auto">
+            <!-- Mobile Quick Search Trigger -->
+            <button class="btn btn-mobile-search-pill" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNavOffcanvas" aria-controls="mobileNavOffcanvas" aria-label="Search stays">
+                <i class="fa-solid fa-magnifying-glass text-danger"></i>
+                <span class="d-none d-sm-inline text-muted small ms-1">Search stays...</span>
+            </button>
+
+            <!-- Modern Hamburger Button -->
+            <button class="btn btn-mobile-hamburger shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNavOffcanvas" aria-controls="mobileNavOffcanvas" aria-label="Open mobile navigation menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Desktop Navigation Bar (Only on >= 1200px) -->
+        <div class="collapse navbar-collapse d-none d-xl-flex" id="navbarNavAltMarkup">
             <div class="navbar-nav align-items-xl-center gap-1">
                 <a class="nav-link nav-pill-btn" href="/listings">Explore</a>
                 <a class="nav-link nav-pill-btn" href="/room-shares" title="Find roommates and shared stays">
                     <i class="fa-solid fa-user-group me-1"></i>Room shares
                 </a>
                 <a class="nav-link nav-pill-btn" id="wl-nav-ai-planner" href="/itineraries/new" title="Trip planner">
-                    <i class="fa-solid fa-route me-1"></i>Trip planner
+                    <i class="fa-solid fa-wand-magic-sparkles me-1 text-danger"></i>Trip planner
                 </a>
             </div>
 
@@ -36,7 +50,7 @@
                     </a>
                 <% } %>
                 <% if(typeof currUser !== 'undefined' && currUser){ %>
-                    <a class="nav-link nav-pill-btn d-xl-none d-xxl-inline-flex" href="/wishlist" title="Saved stays">
+                    <a class="nav-link nav-pill-btn" href="/wishlist" title="Saved stays">
                         <i class="fa-regular fa-heart me-1"></i>Saved
                     </a>
                     <a class="nav-link nav-pill-btn" href="/bookings">
@@ -44,8 +58,7 @@
                     </a>
                 <% } %>
                 <a class="nav-link nav-pill-btn" href="/listings/new">
-                    <span class="d-none d-xxl-inline">Host a stay</span>
-                    <span class="d-xxl-none">Host stay</span>
+                    <span>Host stay</span>
                 </a>
 
                 <div class="dropdown ms-xl-1">
@@ -85,4 +98,220 @@
             </div>
         </div>
     </div>
+</nav>
+
+<!-- Modern Mobile App Offcanvas Drawer -->
+<div class="offcanvas offcanvas-end mobile-nav-drawer d-xl-none" tabindex="-1" id="mobileNavOffcanvas" aria-labelledby="mobileNavOffcanvasLabel">
+    <div class="offcanvas-header border-bottom py-3 px-3">
+        <a class="d-flex align-items-center text-decoration-none" href="/listings">
+            <i class="fa-solid fa-compass brand-icon me-2"></i>
+            <span class="brand-text">wanderlust</span>
+        </a>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body p-0">
+        <!-- User Profile Card / Guest Welcome Banner -->
+        <% if (typeof currUser !== 'undefined' && currUser) { %>
+            <div class="mobile-drawer-user-card mx-3 my-3 p-3 rounded-4 bg-light border">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="mobile-avatar-circle">
+                        <%= (currUser.username || "U").charAt(0).toUpperCase() %>
+                    </div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="fw-bold text-dark text-truncate fs-6"><%= currUser.username %></div>
+                        <div class="small text-muted text-truncate"><%= currUser.email || "Verified Wanderer" %></div>
+                    </div>
+                    <a href="/profile" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-semibold">Profile</a>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="mobile-drawer-auth-card mx-3 my-3 p-3 rounded-4 bg-light border">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <div class="mobile-guest-badge">
+                        <i class="fa-solid fa-sparkles text-danger"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Welcome to Wanderlust</h6>
+                        <span class="text-muted small">Plan, stay &amp; share rooms together</span>
+                    </div>
+                </div>
+                <div class="d-grid gap-2 mt-3">
+                    <a href="/login" class="btn btn-danger rounded-pill fw-semibold py-2">
+                        <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Log in
+                    </a>
+                    <a href="/signup" class="btn btn-outline-dark rounded-pill fw-semibold py-2">
+                        <i class="fa-regular fa-user me-2"></i>Create account
+                    </a>
+                    <a href="/guest-login" class="btn btn-light border text-muted small rounded-pill py-1 fw-medium text-center">
+                        <i class="fa-regular fa-id-badge me-1"></i>One-Click Guest Demo
+                    </a>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Mobile Drawer Search Bar -->
+        <div class="px-3 mb-3">
+            <form class="mobile-drawer-search-form" role="search" action="/listings" method="GET">
+                <div class="input-group rounded-pill border bg-white shadow-sm p-1">
+                    <span class="input-group-text bg-transparent border-0 text-danger ps-3">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input class="form-control bg-transparent border-0 shadow-none ps-1 py-1 small" type="search" placeholder="Where to? Search stays..." name="q" value="<%= typeof q !== 'undefined' && q ? q : '' %>">
+                    <button class="btn btn-danger rounded-pill px-3 py-1 btn-sm fw-semibold" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Categorized Mobile Navigation Links -->
+        <div class="mobile-drawer-nav px-3 pb-4">
+            <div class="drawer-section-label">DISCOVER</div>
+            <a href="/listings" class="mobile-drawer-item">
+                <div class="drawer-item-left">
+                    <i class="fa-solid fa-compass drawer-item-icon text-danger"></i>
+                    <span>Explore Stays</span>
+                </div>
+                <i class="fa-solid fa-chevron-right drawer-item-chevron"></i>
+            </a>
+
+            <a href="/room-shares" class="mobile-drawer-item">
+                <div class="drawer-item-left">
+                    <i class="fa-solid fa-user-group drawer-item-icon text-primary"></i>
+                    <span>Solo Room Shares</span>
+                </div>
+                <span class="badge bg-danger-subtle text-danger rounded-pill px-2 py-1 small fw-semibold">Match</span>
+            </a>
+
+            <a href="/itineraries/new" class="mobile-drawer-item">
+                <div class="drawer-item-left">
+                    <i class="fa-solid fa-wand-magic-sparkles drawer-item-icon text-warning"></i>
+                    <span>AI Trip Planner</span>
+                </div>
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1 small fw-semibold">Gemini AI</span>
+            </a>
+
+            <a href="/wishlist" class="mobile-drawer-item">
+                <div class="drawer-item-left">
+                    <i class="fa-regular fa-heart drawer-item-icon text-danger"></i>
+                    <span>Saved Stays</span>
+                </div>
+                <i class="fa-solid fa-chevron-right drawer-item-chevron"></i>
+            </a>
+
+            <% if (typeof currUser !== 'undefined' && currUser) { %>
+                <div class="drawer-section-label mt-3">MY ACCOUNT</div>
+                <a href="/bookings" class="mobile-drawer-item">
+                    <div class="drawer-item-left">
+                        <i class="fa-regular fa-calendar-check drawer-item-icon text-success"></i>
+                        <span>My Bookings</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right drawer-item-chevron"></i>
+                </a>
+
+                <a href="/itineraries" class="mobile-drawer-item">
+                    <div class="drawer-item-left">
+                        <i class="fa-solid fa-route drawer-item-icon text-info"></i>
+                        <span>My Trips</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right drawer-item-chevron"></i>
+                </a>
+
+                <a href="/profile" class="mobile-drawer-item">
+                    <div class="drawer-item-left">
+                        <i class="fa-regular fa-user drawer-item-icon text-secondary"></i>
+                        <span>Profile &amp; Preferences</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right drawer-item-chevron"></i>
+                </a>
+            <% } %>
+
+            <div class="drawer-section-label mt-3">HOSTING</div>
+            <a href="/listings/new" class="mobile-drawer-item">
+                <div class="drawer-item-left">
+                    <i class="fa-solid fa-house-chimney drawer-item-icon text-danger"></i>
+                    <span>Wanderlust Your Home</span>
+                </div>
+                <i class="fa-solid fa-chevron-right drawer-item-chevron"></i>
+            </a>
+
+            <% if (typeof currUser !== 'undefined' && currUser) { %>
+                <a href="/host/dashboard" class="mobile-drawer-item">
+                    <div class="drawer-item-left">
+                        <i class="fa-solid fa-chart-line drawer-item-icon text-dark"></i>
+                        <span>Host Dashboard</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right drawer-item-chevron"></i>
+                </a>
+            <% } %>
+
+            <div class="drawer-section-label mt-3">HELP &amp; POLICIES</div>
+            <a href="/help" class="mobile-drawer-item">
+                <div class="drawer-item-left">
+                    <i class="fa-regular fa-circle-question drawer-item-icon text-muted"></i>
+                    <span>Help Centre</span>
+                </div>
+                <i class="fa-solid fa-chevron-right drawer-item-chevron"></i>
+            </a>
+
+            <a href="/cancellation-policy" class="mobile-drawer-item">
+                <div class="drawer-item-left">
+                    <i class="fa-solid fa-shield-halved drawer-item-icon text-muted"></i>
+                    <span>Cancellation &amp; Refunds</span>
+                </div>
+                <i class="fa-solid fa-chevron-right drawer-item-chevron"></i>
+            </a>
+
+            <a href="/terms" class="mobile-drawer-item">
+                <div class="drawer-item-left">
+                    <i class="fa-regular fa-file-lines drawer-item-icon text-muted"></i>
+                    <span>Terms &amp; Conditions</span>
+                </div>
+                <i class="fa-solid fa-chevron-right drawer-item-chevron"></i>
+            </a>
+
+            <% if (typeof currUser !== 'undefined' && currUser) { %>
+                <div class="pt-3 mt-3 border-top">
+                    <a href="/logout" class="btn btn-outline-danger rounded-pill w-100 fw-semibold py-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Log out
+                    </a>
+                </div>
+            <% } %>
+
+            <div class="text-center text-muted small pt-4">
+                <div class="fw-semibold">Wanderlust Platform</div>
+                <div style="font-size: 0.72rem;">Discover • Match • Stay</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Bottom Navigation Bar (Sticky Thumb-Friendly Navigation) -->
+<nav class="mobile-bottom-nav d-xl-none" id="mobileBottomNav" aria-label="Mobile Navigation">
+    <a href="/listings" class="bottom-nav-tab <%= (typeof currentPath !== 'undefined' && (currentPath === '/listings' || currentPath === '/')) ? 'active' : '' %>" data-path="/listings">
+        <div class="bottom-nav-icon"><i class="fa-solid fa-compass"></i></div>
+        <span class="bottom-nav-label">Explore</span>
+    </a>
+    <a href="/room-shares" class="bottom-nav-tab <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/room-shares')) ? 'active' : '' %>" data-path="/room-shares">
+        <div class="bottom-nav-icon"><i class="fa-solid fa-user-group"></i></div>
+        <span class="bottom-nav-label">Room Share</span>
+    </a>
+    <a href="/itineraries/new" class="bottom-nav-tab <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/itineraries')) ? 'active' : '' %>" data-path="/itineraries">
+        <div class="bottom-nav-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <span class="bottom-nav-label">AI Planner</span>
+    </a>
+    <a href="/wishlist" class="bottom-nav-tab <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/wishlist')) ? 'active' : '' %>" data-path="/wishlist">
+        <div class="bottom-nav-icon"><i class="fa-regular fa-heart"></i></div>
+        <span class="bottom-nav-label">Wishlist</span>
+    </a>
+    <% if (typeof currUser !== 'undefined' && currUser) { %>
+        <a href="/profile" class="bottom-nav-tab <%= (typeof currentPath !== 'undefined' && (currentPath.startsWith('/profile') || currentPath.startsWith('/bookings'))) ? 'active' : '' %>" data-path="/profile">
+            <div class="bottom-nav-icon"><i class="fa-regular fa-circle-user"></i></div>
+            <span class="bottom-nav-label">Profile</span>
+        </a>
+    <% } else { %>
+        <a href="/login" class="bottom-nav-tab <%= (typeof currentPath !== 'undefined' && (currentPath === '/login' || currentPath === '/signup')) ? 'active' : '' %>" data-path="/login">
+            <div class="bottom-nav-icon"><i class="fa-regular fa-circle-user"></i></div>
+            <span class="bottom-nav-label">Log in</span>
+        </a>
+    <% } %>
 </nav>

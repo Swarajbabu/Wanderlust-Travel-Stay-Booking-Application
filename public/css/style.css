@@ -394,48 +394,211 @@ body {
     background-color: #c13e2d !important;
 }
 
-/* Mobile & Medium Device Responsiveness for Navbar */
+/* ==========================================================================
+   Mobile-First App Navigation & Modern Offcanvas Drawer (10+ Year Mobile Lead)
+   ========================================================================== */
+
+/* Modern Hamburger Button */
+.btn-mobile-hamburger {
+    width: 42px;
+    height: 42px;
+    border-radius: 50% !important;
+    background: #f8f8f8 !important;
+    border: 1px solid #e8e8e8 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #222222 !important;
+    font-size: 1.15rem !important;
+    padding: 0 !important;
+    transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+.btn-mobile-hamburger:hover,
+.btn-mobile-hamburger:focus {
+    background-color: #efefef !important;
+    color: #fe424d !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+.btn-mobile-hamburger:active {
+    transform: scale(0.95);
+}
+
+/* Mobile Quick Search Pill Trigger in Header */
+.btn-mobile-search-pill {
+    background: #f8f8f8 !important;
+    border: 1px solid #e8e8e8 !important;
+    border-radius: 24px !important;
+    padding: 0.4rem 0.85rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    color: #484848 !important;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+.btn-mobile-search-pill:hover,
+.btn-mobile-search-pill:focus {
+    background-color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Modern Native-Style Mobile Offcanvas Drawer */
+.mobile-nav-drawer {
+    width: 320px !important;
+    max-width: 86vw !important;
+    border-top-left-radius: 20px !important;
+    border-bottom-left-radius: 20px !important;
+    border-left: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.14) !important;
+    background: #ffffff !important;
+}
+.mobile-nav-drawer .offcanvas-header {
+    background: #ffffff;
+    border-bottom: 1px solid #f0f0f0;
+}
+.mobile-drawer-user-card,
+.mobile-drawer-auth-card {
+    background: #fbfbfb;
+    border: 1px solid #ebebeb;
+    border-radius: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+.mobile-avatar-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fe424d, #ff5a5f);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 10px rgba(254, 66, 77, 0.28);
+    flex-shrink: 0;
+}
+.mobile-guest-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff0f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.drawer-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #8c8c8c;
+    text-transform: uppercase;
+    padding: 0.6rem 0.75rem 0.25rem;
+}
+.mobile-drawer-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0.85rem;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #222222;
+    font-weight: 500;
+    font-size: 0.92rem;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+    margin-bottom: 2px;
+    min-height: 44px;
+}
+.mobile-drawer-item:hover,
+.mobile-drawer-item:active {
+    background-color: #f5f5f5;
+    color: #000000;
+}
+.drawer-item-left {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+.drawer-item-icon {
+    width: 22px;
+    text-align: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.drawer-item-chevron {
+    color: #c4c4c4;
+    font-size: 0.75rem;
+}
+
+/* Fixed Native Bottom Navigation Bar for Mobile */
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 62px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 1040;
+    padding: 0 4px;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+}
+.bottom-nav-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #717171;
+    font-size: 0.68rem;
+    font-weight: 500;
+    padding: 4px 0;
+    flex: 1;
+    min-width: 0;
+    transition: color 0.15s ease, transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.bottom-nav-tab .bottom-nav-icon {
+    font-size: 1.25rem;
+    margin-bottom: 2px;
+    line-height: 1;
+    transition: transform 0.15s ease;
+}
+.bottom-nav-tab:hover,
+.bottom-nav-tab:focus {
+    color: #1c1917;
+}
+.bottom-nav-tab.active {
+    color: #fe424d !important;
+    font-weight: 700;
+}
+.bottom-nav-tab.active .bottom-nav-icon {
+    transform: scale(1.12);
+}
+
+/* Adjust mobile body padding & chatbot position so bottom nav never overlaps */
 @media (max-width: 1199.98px) {
-    .navbar-collapse {
-        background-color: white;
-        padding: 1rem 0 0.5rem;
-        border-top: 1px solid #f0f0f0;
-        margin-top: 0.5rem;
+    body {
+        padding-bottom: 74px !important;
     }
-    .search-form {
-        margin: 0.75rem 0;
-        width: 100%;
+    .wl-chat-fab {
+        bottom: 76px !important;
+        right: 16px !important;
     }
-    .search-bar {
-        width: 100%;
-        max-width: 100%;
-    }
-    .search-input {
-        width: 100% !important;
-        flex-grow: 1;
-        max-width: 100% !important;
-    }
-    .nav-pill-btn {
-        margin-right: 0 !important;
-        margin-bottom: 0.35rem;
-        width: 100%;
-        text-align: left;
-    }
-    .dropdown {
-        width: 100%;
-        margin-top: 0.5rem;
-    }
-    .btn-profile-menu {
-        width: 100%;
-        justify-content: space-between;
-    }
-    .dropdown-menu {
-        position: static !important;
-        float: none;
-        width: 100%;
-        box-shadow: none !important;
-        border: 1px solid #eee !important;
-        margin-top: 0.5rem !important;
+}
+
+@media (min-width: 1200px) {
+    .mobile-bottom-nav,
+    .mobile-nav-drawer,
+    .btn-mobile-hamburger,
+    .btn-mobile-search-pill {
+        display: none !important;
     }
 }
 

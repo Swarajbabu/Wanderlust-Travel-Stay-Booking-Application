@@ -308,3 +308,27 @@ window.wlOpenMapsDirections = function wlOpenMapsDirections({ lng, lat, waypoint
     }
   });
 };
+
+// Sync active tab for Mobile Bottom Navigation Bar (10+ Year Mobile Lead)
+document.addEventListener("DOMContentLoaded", () => {
+  const currentPath = window.location.pathname.toLowerCase();
+  const bottomTabs = document.querySelectorAll(".bottom-nav-tab");
+  if (!bottomTabs.length) return;
+
+  bottomTabs.forEach((tab) => {
+    const tabPath = (tab.getAttribute("data-path") || "").toLowerCase();
+    if (!tabPath) return;
+
+    let isMatch = false;
+    if (tabPath === "/listings") {
+      isMatch = currentPath === "/" || currentPath.startsWith("/listings");
+    } else {
+      isMatch = currentPath.startsWith(tabPath);
+    }
+
+    if (isMatch) {
+      bottomTabs.forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+    }
+  });
+});

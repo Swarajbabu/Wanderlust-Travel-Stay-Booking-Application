@@ -124,6 +124,7 @@ app.use((req, res, next) => {
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user || null;
     res.locals.isPrivilegedUser = hasAdminOrDemoPrivilege(req.user);
+    res.locals.currentPath = req.path || "";
     next();
 });
 
